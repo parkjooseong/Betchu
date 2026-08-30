@@ -22,7 +22,7 @@
 | 문서 구간 | 결정 상태 | 출시 범위 |
 | --- | --- | --- |
 | 1~18절 핵심 규칙 | `[확정]` | `[MVP]` (명시된 후속 기능 제외) |
-| 19절 정식 PvP | `[제안]` | `[후속]` |
+| 19절 커플 PvP | 출시 포함·핵심 원칙 `[확정]`, 세부 전투 수치 `[제안]` | `[후속]` `P2-4` |
 | 20절 간이 협동 보스 | `[확정]` | `[MVP]` |
 | 20절 정식 레이드 | 전투·보상 `[제안]`, 4주 보스 순환 `[확정]` | `[후속]` |
 | 21절 월간 시즌 | `[제안]` | `[후속]` |
@@ -160,7 +160,7 @@ BETCHU는 이 둘을 결합한다.
 더 높은 보상의 퀘스트 도전
 ```
 
-MVP에서는 평일에 전투력·연승·주간 성장량을 비교하고, 주말에는 두 몬스터의 합산 전투력으로 간이 협동 보스를 판정한다. 선택형 PvP와 정식 레이드는 후속으로 확장한다.
+MVP에서는 평일에 전투력·연승·주간 성장량을 비교하고, 주말에는 두 몬스터의 합산 전투력으로 간이 협동 보스를 판정한다. 현재 연결된 커플의 선택형 PvP는 `P2-4`, 정식 레이드는 후속 콘텐츠로 확장한다.
 
 > **경쟁 50% + 협동 50%**
 
@@ -271,9 +271,9 @@ ATK 10
 5. 각 사용자의 몬스터·아이템·개인 지갑은 유지한다.
 6. 공동 기록은 화면에서 숨기고 보안·정산 이의 처리에 필요한 최소 메타데이터만 접근 제한 상태로 보관한다.
 
-P2 교환·선물·정식 레이드가 열린 뒤에는 연결 종료·차단 직후 해당 커플의 미완료 교환·선물·레이드도 더 이상 조회·수락·확정할 수 없다. `relationship_end_jobs`의 후속 단계가 이를 `CANCELED_RELATIONSHIP_ENDED`로 한 번만 종료하고, 교환·보유 아이템 선물 예약과 미완료 주간 예약 횟수를 해제한다. 상점 선물로 잠긴 코인은 전액 반환 원장을 남기며, 정식 레이드는 보상 없이 종료한다. 이미 완료된 이전·선물·레이드 보상은 되돌리지 않는다.
+P2 교환·선물·커플 PvP·정식 레이드가 열린 뒤에는 연결 종료·차단 직후 해당 커플의 미완료 교환·선물·PvP·레이드도 더 이상 조회·수락·확정할 수 없다. `relationship_end_jobs`의 후속 단계가 이를 `CANCELED_RELATIONSHIP_ENDED`로 한 번만 종료하고, 교환·보유 아이템 선물 예약과 미완료 주간 예약 횟수를 해제한다. 상점 선물로 잠긴 코인은 전액 반환 원장을 남기며, PvP와 정식 레이드는 보상 없이 종료한다. 이미 완료된 이전·선물·PvP·레이드 보상은 되돌리지 않는다.
 
-종료 화면은 관계 종료 작업에 스냅샷된 모든 자원의 정리가 끝날 때까지 `PROCESSING`을 표시한다. MVP에서는 대상 퀘스트 정산·간이 협동 보스 종료가, 해당 기능 출시 뒤에는 교환·선물·정식 레이드 정리까지 모든 `relationship_end_job_items`가 `COMPLETED`이고 `processed_resource_count = target_resource_count`일 때만 상위 작업을 `COMPLETED`로 바꾼다. 화면은 전체 대상·처리 수와 관계 정리 상태를 보여주고, 완료 뒤 최종 사용 가능·잠긴 잔액을 함께 표시한다.
+종료 화면은 관계 종료 작업에 스냅샷된 모든 자원의 정리가 끝날 때까지 `PROCESSING`을 표시한다. MVP에서는 대상 퀘스트 정산·간이 협동 보스 종료가, 해당 기능 출시 뒤에는 교환·선물·커플 PvP·정식 레이드 정리까지 모든 `relationship_end_job_items`가 `COMPLETED`이고 `processed_resource_count = target_resource_count`일 때만 상위 작업을 `COMPLETED`로 바꾼다. 화면은 전체 대상·처리 수와 관계 정리 상태를 보여주고, 완료 뒤 최종 사용 가능·잠긴 잔액을 함께 표시한다.
 
 연결 종료 직후부터 어느 쪽도 상대 프로필과 상대가 제출한 자료를 볼 수 없다. 인증 자료는 백엔드 미디어 게이트웨이가 요청마다 권한을 검사해 전달하므로 종료 전에 얻은 영구·직접 저장소 URL로 접근할 수 없다. 각 사용자는 종료 시점에 아직 남아 있는 자신이 작성한 퀘스트 텍스트와 자신이 제출한 인증 처리본만 내보낼 수 있으며 상대 식별 정보는 가린다. 내보내기 기한은 `min(원래 최종 정산 시각 + 30일, 연결 종료 시각 + 30일)`이고 삭제·동의 철회 요청이 더 빠르면 즉시 차단 후 삭제 절차를 적용한다. 일반 공동 기록과 관계 식별자는 30일 이내 삭제 또는 익명화하고, 지갑 원장·신고처럼 별도 보관 근거가 있는 최소 데이터만 분리 보관한다.
 
@@ -1182,6 +1182,7 @@ MVP에서는 사용자 간 아이템 교환·선물을 지원하지 않는다. �
 | P2-1 | 상점에서 상대에게 사 주는 전투력 0 귀속 꾸미기 선물 | 기존 장비 이전 없이 선물 상호작용 먼저 검증 |
 | P2-2 | 중복 아이템 1:1 교환 | 등급·횟수·연결 기간 제한으로 경제 안전성 검증 |
 | P2-3 | 기존 보유 꾸미기·저등급 중복 아이템 선물 | 개별 아이템 귀속·반환·재이전 금지 검증 후 출시 |
+| P2-4 | 현재 연결된 커플의 선택형 3턴 PvP | 성장 결과에 영향 없는 커플 간 대전과 꾸미기 수집 동기 제공 |
 
 ## 커플 아이템 1:1 교환
 
@@ -1233,9 +1234,38 @@ P2-1의 선물 가능 꾸미기는 `HEAD`, `BODY`, `BACKGROUND` 중 한 슬롯�
 
 # 19. PvP 배틀
 
-> 결정 상태: `[제안]` · 출시 범위: `[후속]`
+> 결정 상태: 출시 포함·핵심 원칙 `[확정]`, 세부 전투 수치 `[제안]` · 출시 범위: `[후속]` · 우선순위: `P2-4`
 
-PvP는 단순 전투력 비교가 아니라 선택형 3턴 전투로 만든다. 기존 기획에서도 공격·방어·스킬 중 하나를 동시에 선택하는 방식이 제안됐다.
+P2-4에서는 **현재 연결된 커플 두 사람의 배츄가 서로 싸우는 PvP**를 추가한다. 공개 매칭, 다른 커플과의 대전과 공개 순위표는 제공하지 않는다.
+
+## 확정 범위
+
+* 한 사람이 대전을 신청하고 현재 파트너가 수락해야 시작한다. 거절·초대 만료에는 불이익이 없다.
+* 수락 시 두 사용자의 활성 배츄, 계정 능력치와 장착 장비를 스냅샷하며 대전 도중 장비·활성 배츄 변경은 해당 대전에 반영하지 않는다.
+* 한 커플은 `PENDING_ACCEPTANCE` 또는 `ACTIVE` 대전을 동시에 하나만 가질 수 있다.
+* 각 턴의 선택은 두 사람이 모두 제출하기 전까지 상대에게 공개하지 않는다.
+* PvP 결과는 퀘스트 성공 수·XP·연승·케미 게이지·주간 보스 해금에 영향을 주지 않는다.
+* 츄코인은 지급하거나 소각하지 않는다. 보상은 능력치가 없는 배틀 메달 기반 꾸미기·칭호로 분리한다.
+* 연결 종료·차단 시 대기 또는 진행 중 대전은 보상 없이 `CANCELED_RELATIONSHIP_ENDED`로 종료한다.
+
+```text
+PENDING_ACCEPTANCE
+  ├─ partner accepts ─→ ACTIVE
+  ├─ partner declines ─→ DECLINED
+  ├─ proposer cancels ─→ CANCELED
+  └─ invitation deadline ─→ EXPIRED
+
+ACTIVE
+  ├─ both submit each of 3 turns ─→ COMPLETED
+  ├─ turn deadline ─→ EXPIRED
+  └─ relationship ends or block ─→ CANCELED_RELATIONSHIP_ENDED
+```
+
+`EXPIRED` 대전은 승패와 보상을 만들지 않는다. 사용자는 완료 화면에서 같은 파트너에게 재대전을 신청할 수 있다.
+
+## 제안 전투 방식
+
+PvP는 단순 전투력 비교가 아니라 선택형 3턴 전투로 만든다. 공격·방어·스킬 중 하나를 동시에 선택하는 방식과 아래 수치는 P2-4 밸런스 테스트에서 확정한다.
 
 ## 기본 규칙
 
@@ -1272,17 +1302,17 @@ PvP는 단순 전투력 비교가 아니라 선택형 3턴 전투로 만든다. 
 * HP가 같으면 총 피해량이 높은 플레이어 승리
 * 모두 같으면 무승부
 
-## PvP 보상
+## PvP 보상 방향
 
-PvP에서 큰 코인을 지급하면 강한 사람이 계속 더 강해질 수 있다. 따라서 보상 차이를 작게 둔다.
+PvP에서 코인이나 능력치 장비를 지급하면 반복 합의 대전으로 경제를 파밍하거나 강한 사람이 더 강해질 수 있다. 따라서 첫 출시에서는 배틀 메달만 지급하며, 아래 결과별 수량은 밸런스 초안으로 둔다.
 
-| 결과  |             보상 |
-| --- | -------------: |
-| 승리  | 50C + 배틀 메달 3개 |
-| 패배  | 20C + 배틀 메달 1개 |
-| 무승부 | 30C + 배틀 메달 2개 |
+| 결과  | 제안 보상 |
+| --- | ---: |
+| 승리  | 배틀 메달 3개 |
+| 패배  | 배틀 메달 1개 |
+| 무승부 | 배틀 메달 2개 |
 
-배틀 메달은 능력치 장비보다 프로필 테두리, 승리 포즈, 칭호 등에 사용하는 것이 좋다.
+배틀 메달 보상은 커플당 KST 하루 최초 3회의 정상 완료 대전에만 지급하고 이후 재대전은 기록만 남긴다. 배틀 메달은 전투력 없는 프로필 테두리, 승리 포즈, 칭호에만 사용한다. 정확한 교환 가격과 일일 보상 횟수는 P2-4 밸런스 테스트에서 최종 확정한다.
 
 ---
 
@@ -1576,7 +1606,7 @@ LV.20
 
 | 화면 | 주요 기능 |
 | --- | --- |
-| PvP | 3턴 커플 배틀 |
+| 커플 PvP (`P2-4`) | 신청·수락 후 진행하는 3턴 커플 배틀 |
 | 정식 레이드 | 4주 순환 보스와 선택형 주말 보스전 |
 | 시즌 | 월간 통계와 보상 |
 | 배츄 보관함 | 복수 배츄, 80회 알 선택, 활성 배츄 교체 |
@@ -1668,7 +1698,7 @@ BETCHU의 알림은 관리 앱처럼 딱딱하지 않고, 몬스터가 직접 �
 
 커플 연결 최종 확인·만료 임박, 퀘스트 시작 승인·수정 요청·공동 취소 요청·동의·거절·파트너 실제 결과 선택·최종 승인·마감, 간이 보스 해금·파트너 참여 대기·주말 마감 알림과 인앱 대기함은 거래성 P0 기능이다. 푸시를 거부해도 홈 배지와 인앱 대기함에서 같은 항목과 남은 시간을 확인할 수 있어야 한다. 출석·이벤트·홍보 알림은 P1이며 기본 수신 동의를 강제하지 않는다.
 
-P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 아이템 추가·최종 확인·만료, 선물 수락·거절·만료도 해당 기능의 필수 거래성 알림으로 추가한다. 수령자가 선물 수신을 끈 경우에는 새 선물 알림도 만들지 않는다.
+P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 아이템 추가·최종 확인·만료, 선물 수락·거절·만료, PvP 신청·수락·내 턴 선택·턴 만료도 해당 기능의 필수 거래성 알림으로 추가한다. 수령자가 선물 수신을 끈 경우에는 새 선물 알림도 만들지 않는다.
 
 잠금 화면 미리보기는 기본적으로 파트너 이름, 퀘스트 제목, 인증 자료, 판정 결과와 코인 금액을 숨긴다.
 
@@ -1849,14 +1879,15 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 | 너무 쉬운 약속으로 코인 파밍 | 난이도별 보너스율·저난도 일일 보너스 상한·일 2개 서버 예약 한도 | `[확정][MVP]` |
 | 판정 거절·최종 승인 누락으로 손실 회피 | `INVALID` 원금 반환을 별도 기록하고 7일 3회면 신규 코인 베팅 일시 중지 | `[확정][MVP]` |
 | 파트너가 반복적으로 최종 승인하지 않음 | 거래성 알림·인앱 대기함, 반복 무효 시 베팅 중지, 연결 종료·차단 | `[확정][MVP]` |
-| 강한 사람이 PvP를 계속 이김 | 선택 상성, 능력치 보정, 패배 보상 | `[제안][후속]` |
+| 강한 사람이 PvP를 계속 이김 | 선택 상성, 능력치 보정, 전투력 없는 패배 메달 보상 | `[제안][후속 P2-4]` |
+| 합의 반복 PvP로 보상 파밍 | 코인·XP 미지급, 커플당 일일 메달 보상 횟수 제한 | `[확정][후속 P2-4]` |
 | 코인을 전부 잃음 | P0 구조 퀘스트 | `[확정][MVP]` |
 | 뽑기 중복으로 흥미 저하 | MVP 자동 조각, P2 보관·교환 선택, 후속 강화 | 조각 `[확정][MVP]`, 보관·교환 `[확정][P2]`, 강화 `[제안][후속]` |
 | 교환·선물 몰아주기와 다계정 악용 | 현재 커플만 허용하고 교환은 연결 7일 이후 개방, 중복 여분·등급·귀속·주간 한도·재이전 금지 적용 | `[확정][P2]` |
 | 뽑기 운이 지나치게 나쁨 | 천장 시스템 | `[확정][MVP]` |
-| 경쟁 때문에 실제로 싸움 | 무보상 비교, 간이 협동 보스, 비난 없는 문구 | `[확정][MVP]` |
+| 경쟁 때문에 실제로 싸움 | MVP 무보상 비교·간이 협동 보스, P2-4 신청·수락형 대전, 거절 불이익·공개 순위 없음, 비난 없는 문구 | `[확정][공통]` |
 | 콘텐츠가 빠르게 소모됨 | 시즌, 도감, 추가 진화 형태, 한정 보스 | `[제안][후속]` |
-| 개발 범위가 너무 커짐 | MVP는 자동 판정 간이 보스, 선택형 PvP·정식 레이드는 후속 | `[확정][공통]` |
+| 개발 범위가 너무 커짐 | MVP는 자동 판정 간이 보스, 커플 PvP는 `P2-4`, 정식 레이드는 후속 | `[확정][공통]` |
 | 도박 앱처럼 보임 | 현금 기능 제거, 귀여운 퀘스트 중심 UI | `[확정][공통]` |
 | 연결 종료 후 사생활 노출 | 즉시 접근 차단, 인증 자료 삭제 수명주기 | `[확정][공통]` |
 | 인증 이미지 메타데이터 노출 | 비공개 저장, 재인코딩, EXIF·GPS 제거 | `[확정][공통]` |
@@ -1867,7 +1898,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 > 결정 상태: `[확정]` · 출시 범위: `[MVP]`
 
-1차 버전에는 커플 연결과 안전한 종료, 퀘스트 버전별 시작 승인·최종 정산, 경험치·계정 레벨업, 영구 인정 성공 수 기반 4단계 배츄 외형 성장과 60회 숙련 보상, 세 종류의 뽑기, 장비·전투력, 파트너 비교 카드와 자동 판정 간이 협동 보스까지 포함한다. 80회 달성 선택권은 MVP에서 기록하되, 복수 배츄 보관함·선택·교체는 후속 P2에서 연다. 선택형 PvP·정식 레이드·월간 시즌과 고급 진화 애니메이션은 후속 버전으로 분리한다.
+1차 버전에는 커플 연결과 안전한 종료, 퀘스트 버전별 시작 승인·최종 정산, 경험치·계정 레벨업, 영구 인정 성공 수 기반 4단계 배츄 외형 성장과 60회 숙련 보상, 세 종류의 뽑기, 장비·전투력, 파트너 비교 카드와 자동 판정 간이 협동 보스까지 포함한다. 80회 달성 선택권은 MVP에서 기록하되, 복수 배츄 보관함·선택·교체는 후속 P2에서 연다. 현재 연결된 커플의 선택형 PvP는 `P2-4`, 정식 레이드·월간 시즌과 고급 진화 애니메이션은 후속 버전으로 분리한다.
 
 ## MVP 필수 기능
 
@@ -1925,7 +1956,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 > 결정 상태: `[확정]` · 출시 범위: `[후속]`
 
-* PvP 실제 전투
+* 현재 연결된 커플의 선택형 3턴 PvP 실제 전투 (`P2-4`)
 * 공격·방어·스킬 선택형 정식 레이드
 * 아이템 강화
 * 고급 진화 애니메이션 (진화 상태 전환과 단계별 정적 이미지 반영은 MVP 포함)
@@ -1939,7 +1970,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 > 결정 상태: `[확정]` · 출시 범위: `[MVP]`
 
-MVP 배틀 탭에는 간이 협동 보스를 제공하고 PvP만 후속으로 예고한다.
+MVP 배틀 탭에는 간이 협동 보스를 제공하고 커플 PvP는 P2-4 후속 기능으로 예고한다.
 
 ```text
 CO-OP
@@ -1950,7 +1981,7 @@ CO-OP
 
 [간이 협동 보스]
 
-PvP는 추후 업데이트 예정
+커플 PvP는 P2-4 업데이트 예정
 ```
 
 ---
@@ -1996,6 +2027,8 @@ PvP는 추후 업데이트 예정
 | --- | ---: | --- |
 | 정식 레이드 일반 보스 | 3종 | `[확정]` |
 | 정식 레이드 시즌 보스 | 시즌당 1종 | `[확정]` |
+| P2-4 PvP 선택 아이콘 | 공격·방어·스킬 3종 | `[확정]` |
+| P2-4 배틀 메달 꾸미기 | 프로필 테두리·승리 포즈·칭호 수량 별도 확정 | `[미정]` |
 | 80회 알 선택 후보 | 미보유 종 최대 3개 | `[확정]` |
 | 상점 귀속 꾸미기 선물 | 가격·에셋 버전 검수 후 별도 확정 | `[미정]` |
 
@@ -2093,7 +2126,7 @@ relationship_end_jobs
 
 relationship_end_job_items
 - relationship_end_job_id
-- resource_type (QUEST, ITEM_EXCHANGE, ITEM_GIFT, WEEKLY_RAID)
+- resource_type (QUEST, ITEM_EXCHANGE, ITEM_GIFT, PVP_MATCH, WEEKLY_RAID)
 - resource_id
 - status (PENDING, PROCESSING, COMPLETED)
 - processed_at
@@ -2243,7 +2276,7 @@ monster_growth_milestone_claims
 
 cosmetic_definitions
 - id
-- cosmetic_type (AURA, TITLE)
+- cosmetic_type (AURA, TITLE, PROFILE_FRAME, VICTORY_POSE)
 - species
 - name
 - asset_key
@@ -2252,10 +2285,13 @@ cosmetic_definitions
 user_cosmetics
 - user_id
 - cosmetic_definition_id
-- source_milestone_claim_id
+- source_milestone_claim_id (NULL 허용)
+- source_battle_medal_transaction_id (NULL 허용)
 - acquired_at
 - equipped_at
 - PRIMARY KEY (user_id, cosmetic_definition_id)
+- source_battle_medal_transaction_id는 값이 있으면 UNIQUE
+- 마일스톤 보상은 source_milestone_claim_id만, 배틀 메달 구매는 source_battle_medal_transaction_id만 NOT NULL
 - 종별 오라·칭호 같은 양도 불가 프로필 보상만 저장하며, 선물 가능한 꾸미기는 item_definitions와 inventory_item_units를 사용
 
 [P2] egg_choice_offers
@@ -2752,6 +2788,115 @@ gacha_draws
 - processed_at
 - PRIMARY KEY (gift_settings_cleanup_job_id, item_gift_id)
 
+[P2-4] pvp_rule_versions
+- id
+- version_no (UNIQUE)
+- turn_count (DEFAULT 3)
+- action_matrix_json
+- damage_config_json
+- invitation_ttl_minutes
+- turn_ttl_minutes
+- daily_rewarded_match_limit
+- status (DRAFT, ACTIVE, RETIRED)
+- effective_from
+- 활성화 후 규칙·수치 수정 금지, 새 밸런스는 새 버전으로 배포
+
+[P2-4] pvp_matches
+- id
+- couple_id
+- proposer_id
+- responder_id
+- pvp_rule_version_id
+- status (PENDING_ACCEPTANCE, ACTIVE, COMPLETED, DECLINED, CANCELED, EXPIRED, CANCELED_RELATIONSHIP_ENDED)
+- current_turn
+- row_version
+- invitation_expires_at
+- turn_deadline_at
+- accepted_at
+- resolved_at
+- created_at
+- idempotency_key
+- UNIQUE (proposer_id, idempotency_key)
+- couple_id 기준 PENDING_ACCEPTANCE·ACTIVE 대전은 합쳐서 최대 1개인 부분 고유 제약
+
+[P2-4] pvp_match_players
+- pvp_match_id
+- user_id
+- monster_id
+- monster_name_snapshot
+- growth_stage_snapshot
+- final_hp_snapshot
+- final_attack_snapshot
+- combat_power_snapshot
+- equipment_snapshot_json
+- remaining_hp
+- total_damage
+- result (WIN, LOSE, DRAW, 결정 전 NULL)
+- battle_medal_reward
+- PRIMARY KEY (pvp_match_id, user_id)
+
+[P2-4] pvp_turn_choices
+- pvp_match_id
+- turn_no
+- user_id
+- action (ATTACK, DEFEND, SKILL)
+- submitted_at
+- idempotency_key
+- PRIMARY KEY (pvp_match_id, turn_no, user_id)
+- UNIQUE (user_id, idempotency_key)
+- 양쪽 선택 제출 또는 턴 종료 전에는 상대 action을 API·알림·로그에서 가리고 UPDATE·DELETE 금지
+
+[P2-4] pvp_turn_results
+- pvp_match_id
+- turn_no
+- proposer_action
+- responder_action
+- proposer_damage
+- responder_damage
+- proposer_hp_after
+- responder_hp_after
+- resolved_at
+- PRIMARY KEY (pvp_match_id, turn_no)
+
+[P2-4] user_battle_medal_wallets
+- user_id (PRIMARY KEY)
+- balance
+- updated_at
+- CHECK balance >= 0
+
+[P2-4] battle_medal_transactions
+- id
+- user_id
+- pvp_match_id (NULL 허용)
+- battle_cosmetic_offering_id (NULL 허용)
+- amount
+- balance_after
+- transaction_type (PVP_REWARD, COSMETIC_PURCHASE, ADMIN_ADJUSTMENT)
+- idempotency_key
+- created_at
+- UNIQUE (user_id, idempotency_key)
+- pvp_match_id가 있으면 UNIQUE (user_id, pvp_match_id, transaction_type)
+- PVP_REWARD는 pvp_match_id만, COSMETIC_PURCHASE는 battle_cosmetic_offering_id만 NOT NULL
+
+[P2-4] daily_pvp_reward_budgets
+- couple_id
+- reward_date_kst
+- rewarded_match_count
+- reward_limit_snapshot
+- PRIMARY KEY (couple_id, reward_date_kst)
+- CHECK reward_limit_snapshot >= 0
+- CHECK rewarded_match_count BETWEEN 0 AND reward_limit_snapshot
+
+[P2-4] battle_cosmetic_offerings
+- id
+- cosmetic_definition_id
+- medal_price
+- status (ACTIVE, RETIRED)
+- effective_from
+- CHECK medal_price > 0
+- PROFILE_FRAME·VICTORY_POSE·TITLE이면서 전투력에 영향을 주지 않는 정의만 등록 가능
+- 사용된 제공 행의 cosmetic_definition_id·medal_price·effective_from은 수정 금지, status만 ACTIVE → RETIRED 허용
+
 [P2] user_cosmetic_loadout_slots
 - user_id
 - cosmetic_slot (HEAD, BODY, BACKGROUND)
@@ -2861,7 +3006,7 @@ weekly_power_baselines
 5. 퀘스트 제출·회수·폐기·수정 요청·거절·시작 승인·취소·실제 결과 선택·최종 승인·무효 처리·정산과 구조 퀘스트·뽑기·연결 종료·차단·탈퇴처럼 공유 상태, 코인 또는 접근 권한을 바꾸는 요청에는 `Idempotency-Key`를 필수로 받는다. 제출은 `expectedRowVersion`, 회수는 `questVersionId + expectedRowVersion`, 수정 요청·거절·시작 승인은 `questVersionId + expectedRowVersion`이 현재 값과 맞을 때만 처리한다. 결과 선택·수정·최종 승인·판정 거절은 `expectedRowVersion`과 현재 선택값을 검사한다. 초안 `PATCH`는 `Idempotency-Key` 대신 `expectedRowVersion`으로 덮어쓰기를 막는다. 초안 내용 변경을 포함해 `quests`에 영향을 주는 PATCH·제출·회수·수정 요청·거절·시작 승인·폐기·취소·결과 상태 변경과 마감 작업이 성공할 때마다 같은 트랜잭션에서 `row_version`을 정확히 1 올린다. 모든 퀘스트 읽기와 성공한 변경 응답은 새 `rowVersion`을 반환하고, 승인 대기 응답은 현재 `questVersionId`도 함께 반환한다.
 6. 파트너의 실제 결과 선택·수정·판정 거절·최종 승인·최종 거절은 `quest_partner_result_events`에 추가만 하고 수정·삭제하지 않는다. 현재 작업 값은 `quest_partner_results`에 투영하되 예상 `row_version`과 파트너 역할을 검증한다. 최종 승인 트랜잭션은 선택된 결과를 다시 확인하고 `quest_settlements.quest_id UNIQUE`를 이용해 정확히 한 번만 `SUCCESS` 또는 `FAILURE`로 정산한다.
 7. 시작 승인 때의 `predicted_result`는 `ACTIVE`부터 두 사람 모두에게 표시하되 실제 결과·보상 계산에는 사용하지 않는다. `AWAITING_RESULT`와 `PENDING_FINAL_APPROVAL`에서 도전자에게는 파트너의 선택·변경 버튼을 제공하지 않고 확인 대기 상태와 마감만 반환한다. 파트너가 선택한 실제 결과는 최종 확인 화면과 감사 로그에 사용하며 최종 승인 전에는 정산 결과로 표시하지 않는다.
-8. 시작 승인·결과 확인·최종 승인·공동 취소 요청·초대·간이 보스 마감은 클라이언트 시간이 아니라 서버 시각과 재시도 가능한 스케줄러로 처리한다. `PENDING_APPROVAL`이 승인 마감에 도달하면 `APPROVAL_EXPIRED`로 한 번만 전환하고 코인·활동·XP·보너스 슬롯을 건드리지 않으며, 화면에는 `EXPIRED`로 표시한다. `AWAITING_RESULT` 또는 `PENDING_FINAL_APPROVAL`이 `result_confirmation_deadline_at`에 도달하면 한 번만 `INVALID`로 전환하고 잠긴 원금 반환·예약 및 슬롯 복구·무보상 처리를 같은 트랜잭션에서 커밋한다. P2에서는 중복 선택 24시간, 교환 24시간, 선물 72시간 만료와 월요일 정식 레이드 인스턴스 생성도 같은 스케줄러 계약을 사용한다. 마감 작업은 모두 결정적인 멱등 키와 고유 제약을 사용한다. 초대 생성·참여 시 `couple_pairing_slots`로 양쪽 사용자를 예약하고 종료 상태에서 해제해 여러 연결 요청에 동시에 들어가지 못하게 한다. 이전 커플의 `relationship_end_jobs`가 `COMPLETED`가 아니면 새 초대 참여와 연결 확정을 거절한다.
+8. 시작 승인·결과 확인·최종 승인·공동 취소 요청·초대·간이 보스 마감은 클라이언트 시간이 아니라 서버 시각과 재시도 가능한 스케줄러로 처리한다. `PENDING_APPROVAL`이 승인 마감에 도달하면 `APPROVAL_EXPIRED`로 한 번만 전환하고 코인·활동·XP·보너스 슬롯을 건드리지 않으며, 화면에는 `EXPIRED`로 표시한다. `AWAITING_RESULT` 또는 `PENDING_FINAL_APPROVAL`이 `result_confirmation_deadline_at`에 도달하면 한 번만 `INVALID`로 전환하고 잠긴 원금 반환·예약 및 슬롯 복구·무보상 처리를 같은 트랜잭션에서 커밋한다. P2에서는 중복 선택 24시간, 교환 24시간, 선물 72시간, PvP 초대·턴 선택 만료와 월요일 정식 레이드 인스턴스 생성도 같은 스케줄러 계약을 사용한다. 마감 작업은 모두 결정적인 멱등 키와 고유 제약을 사용한다. 초대 생성·참여 시 `couple_pairing_slots`로 양쪽 사용자를 예약하고 종료 상태에서 해제해 여러 연결 요청에 동시에 들어가지 못하게 한다. 이전 커플의 `relationship_end_jobs`가 `COMPLETED`가 아니면 새 초대 참여와 연결 확정을 거절한다.
 9. `POST /gacha/draw`는 사용자가 확인한 `expectedProbabilityVersionId`를 요구한다. 트랜잭션 시작 시 해당 뽑기 종류의 `ACTIVE` 버전을 잠그고 ID가 다르면 차감 없이 `409 Conflict`로 새 확률표 확인을 요구한다. 일치하면 코인 또는 뽑기권 차감, 그 버전으로 서버 추첨, 확률 버전 기록, 천장 갱신, 뽑기 기록, 최초 획득 개별 단위 생성 또는 중복 조각 증가를 한 트랜잭션으로 처리한다. P2 중복 보관 선택이 열린 뒤에는 중복 조각 증가 대신 `PENDING_DISPOSITION` 단위를 생성한다.
 10. 사용된 확률 버전은 수정하지 않는다. 새 버전은 모든 가중치가 양수이고 합계·아이템 참조가 유효한지 활성화 트랜잭션에서 검사한 뒤에만 `ACTIVE`로 바꾼다. 천장은 뽑기 종류별로 잠그고 목표 등급 이상 획득 시에만 초기화하며, 확률 버전 변경으로 초기화하지 않는다.
 11. MVP 중복 아이템의 조각 수량은 `item_fragments`에 원자적으로 누적하고 음수가 될 수 없다. 보유 판정은 `CONVERTED`를 제외한 현재 소유자의 같은 정의 개별 단위를 기준으로 하며, 뽑기 기록과 조각 증가 사이에 중간 커밋을 두지 않는다.
@@ -2869,7 +3014,7 @@ weekly_power_baselines
 13. 케미 게이지는 별도 누적값으로 저장하지 않는다. 해당 주의 일반 개인 퀘스트 중 파트너의 최종 승인으로 정산된 `SUCCESS` 또는 `FAILURE`만 `COUNT(DISTINCT quest_id)`하고 `INVALID`, 튜토리얼·구조 퀘스트를 제외한다.
 14. MVP 애플리케이션은 사용자당 스타팅 배츄 한 마리와 활성 배츄 한 마리만 허용한다. `POST /monsters/starter`는 `STARLIGHT`, `WAVE`, `SUNSET`, `FOREST` 중 선택한 종류와 이름, 계정 성장 행, 활성 배츄 참조를 한 트랜잭션에서 만들며 스타터 부분 고유 제약으로 동시 요청과 재시도의 중복 생성을 막는다. DB는 80회 보상의 소급 지급을 위해 복수 배츄를 수용하되, P2 전에는 추가 생성·선택·교체 API를 열지 않는다.
 15. 계정 `user_progressions.base_hp`, `base_attack`은 장비를 제외한 현재 계정 레벨의 최대 기본 능력치이며 모든 배츄가 공유한다. 일반 개인 퀘스트가 파트너의 최종 승인으로 `SUCCESS` 정산되면 코인 처리와 함께 `user_progressions`·`user_active_monsters`·해당 `monsters`·마일스톤 행을 잠그고 XP·연승·레벨·기본 능력치를 갱신한 뒤, 잠근 활성 배츄에 인정 성공 수를 정확히 1회 기록한다. 이 잠금 뒤 `credited_monster_id`를 고정하므로 활성 교체와 정산이 경합해도 한 성공이 두 배츄에 들어가지 않는다. 튜토리얼·구조·보스 퀘스트와 `FAILURE`·`CANCELED`·`INVALID`는 인정 성공 수에서 제외한다. 튜토리얼 성공은 인정 성공 수를 올리지 않고 `(monster_id, HATCH)` 마일스톤과 `EGG → BABY`를 같은 정산에서 처리한다. 스타터인지 추가 알인지와 관계없이 활성 배츄가 아직 `EGG`라면 첫 인정 성공 정산이 수를 `0 → 1`로 올리는 동시에 같은 `HATCH` 마일스톤을 만들고 부화시킨다. 인정 성공 수가 처음 20·40·60·80에 도달한 정산에서 각각 `INTERMEDIATE`, `FINAL`, 종별 오라·칭호·전투력 0 귀속 장신구, `SUCCESS_80` 달성 기록을 고유 마일스톤으로 지급한다. 정산에는 `credited_monster_id`, 인정 성공 수와 성장 단계의 전후 값을 저장하고 일반 개인 성공은 전후 수가 정확히 1 차이 나야 한다. MVP는 80회에 마일스톤과 outbox 이벤트만 만든다. P2 배포 시의 소급 스캔과 이후 상시 작업자가 선택권이 없는 모든 `SUCCESS_80` 이벤트를 소비해 마일스톤당 한 번만 `egg_choice_offer`로 변환한다. 새 종이 활성화되면 `PENDING_CONTENT`도 다시 평가해 새 불변 후보 버전을 만들고 `PENDING_SELECTION`으로 전환한다. XP·성장·마일스톤 중 하나라도 실패하면 코인과 정산도 전부 롤백한다. 파트너가 최종 승인한 실패 정산은 계정 연승 초기화만 함께 처리한다.
-16. 연결 종료·차단·탈퇴는 `couples` 행을 먼저 잠그고, 커플 `ENDED` 전환, 양쪽 `couple_members` 종료·`left_at` 기록, 관계 접근 차단, 미판정 주간 보스 취소와 `relationship_end_jobs` 생성을 먼저 독립 커밋한다. 후속 작업은 대상 퀘스트와 P2의 미완료 교환·선물·정식 레이드를 각각 `relationship_end_job_items`로 고정한 뒤, 6.5절의 반환·소각·예약 해제·잠금 코인 반환을 자원별로 멱등 처리한다. 각 자원 완료와 `processed_resource_count`를 함께 갱신하고 모든 자원이 끝나기 전에는 상위 작업을 `COMPLETED`로 바꾸지 않는다. 활성 멤버십 제약은 즉시 해제하되 종료 작업 완료 전에는 새 초대 참여와 연결 확정을 거절한다.
+16. 연결 종료·차단·탈퇴는 `couples` 행을 먼저 잠그고, 커플 `ENDED` 전환, 양쪽 `couple_members` 종료·`left_at` 기록, 관계 접근 차단, 미판정 주간 보스 취소와 `relationship_end_jobs` 생성을 먼저 독립 커밋한다. 후속 작업은 대상 퀘스트와 P2의 미완료 교환·선물·커플 PvP·정식 레이드를 각각 `relationship_end_job_items`로 고정한 뒤, 6.5절의 반환·소각·예약 해제·잠금 코인 반환·무보상 PvP 종료를 자원별로 멱등 처리한다. 각 자원 완료와 `processed_resource_count`를 함께 갱신하고 모든 자원이 끝나기 전에는 상위 작업을 `COMPLETED`로 바꾸지 않는다. 활성 멤버십 제약은 즉시 해제하되 종료 작업 완료 전에는 새 초대 참여와 연결 확정을 거절한다.
 17. 인증 자료는 `quest_id`로 업로드를 시작하고 완료 호출 후 검사·재인코딩한다. `READY` 처리본만 미디어 게이트웨이가 매 요청 권한을 확인해 전달하며, 안전 신고 보존본은 제한 저장소와 `hold_until`로 분리한다.
 18. 간이 협동 보스 참여는 `couples` 행을 먼저 잠그고 `CONNECTED`를 재검사한다. 첫 참여는 시각만 기록한다. 두 번째 참여 트랜잭션에서 커플·두 참가자·보스 행을 잠그고 양쪽 전투력을 동시에 저장해 한 번만 판정하며, 클리어한 때만 양쪽 뽑기권 지급과 결과 저장을 함께 처리한다.
 19. 기존 커플은 월요일, 배츄를 이미 가진 새 커플은 연결 완료 시, 기준값이 없는 신규 사용자는 스타팅 배츄 생성 시 `weekly_power_baselines`를 관계별로 한 번 기록하고 `현재 전투력 - 기준 전투력`을 비교 카드의 `weeklyCombatPowerDelta`로 계산한다.
@@ -2894,6 +3039,7 @@ weekly_power_baselines
 36. P2 선물은 `item_gifts.row_version`, 수령자의 `user_interaction_settings.row_version`, 현재 연결과 수신 설정을 생성·수락 때 확인한다. `gift_duplicate_policy = REJECT_IF_OWNED`이면 상점·보유 아이템 선물 모두 수령자의 같은 정의 보유 여부를 검사한다. 상점 선물은 현재 활성 불변 가격 버전, 전투력 0·유효 꾸미기 슬롯을 검증하고 코인을 잠근 뒤, 수락 시 생성 때의 가격 스냅샷대로 소각하며 수령자 `AVAILABLE + TRANSFER_LOCKED` 꾸미기 단위를 생성한다. 가격·아이템·시행 시각은 불변이고 사용된 버전도 `ACTIVE → RETIRED` 상태 변경만 허용한다. 보유 아이템 선물은 현재 예약 주와 필요 시 완료 주 예산, 보내는 사람의 주 1회 한도와 허용된 개별 단위를 잠근다. 완료 주 한도가 찼으면 수락 전체를 롤백한다. 수락 시 ACTIVE 예약을 `CONSUMED`, 주간 수를 `reserved → completed`로 바꾸고 같은 단위의 소유자를 바꿔 `AVAILABLE + TRANSFER_LOCKED`로 저장한다. `TRANSFER_LOCKED` 단위는 조각 변환·재선물·재교환할 수 없다. 수신 설정을 끄는 트랜잭션은 요청의 `Idempotency-Key`를 정리 작업에 기록하고 당시 PENDING 선물을 `gift_settings_cleanup_items`로 스냅샷한 뒤 작업 ID를 반환한다. 같은 키 재시도는 기존 작업을 반환한다. 작업이 각 선물을 `REJECTED_SETTINGS_DISABLED`로 바꾸며 코인·단위 반환을 한 번만 처리하고, 모든 자원이 끝나야 상위 작업을 완료한다. 거절·72시간 만료·연결 종료·차단도 코인 또는 단위 예약을 한 번만 반환하고, 완료된 보유 아이템 선물 횟수는 되돌리지 않는다.
 37. P2 정식 레이드는 보스 버전을 편성하기 전에 `max_hp > 0`, 난이도, 전투 설정, 에셋·스킬·보상·연출 데이터의 스키마와 참조를 검증한다. 순환 1~3번 슬롯은 `NORMAL`, 4번 슬롯은 `SEASONAL` 보스만 허용한다. 매주 월요일 생성 시 `raid_rotation_weeks`의 `boss_definition_version_id`를 `weekly_raid_instances`에 복사하고 주차+버전 복합 FK로 원본 편성을 고정한다. 생성 후 운영 데이터가 바뀌어도 진행 중 인스턴스의 HP·난이도·전투 설정·외형·스킬·보상·연출 스냅샷은 변경하지 않는다.
 38. P2 꾸미기 적용·해제는 `expectedSlotRowVersion`과 `expectedCurrentItemUnitId`를 요구하고 사용자·슬롯·개별 단위를 잠근다. 두 예상값, 소유권, `COSMETIC`, 정의의 슬롯, `AVAILABLE` 상태가 모두 맞을 때만 처리한다. 새 단위를 적용하면 기존 슬롯 단위를 `AVAILABLE`, 새 단위를 `EQUIPPED`로 바꾸고 슬롯 행의 `row_version`을 올린다. 해제는 행을 지우지 않고 단위를 `AVAILABLE`, 슬롯 참조를 NULL로 바꾸며 버전을 올린다. `TRANSFER_LOCKED`는 적용을 막지 않지만 교환·선물·조각 변환은 계속 금지하며, 꾸미기 능력치는 항상 0으로 서버가 검증한다.
+39. P2-4 PvP 신청은 서버가 현재 연결된 파트너를 상대방으로 결정하고 커플·활성 대전 제약을 잠근 뒤 만든다. 상대 수락 트랜잭션은 커플 연결, 양쪽 활성 배츄와 장비를 재검사하고 불변 `pvp_rule_version_id`와 두 플레이어의 전투 스냅샷을 함께 기록한다. 각 턴 선택은 요청의 `expectedTurnNo`와 현재 `ACTIVE` 상태를 확인해 `pvp_turn_choices`에 사용자당 한 번만 추가한다. 두 요청이 동시에 도착해도 먼저 대전 행 잠금을 얻은 요청부터 직렬화하고, 두 선택이 모두 저장된 트랜잭션만 규칙 버전으로 피해·남은 HP를 계산해 `pvp_turn_results`와 다음 턴 또는 최종 결과를 한 번 커밋한다. 상대 선택은 공동 공개 전까지 가린다. 정상 완료 시 커플의 KST 일일 보상 예산과 양쪽 메달 지갑을 잠가 보상 가능 횟수 안에서만 메달 원장과 잔액을 함께 갱신하며 코인·XP·인정 성공 수·연승·케미는 변경하지 않는다. 연결 종료·차단·초대 만료·턴 만료는 결정적인 멱등 키로 보상 없이 종료한다.
 
 ---
 
@@ -3069,15 +3215,28 @@ GET   /interaction-settings
 PATCH /interaction-settings
 GET   /interaction-settings/gift-cleanup/{jobId}
 
+GET  /pvp/matches
+POST /pvp/matches
+GET  /pvp/matches/{matchId}
+POST /pvp/matches/{matchId}/accept
+POST /pvp/matches/{matchId}/decline
+POST /pvp/matches/{matchId}/cancel
+POST /pvp/matches/{matchId}/turns/{turnNo}/choice
+GET  /pvp/battle-medals
+GET  /pvp/cosmetic-offerings
+POST /pvp/cosmetic-offerings/{offeringId}/purchase
+
 GET /raids/rotation
 GET /raids/weekly
 ```
 
 P2 출시 시 소급 작업을 실행한 뒤 상시 outbox 작업자가 `SUCCESS_80` 마일스톤은 있지만 선택권이 없는 기록을 계속 찾아 사용자당·마일스톤당 `egg_choice_offer`를 정확히 1개 만든다. 새 종이 추가되면 `PENDING_CONTENT` 선택권도 재평가해 후보 버전을 올리고 `PENDING_SELECTION`으로 바꾼다. `POST /monsters/egg-choice-offers/{offerId}/select`는 `{ species, name, expectedOptionsVersion }`과 `Idempotency-Key`를 요구한다. 서버는 선택권 행과 사용자의 배츄를 잠그고 현재 후보·이름 규칙·미보유 종 여부를 다시 검사한 뒤, `sourceEggChoiceOfferId`가 고유한 새 배츄를 `EGG`, 인정 성공 0회로 한 번만 생성한다. 다른 선택권으로 해당 종을 먼저 얻어 후보가 오래됐으면 생성하지 않는다. 미보유 종이 1개 이상 남으면 후보 버전을 갱신하고 `409 STALE_EGG_CHOICE_OPTIONS`와 새 버전을 반환하며, 하나도 남지 않으면 선택권을 `PENDING_CONTENT`로 바꾸고 같은 409 응답에 그 상태를 반환한다. 새 배츄는 활성화 후 첫 인정 성공 정산에서 `HATCH` 마일스톤과 함께 `BABY`로 부화한다. 활성 배츄 교체는 `user_active_monsters`를 잠그고 소유권을 확인하며, 이미 시작된 정산의 `creditedMonsterId`를 뒤바꾸지 않는다.
 
+`POST /pvp/matches`는 임의의 상대 ID를 받지 않고 현재 연결된 파트너에게 대전을 신청하며 `Idempotency-Key`를 요구한다. `accept`는 `expectedRowVersion`을 받아 수락 시점의 양쪽 활성 배츄·장비·최종 능력치와 현재 활성 PvP 규칙 버전을 고정한다. `POST /pvp/matches/{matchId}/turns/{turnNo}/choice`는 `{ action, expectedTurnNo }`와 `Idempotency-Key`를 요구하며 본인의 선택만 저장한다. 한쪽 선택만 제출된 응답과 조회에는 상대 선택을 포함하지 않고, 양쪽 선택이 모두 커밋된 뒤에만 턴 결과와 남은 HP를 두 사람에게 함께 반환한다. 완료 응답은 승패·턴 기록·보상 대상 여부·배틀 메달 원장을 반환하되 코인·XP·인정 성공 수·연승·케미 값은 변경하지 않는다. 배틀 메달 꾸미기 구매는 사용자가 확인한 `expectedBattleCosmeticOfferingId`와 `Idempotency-Key`를 요구하며 메달 원장 차감과 양도 불가 `user_cosmetics` 획득을 한 트랜잭션으로 처리한다.
+
 교환 최초 생성자는 `ownItemUnitId`와 `requestedItemDefinitionId`로 자기 적격 단위를 보내고 원하는 상대 아이템 정의를 요청한다. 파트너도 자기 적격 목록에서 요청 정의와 같은 자기 단위만 추가·교체할 수 있으며 이때 새 `offerVersion`이 생성되고 양쪽 확인이 초기화된다. 교환 변경은 `expectedRowVersion + offerVersion`, 선물 변경은 `expectedRowVersion`, 수신 설정 변경은 설정의 `expectedRowVersion`, 중복 선택은 `expectedStatus = PENDING`을 요구한다. 모든 변경 요청은 `Idempotency-Key`도 요구하고, 임의 `recipientId` 대신 현재 커플 상대를 서버가 결정한다. 성공한 교환·선물 변경 응답은 새 `rowVersion`과 현재 `offerVersion` 또는 상태를 반환한다. 주간 완료 한도 오류는 마지막 확인·수락을 저장하지 않고 현재 버전을 그대로 반환한다. 상점 응답과 정식 레이드 응답은 각각 불변 `shopOfferingVersionId`, `bossDefinitionVersionId`를 포함한다. `PATCH /interaction-settings`로 선물 수신을 끄면 기존 대기 선물은 수락 불가가 되고 `giftSettingsCleanupJobId`, 대상·완료 수를 응답한다. `GET /interaction-settings`에서 현재 값과 `rowVersion`, 정리 중 여부를 조회하고 작업 상세 API에서 반환 진행도를 확인한다. 정식 레이드의 턴 행동 API는 20절의 제안 전투 방식이 확정된 뒤 별도 계약으로 추가한다.
 
-P2에서 `GET /actions/pending`은 알 선택, 중복 처리 선택, 상대 아이템 추가, 교환 최종 확인, 선물 수락·거절과 각 만료 시각도 반환한다. 퀘스트가 아닌 항목은 자기 엔터티의 `status`와 동시성 기준인 `rowVersion`, `offerVersion`, `optionsVersion` 또는 `slotRowVersion` 중 해당 값을 반환하며 퀘스트 `rowVersion`을 대신 사용하지 않는다. 알 선택, 상점·보유 아이템 선물 생성, 수락·거절·취소, 중복 처리 선택, 교환 생성·자기 단위 변경·확인·거절·취소, 꾸미기 적용·해제와 활성 배츄 교체는 모두 `Idempotency-Key`를 요구한다. `GET /cosmetic-loadout`은 슬롯별 단위·에셋·`slotRowVersion`을 반환하고 적용·해제 API는 `expectedSlotRowVersion`, `expectedCurrentItemUnitId`, 새 단위의 `expectedItemUnitState`를 검사한다.
+P2에서 `GET /actions/pending`은 알 선택, 중복 처리 선택, 상대 아이템 추가, 교환 최종 확인, 선물 수락·거절, PvP 대전 수락·내 턴 선택과 각 만료 시각도 반환한다. 퀘스트가 아닌 항목은 자기 엔터티의 `status`와 동시성 기준인 `rowVersion`, `offerVersion`, `optionsVersion` 또는 `slotRowVersion` 중 해당 값을 반환하며 퀘스트 `rowVersion`을 대신 사용하지 않는다. 알 선택, 상점·보유 아이템 선물 생성, 수락·거절·취소, 중복 처리 선택, 교환 생성·자기 단위 변경·확인·거절·취소, PvP 신청·수락·거절·취소·턴 선택, 꾸미기 적용·해제와 활성 배츄 교체는 모두 `Idempotency-Key`를 요구한다. `GET /cosmetic-loadout`은 슬롯별 단위·에셋·`slotRowVersion`을 반환하고 적용·해제 API는 `expectedSlotRowVersion`, `expectedCurrentItemUnitId`, 새 단위의 `expectedItemUnitState`를 검사한다.
 
 P2에서 중복이 나온 `POST /gacha/draw` 성공 응답은 `itemUnitId`, `duplicateDisposition = PENDING`, `dispositionExpiresAt`을 함께 반환해 즉시 보관·조각 선택 화면을 열 수 있게 한다. 상점 선물 생성은 사용자가 본 `expectedShopOfferingVersionId`가 현재 활성 버전과 다르면 코인을 잠그지 않고 새 버전을 반환한다. 이미 생성된 대기 선물은 이후 활성 버전이 바뀌어도 저장된 가격 스냅샷을 사용한다.
 
@@ -3188,7 +3347,7 @@ MVP에서는 `home` API 하나에서 다음 정보를 한 번에 내려주는 �
 
 > 출시 범위: `[후속]` · 우선순위: 본문의 P1·P2 표기를 따름
 
-* PvP
+* 현재 연결된 커플의 선택형 3턴 PvP (`P2-4`)
 * 선택형 정식 커플 레이드
 * 일반 보스 3종·시즌 보스 1종 4주 순환
 * 분기 진화·추가 진화 형태
@@ -3247,7 +3406,7 @@ BETCHU는 다운로드 수보다 **커플 두 명이 함께 행동하는지**가
 | 지표 | 적용 기능 |
 | --- | --- |
 | 정식 레이드 참여율·클리어율 | 선택형 정식 레이드 |
-| PvP 참여율·재대결률 | PvP |
+| PvP 초대 수락률·정상 완료율·재대결률 | 커플 PvP (`P2-4`) |
 | 시즌 참여율·보상 수령률 | 월간 시즌 |
 | 80회 달성 후 알 선택 완료율·활성 교체율 | 복수 배츄 보관함 |
 | 중복 보관 선택률·교환 제안 대비 완료율 | 중복 처리·아이템 교환 |
