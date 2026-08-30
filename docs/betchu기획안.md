@@ -2,7 +2,7 @@
 
 ## 서비스 기획안 v0.1
 
-이 문서는 제품 규칙과 구현 계약을 함께 관리한다. 결정 상태와 출시 범위를 다음 표기로 구분한다.
+이 문서는 제품 규칙과 구현 계약을 함께 관리한다. [README](../README.md)에 요약된 현재 확정 MVP 흐름을 상위 기준으로 삼고, 이 문서의 세부 상태·데이터 구조·API 계약은 그 흐름과 충돌하지 않도록 동기화한다. 결정 상태와 출시 범위를 다음 표기로 구분한다.
 
 # 0. 문서 표기 규칙
 
@@ -69,9 +69,10 @@ BETCHU는 이 둘을 결합한다.
 | ------------- | ------------ |
 | “오늘 1시 전에 잘게” | 퀘스트 생성       |
 | 약속에 자신감 보이기   | 코인 걸기        |
-| 상대방이 조건 확인    | 퀘스트 승인       |
-| 실제로 약속 지키기    | 퀘스트 성공       |
-| 보상 받기         | 코인·경험치 획득    |
+| 상대방이 조건과 결과 예상 확인 | 파트너 시작 승인 |
+| 실제로 약속 지키기    | 퀘스트 수행       |
+| 상대방이 실제 결과 확인 | 파트너 판정·최종 승인 |
+| 보상 받기         | 최종 정산 후 코인·경험치 획득 |
 | 꾸준히 지키기       | 계정 레벨업·성공 누적 외형 성장 |
 | 번 코인 사용       | 뽑기·아이템 구매    |
 | 서로 비교하기       | 전투력·연승·시즌 기록 |
@@ -118,7 +119,7 @@ BETCHU는 이 둘을 결합한다.
 | 배츄     | 각 플레이어가 키우는 몬스터                 |
 | 정산     | 약속 성공·실패에 따라 코인과 경험치를 처리하는 과정   |
 | 전투력    | 몬스터의 최종 HP·ATK로 서버가 계산하는 수치        |
-| 케미 게이지 | 유효한 일반 개인 퀘스트를 두 사람이 성공·실패로 공동 확정할 때 채워지는 협동 게이지 |
+| 케미 게이지 | 유효한 일반 개인 퀘스트가 파트너 최종 승인으로 성공·실패 정산될 때 채워지는 협동 게이지 |
 | 시즌     | 한 달 단위로 기록을 정리하는 기간             |
 
 앱 내부에서는 `베팅`이라는 표현을 계속 반복하기보다 다음처럼 가볍게 표현하는 것이 좋다.
@@ -142,13 +143,13 @@ BETCHU는 이 둘을 결합한다.
    ↓
 코인과 난이도 설정
    ↓
-상대방 승인
+파트너의 성공·실패 예상 선택과 시작 승인
    ↓
-퀘스트 수행
+퀘스트 수행·파트너 예상 표시
    ↓
-성공·실패 정산
+파트너의 실제 결과 입력과 최종 승인
    ↓
-코인·경험치 획득
+성공·실패 정산 또는 무효 처리
    ↓
 뽑기·아이템 장착
    ↓
@@ -249,9 +250,9 @@ ATK 10
 [파트너에게 보내기]
 ```
 
-튜토리얼은 사용자당 한 번만 제공한다. 시작할 때 실제 100C를 잠가 지갑 흐름을 보여주지만 일일 코인 퀘스트 횟수와 보너스 예산에는 포함하지 않는다. 성공하면 원금과 최초 1회 보너스 100C, 10XP를 지급하고, 실패·미응답·관계 종료면 원금만 반환하며 보너스·XP·연승·케미는 지급하지 않는다.
+튜토리얼은 사용자당 한 번만 제공한다. 시작 승인 때 실제 100C를 잠가 지갑 흐름을 보여주지만 일일 코인 퀘스트 횟수와 보너스 예산에는 포함하지 않는다. 파트너가 성공으로 최종 승인하면 원금과 최초 1회 보너스 100C, 10XP를 지급한다. 실패로 최종 승인하거나 최종 승인을 거절·누락해 `INVALID`가 되거나 관계가 종료되면 원금만 반환하며 보너스·XP·연승·케미는 지급하지 않는다.
 
-튜토리얼이 최종 `SUCCESS`로 정산되면 같은 트랜잭션에서 스타팅 배츄를 `EGG → BABY`로 즉시 부화시킨다. 튜토리얼 성공은 15절의 영구 인정 성공 수에는 포함하지 않는다. 튜토리얼이 실패·만료·관계 종료로 종료되면 튜토리얼을 반복하지 않고, 이후 첫 일반 개인 퀘스트 `SUCCESS` 정산 시 부화시킨다.
+튜토리얼이 최종 `SUCCESS`로 정산되면 같은 트랜잭션에서 스타팅 배츄를 `EGG → BABY`로 즉시 부화시킨다. 튜토리얼 성공은 15절의 영구 인정 성공 수에는 포함하지 않는다. 튜토리얼이 `FAILURE`·`INVALID`·관계 종료로 끝나면 튜토리얼을 반복하지 않고, 이후 첫 일반 개인 퀘스트 `SUCCESS` 정산 시 부화시킨다.
 
 ## 6.5 연결 종료·차단·탈퇴
 
@@ -265,10 +266,10 @@ ATK 10
 
 1. `DRAFT`, `PENDING_APPROVAL`, `CHANGE_REQUESTED`인 퀘스트는 커플·퀘스트 행을 잠근 뒤 별도 코인 반환 없이 `CANCELED_RELATIONSHIP_ENDED`로 종료한다. 이미 `APPROVAL_EXPIRED`된 퀘스트는 추가 정산하지 않는다.
 2. 수행 마감 전 진행 중 퀘스트는 `CANCELED_RELATIONSHIP_ENDED`로 종료하고 잠긴 코인을 원래 소유자에게 반환한다.
-3. 수행 마감 후 결과 대기 퀘스트는 최초 두 응답이 같은 값으로 모두 제출된 경우에만 정상 정산한다. 분쟁 중 퀘스트는 양쪽의 해당 `dispute_round` 최종 응답이 모두 제출된 경우에만 10절 규칙으로 정산한다. 그 밖에는 `FAILURE`, `resolution_source = RELATIONSHIP_ENDED_AFTER_DUE`로 정산해 잠긴 코인을 소각한다. 단, 사용자당 1회인 튜토리얼은 6.4절에 따라 원금을 반환한다.
-4. 마감 전 취소는 성공 보너스·경험치·케미를 지급하지 않고 연승을 유지한다. 마감 후 미판정 실패는 성공 보너스·경험치·케미를 지급하지 않고 연승을 0으로 초기화한다. 종료 전에 이미 공동 확정된 결과만 기존 성공·실패 규칙대로 반영한다.
+3. 수행 마감 후 `AWAITING_RESULT` 또는 `PENDING_FINAL_APPROVAL`인 퀘스트는 파트너 최종 승인이 아직 커밋되지 않은 상태이므로 `INVALID`, `invalid_reason = RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL`로 정산하고 잠긴 원금을 반환한다. 종료 전에 파트너 최종 승인과 정산이 이미 커밋된 `SUCCESS`·`FAILURE`만 그대로 유지한다.
+4. 마감 전 취소와 마감 후 `INVALID`는 성공 보너스·경험치·인정 성공 수·케미를 지급하지 않고 연승을 유지한다. 파트너가 실패로 최종 승인해 이미 커밋된 `FAILURE`만 연승을 0으로 초기화한다.
 5. 각 사용자의 몬스터·아이템·개인 지갑은 유지한다.
-6. 공동 기록은 화면에서 숨기고 보안·분쟁 처리에 필요한 최소 메타데이터만 접근 제한 상태로 보관한다.
+6. 공동 기록은 화면에서 숨기고 보안·정산 이의 처리에 필요한 최소 메타데이터만 접근 제한 상태로 보관한다.
 
 P2 교환·선물·정식 레이드가 열린 뒤에는 연결 종료·차단 직후 해당 커플의 미완료 교환·선물·레이드도 더 이상 조회·수락·확정할 수 없다. `relationship_end_jobs`의 후속 단계가 이를 `CANCELED_RELATIONSHIP_ENDED`로 한 번만 종료하고, 교환·보유 아이템 선물 예약과 미완료 주간 예약 횟수를 해제한다. 상점 선물로 잠긴 코인은 전액 반환 원장을 남기며, 정식 레이드는 보상 없이 종료한다. 이미 완료된 이전·선물·레이드 보상은 되돌리지 않는다.
 
@@ -296,13 +297,13 @@ P2 교환·선물·정식 레이드가 열린 뒤에는 연결 종료·차단 �
 | 수행 마감    | 오늘 오전 1시          |
 | 최소 수행 시간 | 30분               |
 | 승인 마감    | 오늘 오전 12시 30분    |
-| 결과 입력 시작 | 내일 오전 9시          |
-| 결과 입력 마감 | 입력 시작 후 24시간      |
+| 결과 확인 시작 | 내일 오전 9시          |
+| 최종 승인 마감 | 확인 시작 후 24시간      |
 | 인증 방식    | 사용 안 함 또는 선택 사진  |
 
 `approval_deadline_at`은 서버가 `due_at - minimum_duration_minutes`로 계산한다. 기본 템플릿의 최소 수행 시간은 서버 템플릿에 고정하고, 자유 입력 퀘스트는 도전자가 허용 범위 안에서 제안해 현재 버전에 포함한다. 시점형 행동은 `0분`을 허용한다. 제출과 승인은 모두 서버 시각이 `approval_deadline_at`보다 빠를 때만 허용한다. 제출 시 이미 마감과 같거나 늦으면 새 버전을 만들지 않고 `APPROVAL_DEADLINE_NOT_FUTURE`를 반환하며 `DRAFT` 또는 `CHANGE_REQUESTED`를 유지해 작성자가 수행 마감 등을 고칠 수 있게 한다. 이미 `PENDING_APPROVAL`인 요청은 마감 도달 시 `APPROVAL_EXPIRED`로 종료한다.
 
-`result_at`은 수행 마감 이후의 결과 입력 시작 시각이고, `response_deadline_at`은 서버가 `result_at + 24시간`으로 계산한다. 사용자가 임의로 승인·결과 입력 기한을 늘리거나 줄일 수 없다.
+`result_at`은 수행 마감 이후 파트너의 결과 확인이 시작되는 시각이고, `result_confirmation_deadline_at`은 서버가 `result_at + 24시간`으로 계산한다. 파트너의 실제 결과 선택과 최종 승인은 모두 이 기한 전에 끝나야 하며 사용자가 임의로 늘리거나 줄일 수 없다.
 
 ## 7.2 퀘스트 카테고리
 
@@ -367,9 +368,9 @@ MVP에서 사용자가 직접 만드는 퀘스트는 **개인 퀘스트만 구�
 
 ---
 
-# 8. 상대방 승인 시스템
+# 8. 파트너 시작 승인 시스템
 
-퀘스트는 상대방이 승인해야 시작된다. 파트너 승인은 성공 조건과 난이도를 함께 확인하는 절차이며, 코인 파밍은 승인만 믿지 않고 난이도별 베팅 상한과 일일 서버 발행 한도로 함께 막는다.
+퀘스트는 파트너가 시작 승인해야 수행할 수 있다. 파트너는 성공 조건과 난이도를 확인한 뒤 도전자의 성공 또는 실패를 예상해 하나를 선택하고 현재 버전을 승인한다. 이 예상은 게임 상호작용용 기록이며 성공 보너스·XP·최종 판정을 바꾸지 않는다. 코인 파밍은 승인만 믿지 않고 난이도별 베팅 상한과 일일 서버 발행 한도로 함께 막는다.
 
 파트너에게 다음 화면이 전달된다.
 
@@ -386,14 +387,16 @@ MVP에서 사용자가 직접 만드는 퀘스트는 **개인 퀘스트만 구�
 수행 마감    오늘 오전 1시
 최소 수행    30분
 승인 마감    오늘 오전 12시 30분
-결과 입력    내일 오전 9시 ~ 모레 오전 9시
+결과 확인    내일 오전 9시 ~ 모레 오전 9시
 인증 방식    선택 사진
 
 v1에서 바뀐 항목
 - 걸기 50C → 100C
 - 성공 조건 문구 수정
 
-[승인하기]
+성공할 것 같아 / 실패할 것 같아
+
+[예상 선택 후 시작 승인]
 [수정 요청]
 [거절하기]
 ```
@@ -408,23 +411,23 @@ v1에서 바뀐 항목
 | `PENDING_APPROVAL` 회수 | 작성자만 회수해 `DRAFT`로 돌릴 수 있음. 해당 버전의 승인 요청은 무효 |
 | 파트너 수정 요청 | `CHANGE_REQUESTED`로 전환하고 요청 문구를 기록 |
 | 수정 후 재제출 | 직전 제출본과 다른 항목이 있어야 하며 `v1 → v2`처럼 버전을 올려 `PENDING_APPROVAL`로 전환. 이전 판단은 모두 무효 |
-| 파트너 승인 | 정확히 표시된 현재 버전만 승인. `ACTIVE` 전환, 코인 잠금, 해당 결과 예정일의 슬롯·보너스 예약을 한 트랜잭션으로 처리 |
+| 파트너 시작 승인 | 성공·실패 예상 중 하나를 선택하고 정확히 표시된 현재 버전만 승인. 예상 기록, `ACTIVE` 전환, 코인 잠금, 해당 결과 예정일의 슬롯·보너스 예약을 한 트랜잭션으로 처리 |
 | 승인 마감 도달 | 내부 상태 `APPROVAL_EXPIRED`, 화면에는 `EXPIRED`. 코인 차감·잠금·슬롯·보너스 예약 없음 |
 | 거절 | `REJECTED`로 종료. 코인 잠금 없음 |
-| `ACTIVE` 후 수정 | 허용하지 않음. 조건을 바꾸려면 수행 마감 전 양쪽 합의 취소 후 새 퀘스트를 생성 |
+| `ACTIVE` 후 수정 | 퀘스트 조건과 시작 예상 모두 수정 불가. 조건을 바꾸려면 수행 마감 전 양쪽 합의 취소 후 새 퀘스트를 생성 |
 | 수행 마감 전 취소 요청 | 두 사람 모두 동의하면 취소 |
 | 수행 마감 전 공동 취소 | 잠긴 코인 반환, 보너스·경험치·케미 없음 |
 | 수행 마감 이후 사용자 취소 | 허용하지 않고 반드시 결과 판정 진행. 단, 안전 기능인 연결 종료·차단은 6.5절의 별도 정산 규칙 적용 |
 
 제출된 각 버전은 수정·삭제하지 않고 보존한다. 파트너에게 보이는 `changedFields`는 클라이언트가 적어 내는 값이 아니라 서버가 직전·현재 불변 버전을 비교해 계산한다. `PENDING_APPROVAL`은 직접 수정할 수 없고 반드시 먼저 회수해야 한다. `CHANGE_REQUESTED` 수정 중에도 파트너는 미제출 작업 내용을 볼 수 없다.
 
-일반 개인 퀘스트 초안은 튜토리얼 중에도 작성할 수 있지만, 도전자의 튜토리얼이 성공·실패·만료 등 최종 상태로 끝나 `tutorial_completed_at`이 기록되기 전에는 제출할 수 없다. 이 경우 `TUTORIAL_REQUIRED`를 반환한다. 승인 시에도 같은 조건을 다시 검사해 튜토리얼과 일반 성공의 부화 순서가 뒤바뀌지 않게 한다.
+일반 개인 퀘스트 초안은 튜토리얼 중에도 작성할 수 있지만, 도전자의 튜토리얼이 `SUCCESS`·`FAILURE`·`INVALID` 등 최종 상태로 끝나 `tutorial_completed_at`이 기록되기 전에는 제출할 수 없다. 이 경우 `TUTORIAL_REQUIRED`를 반환한다. 시작 승인 시에도 같은 조건을 다시 검사해 튜토리얼과 일반 성공의 부화 순서가 뒤바뀌지 않게 한다.
 
 승인 대기 상태의 승인·수정 요청·거절·회수는 모두 퀘스트 행을 잠근 뒤 승인 마감을 먼저 검사한다. 서버 시각이 마감과 같거나 늦으면 스케줄러 도착 여부와 관계없이 `APPROVAL_EXPIRED`가 우선하며 다른 전이는 커밋하지 않는다. 회수·수정 요청 뒤 재제출할 때 직전 제출 버전과 서버 비교 결과가 완전히 같으면 `UNCHANGED_QUEST_VERSION`으로 거절한다.
 
 처음부터 제출하지 않은 `DRAFT`의 존재와 내용은 작성자에게만 보인다. 이미 파트너에게 전달된 버전을 회수한 경우 파트너 화면에서는 활성 승인 항목을 제거하고 `회수됨` 감사 표시와 과거에 실제 전달된 불변 버전만 유지한다. 현재 `quest_drafts`의 내용·수정 시각·새 변경점은 다시 제출되기 전까지 공개하지 않는다. `CHANGE_REQUESTED`에서는 마지막 제출 버전과 파트너 본인의 수정 요청만 공유하고 작성 중 초안은 가린다. `ACTIVE` 이후 화면은 `approved_quest_version_id`를 기준으로 표시한다.
 
-파트너에게는 퀘스트 제목·성공 조건·난이도·걸린 코인·해당 퀘스트의 예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 수정 항목만 공유한다. 도전자의 전체 가용·잠긴 잔액, 남은 개인 코인 퀘스트 횟수·보너스 예산, 전체 지갑 원장, 뽑기·구매 내역, 미제출 `DRAFT`는 공유하지 않는다. 작성자 전용 예산 견적 응답에서만 남은 개인 한도를 보여준다.
+파트너에게는 퀘스트 제목·성공 조건·난이도·걸린 코인·해당 퀘스트의 예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 수정 항목만 공유한다. 시작 승인 때 선택한 `predicted_result`는 `ACTIVE` 전환과 함께 고정해 수행 기간 동안 도전자와 파트너 모두에게 보여주고 최종 결과와 별도로 보존한다. 도전자의 전체 가용·잠긴 잔액, 남은 개인 코인 퀘스트 횟수·보너스 예산, 전체 지갑 원장, 뽑기·구매 내역, 미제출 `DRAFT`는 공유하지 않는다. 작성자 전용 예산 견적 응답에서만 남은 개인 한도를 보여준다.
 
 승인 순간 잔액·일일 한도가 부족하면 코인을 일부만 처리하지 않고 승인을 롤백한다. 파트너에게는 금액을 포함하지 않은 `QUEST_REQUIRES_REVISION`만 반환하고, 작성자에게만 사유와 수정 가능한 범위를 개인 알림으로 제공한다.
 
@@ -449,15 +452,22 @@ PENDING_APPROVAL ── recall ──→ DRAFT
   │                         └─────────→ PENDING_APPROVAL
   ├─ reject ─────────→ REJECTED
   ├─ approval deadline ─→ APPROVAL_EXPIRED
-  │ approve(exact version)
+  │ predict + approve(exact version)
   ↓
-ACTIVE (승인 후 수정 불가)
+ACTIVE (승인 버전·파트너 예상 수정 불가)
+  ├─ mutual cancel before due ─→ CANCELED
+  │ result_at
   ↓
 AWAITING_RESULT
-  ├─ SUCCESS
-  ├─ FAILURE
-  ├─ DISPUTED
-  └─ EXPIRED
+  ├─ partner selects SUCCESS or FAILURE ─→ PENDING_FINAL_APPROVAL
+  ├─ partner rejects judgment ───────────→ INVALID
+  └─ result confirmation deadline ───────→ INVALID
+
+PENDING_FINAL_APPROVAL
+  ├─ final approve selected SUCCESS ─→ SUCCESS
+  ├─ final approve selected FAILURE ─→ FAILURE
+  ├─ final reject ────────────────────→ INVALID
+  └─ result confirmation deadline ────→ INVALID
 ```
 
 예외 상태는 다음과 같다.
@@ -467,8 +477,6 @@ REJECTED
 DISCARDED
 CANCELED
 APPROVAL_EXPIRED
-EXPIRED
-DISPUTED
 INVALID
 CANCELED_RELATIONSHIP_ENDED
 ```
@@ -478,32 +486,33 @@ CANCELED_RELATIONSHIP_ENDED
 | DRAFT            | 현재 작업 초안은 파트너에게 미공개. 회수된 경우 과거 전달본만 응답 전용 `auditProjectionStatus = RECALLED`로 표시 |
 | PENDING_APPROVAL | 현재 불변 버전의 파트너 승인 대기 |
 | CHANGE_REQUESTED | 파트너의 수정 요청 후 작성자 수정·재제출 대기 |
-| ACTIVE           | 수행 중        |
-| AWAITING_RESULT  | 결과 확인 대기    |
-| SUCCESS          | 성공 정산 완료    |
-| FAILURE          | 실패 정산 완료    |
-| DISPUTED         | 두 사람 판단 불일치 |
-| INVALID          | 서버가 확인한 기술 오류로 무효 처리 |
+| ACTIVE           | 시작 승인된 버전과 파트너 예상을 표시하며 수행 중 |
+| AWAITING_RESULT  | 결과 확인 시작 뒤 파트너의 실제 결과 선택 대기 |
+| PENDING_FINAL_APPROVAL | 파트너가 실제 결과를 선택했고 최종 승인·거절 전인 상태 |
+| SUCCESS          | 파트너가 성공으로 최종 승인해 성공 정산 완료 |
+| FAILURE          | 파트너가 실패로 최종 승인해 실패 정산 완료 |
+| INVALID          | 파트너의 판정 거절·최종 승인 거절·기한 만료 또는 서버 기술 오류로 무효 처리 |
 | REJECTED         | 파트너가 현재 제출 버전을 거절해 승인 없이 종료 |
 | DISCARDED        | 작성자가 승인 전 초안을 폐기해 종료 |
 | APPROVAL_EXPIRED | 승인 마감 종료. 화면 표시는 `EXPIRED`, 코인·정산 없음 |
-| EXPIRED          | 결과 입력 기한 내 한 명 이상 미응답한 정산 만료 |
 | CANCELED         | 합의 취소       |
 | CANCELED_RELATIONSHIP_ENDED | 연결 종료에 따른 수행 마감 전 강제 취소 |
 
 ---
 
-# 10. 결과 확인과 분쟁 처리
+# 10. 파트너 결과 판정과 최종 승인
 
 > 결정 상태: `[확정]` · 출시 범위: `[MVP]`
 
-## 최초 결과 입력
+## 실제 결과 선택
 
-1. `result_at`이 되면 도전자와 파트너에게 동시에 결과 입력을 요청한다.
-2. 두 사람은 순서와 관계없이 성공 또는 실패를 독립적으로 선택한다.
-3. 상대방의 선택은 두 사람이 모두 제출하거나 최초 입력 기한이 끝나기 전까지 공개하지 않는다.
-4. `response_deadline_at`은 `result_at + 24시간`이다.
-5. 결과 요청 직후, 12시간 후, 마감 2시간 전에 거래성 알림과 인앱 대기 항목을 제공한다.
+1. `result_at`이 되면 파트너에게 성공 조건과 도전자가 제출한 인증 자료를 확인해 실제 결과를 선택하도록 요청한다.
+2. 실제 결과는 파트너만 `SUCCESS` 또는 `FAILURE` 중 하나로 선택한다. 도전자는 결과값을 제출하지 않는다.
+3. 선택값은 `PENDING_FINAL_APPROVAL`의 작업 값일 뿐 코인·XP·성장에 반영하지 않는다.
+4. 파트너는 최종 승인 전까지 선택값을 바꿀 수 있으며, 변경할 때마다 예상 `row_version`을 검사하고 감사 이벤트를 남긴다.
+5. `result_confirmation_deadline_at = result_at + 24시간`이며 실제 결과 선택과 최종 승인 모두 이 시각 전에 완료해야 한다.
+6. 결과 확인 시작 직후, 12시간 후, 마감 2시간 전에 파트너에게 거래성 알림과 인앱 대기 항목을 제공한다. 도전자에게는 `파트너 확인 대기` 상태만 보여준다.
+7. 시작 승인 때 저장한 `predicted_result`는 수행 중 두 사람에게 표시하지만 실제 결과 선택이나 정산 계산에는 사용하지 않는다.
 
 ```text
 결과를 확인해줘!
@@ -516,59 +525,45 @@ CANCELED_RELATIONSHIP_ENDED
 [실패했어]
 ```
 
-## 결과 조합
-
-| 도전자 | 파트너 | 최초 기한 종료 시 처리 |
-| --- | --- | --- |
-| 성공 | 성공 | `SUCCESS` |
-| 실패 | 실패 | `FAILURE` |
-| 성공 | 실패 | 즉시 `DISPUTED` |
-| 실패 | 성공 | 즉시 `DISPUTED` |
-| 성공 | 미응답 | `EXPIRED` |
-| 실패 | 미응답 | `EXPIRED` |
-| 미응답 | 성공 | `EXPIRED` |
-| 미응답 | 실패 | `EXPIRED` |
-| 미응답 | 미응답 | `EXPIRED` |
-
-한 명이라도 미응답이면 공동 판정이 성립하지 않은 것으로 본다. 일반 개인 퀘스트의 `EXPIRED`에서는 잠긴 베팅금을 소각하며 환불, 성공 보너스, 경험치, 케미 게이지를 지급하지 않는다. 사용자당 1회인 튜토리얼만 6.4절에 따라 원금을 반환한다. 이 규칙은 실제 실패 후 미응답으로 손실을 피하는 경로를 없애기 위한 것이다.
-
-## 의견 불일치 처리
-
-불일치가 발생하면 `disputed_at`을 기록하고 `dispute_deadline_at = disputed_at + 24시간`으로 설정한다. 최초 입력과 분쟁 조정을 합친 최장 정산 시간은 `result_at + 48시간`이다.
+선택 뒤에는 별도의 확인 화면을 제공한다.
 
 ```text
-두 사람의 결과가 달라요.
+최종 승인할까요?
 
 등록한 성공 조건
 “오전 1시 이전에 잠자리에 들기”
 
-[성공으로 변경]
-[실패로 변경]
+선택한 결과
+성공
+
+[결과 수정]
+[최종 승인]
+[판정 거절]
 ```
 
-분쟁이 시작되면 각 사용자는 기존 값을 그대로 유지하는 선택을 포함해 **최종 응답을 한 번씩 독립 제출**한다. 한쪽 최종 응답만 도착했을 때는 두 값이 우연히 같아져도 정산하지 않는다. 양쪽 최종 응답이 모두 도착하거나 분쟁 기한이 끝날 때 각자의 유효값을 한 번 비교한다. 유효값은 최종 응답이 있으면 그 값, 없으면 최초 응답이다. 두 값이 성공으로 같으면 `SUCCESS`, 실패로 같으면 공동 확정 `FAILURE`, 서로 다르면 `FAILURE`와 `resolution_source = DISPUTE_UNRESOLVED`로 정산한다. 이 방식은 양쪽이 동시에 반대 방향으로 바꿔도 요청 도착 순서가 결과를 바꾸지 않게 한다. 분쟁 중에는 베팅금을 계속 잠근다.
+## 최종 승인과 무효 처리
 
-같은 `dispute_round`의 최종 응답값도 양쪽이 모두 제출하거나 분쟁 기한이 끝날 때까지 상대방에게 숨기고, 제출 여부만 보여준다. 이로써 나중에 응답하는 사용자가 상대방 값에 맞추는 것을 막는다.
+파트너가 최종 승인하면 선택한 결과와 퀘스트·예산·지갑·성장 행을 잠근 뒤 한 트랜잭션에서 정확히 한 번 정산한다. 성공 선택은 `SUCCESS`, 실패 선택은 `FAILURE`로 확정한다. 최종 승인 요청이 재시도되면 새 정산을 만들지 않고 최초 결과를 반환한다.
 
-`resolution_source`는 최소 `INITIAL_MATCH`, `DISPUTE_AGREED_SUCCESS`, `DISPUTE_AGREED_FAILURE`, `DISPUTE_UNRESOLVED`, `RESPONSE_TIMEOUT`, `SYSTEM_INVALID`, `RELATIONSHIP_ENDED_AFTER_DUE`로 구분한다. 마감 전 관계 종료는 결과 판정이 아니라 퀘스트의 `canceled_reason = RELATIONSHIP_ENDED`와 정산 결과 `CANCELED_RELATIONSHIP_ENDED`로 기록한다.
+파트너가 판정 또는 최종 승인을 거절하거나 `result_confirmation_deadline_at`까지 최종 승인이 커밋되지 않으면 `INVALID`로 종료한다. `INVALID`는 성공·실패로 집계하지 않고 잠긴 원금만 반환하며 성공 보너스·XP·인정 성공 수·연승·케미를 바꾸지 않는다. 서버 장애·중복 생성 등 확인 가능한 기술 오류도 `INVALID`를 사용한다.
 
-사용자가 선택하는 무효 처리는 제공하지 않는다. `INVALID`는 서버 장애·중복 생성 등 확인 가능한 기술 오류에만 서버가 지정하며 베팅금만 반환한다.
+`invalid_reason`은 최소 `PARTNER_JUDGMENT_REJECTED`, `PARTNER_FINAL_APPROVAL_REJECTED`, `RESULT_CONFIRMATION_TIMEOUT`, `SYSTEM_ERROR`, `RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL`로 구분한다. 수행 마감 전 관계 종료는 `INVALID`가 아니라 `CANCELED_RELATIONSHIP_ENDED`로 기록한다.
 
-최근 7일 동안 한 커플의 일반 개인 퀘스트에서 `EXPIRED` 또는 미합의 분쟁 `DISPUTE_UNRESOLVED`가 3회 발생하면 신규 코인 베팅을 일시 중지한다. 두 사람이 정산 규칙을 다시 확인하면 해제하고 `betting_risk_window_started_at`을 마지막 확인 시각으로 옮긴다. 이후 재정지 판단은 이 시각 뒤에 새로 발생한 건만 집계한다. 중지 중에도 0C 퀘스트와 연결 종료·차단은 사용할 수 있다.
+두 사람이 결과를 따로 입력하거나 서로의 결과를 비교하는 절차는 제공하지 않는다. 따라서 `DISPUTED`, 결과 미응답용 `EXPIRED`, 분쟁 라운드와 24시간 재응답은 일반 개인 퀘스트 상태·API·DB에서 사용하지 않는다.
+
+최근 7일 동안 한 커플의 코인을 건 일반 개인 퀘스트에서 `PARTNER_JUDGMENT_REJECTED`, `PARTNER_FINAL_APPROVAL_REJECTED`, `RESULT_CONFIRMATION_TIMEOUT`에 따른 `INVALID`가 3회 발생하면 손실 회피성 반복 무효를 막기 위해 신규 코인 베팅을 일시 중지한다. `SYSTEM_ERROR`와 관계 종료에 따른 무효는 집계하지 않는다. 두 사람이 정산 규칙을 다시 확인하면 해제하고 이후 사건만 새로 집계한다. 중지 중에도 0C 퀘스트와 연결 종료·차단은 사용할 수 있다.
 
 ## 최종 정산표
 
 | 최종 상태 | 잠긴 베팅금 | 성공 보너스·XP | 케미 | 연승 |
 | --- | --- | --- | --- | --- |
 | `SUCCESS` | 원금 반환 | 지급 | +1 | +1 |
-| 공동 확정 일반 개인 `FAILURE` | 전액 소각 | 없음 | +1 | 0으로 초기화 |
-| 미합의 분쟁 일반 개인 `FAILURE` | 전액 소각 | 없음 | 없음 | 0으로 초기화 |
-| 일반 개인 `EXPIRED` | 전액 소각 | 없음 | 없음 | 0으로 초기화 |
+| 파트너 최종 승인 일반 개인 `FAILURE` | 전액 소각 | 없음 | +1 | 0으로 초기화 |
+| 일반 개인 `INVALID` | 원금 반환 | 없음 | 없음 | 유지 |
 | 수행 마감 전 `CANCELED` | 원금 반환 | 없음 | 없음 | 유지 |
-| 서버 `INVALID` | 원금 반환 | 없음 | 없음 | 유지 |
-| 튜토리얼 `FAILURE`·`EXPIRED` | 원금 반환 | 없음 | 없음 | 유지 |
+| 튜토리얼 `FAILURE`·`INVALID` | 원금 반환 | 없음 | 없음 | 유지 |
 | 마감 전 `CANCELED_RELATIONSHIP_ENDED` | 원금 반환 | 없음 | 없음 | 유지 |
-| 마감 후 관계 종료 `FAILURE` | 전액 소각 | 없음 | 없음 | 0으로 초기화 |
+| 마감 후 관계 종료 전 최종 미승인 `INVALID` | 원금 반환 | 없음 | 없음 | 유지 |
 
 ---
 
@@ -578,7 +573,7 @@ CANCELED_RELATIONSHIP_ENDED
 
 기본 베팅 방식은 다음과 같다.
 
-성공하면 잠긴 원금과 승인 시 확정된 난이도 보너스를 받고, 실패·만료하면 잠긴 원금을 잃는다. 예를 들어 ★★ 퀘스트에 100C를 걸면 성공 보너스는 75C다.
+파트너가 성공으로 최종 승인하면 잠긴 원금과 시작 승인 시 확정된 난이도 보너스를 받고, 실패로 최종 승인하면 잠긴 원금을 잃는다. 최종 승인을 거절하거나 기한 안에 완료하지 않아 `INVALID`가 되면 원금만 반환한다. 예를 들어 ★★ 퀘스트에 100C를 걸면 성공 보너스는 75C다.
 
 ## 기본 정산
 
@@ -613,13 +608,14 @@ CANCELED_RELATIONSHIP_ENDED
 
 | 이벤트 | 사용 가능 잔액 변화 | 잠긴 잔액 변화 |
 | --- | ---: | ---: |
-| 파트너 승인 | `-stake` | `+stake` |
+| 파트너 시작 승인 | `-stake` | `+stake` |
 | 성공 정산 | `+stake + reward` | `-stake` |
-| 실패·만료 정산 | 변화 없음 | `-stake` |
+| 실패 최종 승인 정산 | 변화 없음 | `-stake` |
+| 판정 거절·최종 승인 거절·기한 만료 `INVALID` | `+stake` | `-stake` |
 | 수행 마감 전 공동 취소 | `+stake` | `-stake` |
 | 서버 기술 오류 무효 | `+stake` | `-stake` |
 | 마감 전 연결 종료 강제 취소 | `+stake` | `-stake` |
-| 마감 후 관계 종료 미판정 | 변화 없음 | `-stake` |
+| 마감 후 관계 종료·최종 미승인 `INVALID` | `+stake` | `-stake` |
 | 코인 뽑기 | `-cost` | 변화 없음 |
 
 각 행은 퀘스트 또는 뽑기 상태 변경과 원장 기록을 포함한 하나의 DB 트랜잭션이다.
@@ -679,14 +675,14 @@ MVP 기본 템플릿의 난이도는 서버가 고정하며 사용자가 높일 
 3. 일반 개인 퀘스트 성공 보너스는 사용자당 KST 하루 최대 300C다.
 4. ★·★★ 서버 템플릿과 자유 입력 퀘스트를 합친 저난도 성공 보너스는 그 300C 안에서 하루 최대 100C다.
 5. 승인 트랜잭션에서 해당 결과 예정일의 베팅 슬롯과 계산된 성공 보너스 금액을 예약한다. 전체 300C 또는 저난도 100C를 넘을 수 없다.
-6. 실패·만료·취소 시 보너스 예약액은 해제하지만 그날 사용한 베팅 퀘스트 횟수는 복구하지 않는다.
+6. `FAILURE`·사용자 공동 취소 시 보너스 예약액은 해제하지만 그날 사용한 베팅 퀘스트 횟수는 복구하지 않는다. `INVALID`는 보너스 예약액을 해제하고 사용한 베팅·XP 슬롯을 복구한다.
 7. 원금 반환은 신규 발행이 아니므로 300C 한도에 포함하지 않는다.
-8. 실패·만료로 코인이 소각되어도 당일 발행 한도를 다시 늘리지 않는다.
-9. 서버 기술 오류 `INVALID`는 보너스 예약액을 해제하고 해당 베팅 퀘스트 횟수도 1회 복구한다.
+8. 실패로 코인이 소각되어도 당일 발행 한도를 다시 늘리지 않는다.
+9. `INVALID` 원금 반환은 신규 발행이 아니며, 손실 회피성 반복 무효는 10절의 별도 베팅 중지 기준으로 관리한다.
 
-0C 일반 개인 퀘스트도 동시 진행 5개와 `result_at` KST 날짜 기준 XP 슬롯 5개를 사용한다. 튜토리얼·구조 퀘스트는 이 반복 슬롯에서 제외한다. 승인 때 슬롯을 예약하며 실패·만료·사용자 취소는 그날 슬롯을 복구하지 않고 서버 `INVALID`만 복구한다.
+0C 일반 개인 퀘스트도 동시 진행 5개와 `result_at` KST 날짜 기준 XP 슬롯 5개를 사용한다. 튜토리얼·구조 퀘스트는 이 반복 슬롯에서 제외한다. 시작 승인 때 슬롯을 예약하며 `FAILURE`·사용자 취소는 그날 슬롯을 복구하지 않고 `INVALID`만 복구한다.
 
-일일 출석이 도입된 일반 날짜의 반복 보상 총발행 상한은 `퀘스트 성공 보너스 300C + 출석 100C = 400C`다. 구조 퀘스트 사용일은 예외적으로 최대 500C지만 최근 30일 2회만 가능하다. 따라서 30일 반복 보상 총발행 절대 상한은 MVP `9,200C`, 출석 도입 후 `12,200C`다. 최초 가입 1,000C와 튜토리얼 최초 보너스 100C, 후속 업적·정식 레이드·시즌 보상은 반복 보상과 분리된 일회·운영 예산으로 관리한다. 실제 순증감은 이 발행액에서 실패·만료 소각과 뽑기 소비를 뺀 값이다.
+일일 출석이 도입된 일반 날짜의 반복 보상 총발행 상한은 `퀘스트 성공 보너스 300C + 출석 100C = 400C`다. 구조 퀘스트 사용일은 예외적으로 최대 500C지만 최근 30일 2회만 가능하다. 따라서 30일 반복 보상 총발행 절대 상한은 MVP `9,200C`, 출석 도입 후 `12,200C`다. 최초 가입 1,000C와 튜토리얼 최초 보너스 100C, 후속 업적·정식 레이드·시즌 보상은 반복 보상과 분리된 일회·운영 예산으로 관리한다. 실제 순증감은 이 발행액에서 실패 소각과 뽑기 소비를 뺀 값이다. `INVALID`는 원금 반환이므로 신규 발행·소각 어느 쪽에도 포함하지 않고 별도 관찰한다.
 
 ## 30일·90일 코인 수급 시뮬레이션
 
@@ -707,7 +703,7 @@ MVP 기본 템플릿의 난이도는 서버가 고정하며 사용자가 높일 
 일일 기대 성공 보너스
 75 × 0.80 + 200 × 0.65 = 190C
 
-일일 기대 실패·만료 소각
+일일 기대 실패 소각
 100 × 0.20 + 200 × 0.35 = 90C
 
 출석 포함, 뽑기 전 기대 순증가
@@ -728,7 +724,7 @@ MVP 기본 템플릿의 난이도는 서버가 고정하며 사용자가 높일 
 
 쉬운 퀘스트만 반복하는 최악 전략도 별도로 본다. ★·★★·자유 입력 퀘스트 두 개를 모두 성공해도 저난도 보너스는 하루 100C에서 멈춘다. P1 출석 100C를 받고 계획된 뽑기 200C를 사용하면 순증가는 `100 + 100 - 200 = 0C/일`이다. 뽑기를 전혀 사용하지 않는 보유 전용 사용자는 90일에 19,000C까지 쌓일 수 있으므로 계획된 소비 루프 참여 사용자와 별도 코호트로 관찰하고, 후속 고액 보상이나 유료성 없는 추가 발행을 열기 전에 지속 소비처를 먼저 검증한다.
 
-활동 사용자의 운영 목표는 `성공 보너스·출석 발행액 ÷ 뽑기 소비·실패 소각액 = 0.9~1.1`, 90일 잔액 중앙값 `1,000~3,000C`다. 뽑기를 사용하지 않는 사용자는 코인이 계속 쌓이므로 후속 꾸미기·강화 같은 지속적인 소비처가 필요하다. 출시 후 사용자당 발행액, 실패·만료 소각액, 뽑기 소비액, 난이도별 성공률, 30일·90일 잔액 중앙값과 상위 10%를 함께 관찰해 상한을 조정한다.
+활동 사용자의 운영 목표는 `성공 보너스·출석 발행액 ÷ 뽑기 소비·실패 소각액 = 0.9~1.1`, 90일 잔액 중앙값 `1,000~3,000C`다. 뽑기를 사용하지 않는 사용자는 코인이 계속 쌓이므로 후속 꾸미기·강화 같은 지속적인 소비처가 필요하다. 출시 후 사용자당 발행액, 실패 소각액, `INVALID` 원금 반환액, 뽑기 소비액, 난이도별 성공률, 30일·90일 잔액 중앙값과 상위 10%를 함께 관찰해 상한을 조정한다.
 
 ---
 
@@ -880,7 +876,7 @@ MVP 레벨 상한은 `50`으로 둔다.
 
 ## 정확한 성장 시점
 
-성장은 사용자가 결과 버튼을 누른 순간이 아니라 **두 사람의 결과가 확정되고 서버의 최종 정산 트랜잭션이 커밋된 순간** 반영한다.
+성장은 파트너가 실제 결과를 선택한 순간이 아니라 **파트너의 최종 승인을 받고 서버의 최종 정산 트랜잭션이 커밋된 순간** 반영한다.
 
 * 튜토리얼 성공 정산: 인정 성공 수 `0`을 유지한 채 `HATCH` 기록과 `EGG → BABY`를 동시에 처리
 * 튜토리얼 미성공 스타터 또는 P2에서 새로 얻은 활성 `EGG` 배츄의 첫 일반 개인 퀘스트 성공 정산: 인정 성공 수 `0 → 1`, `HATCH` 기록, `EGG → BABY`를 동시에 처리
@@ -893,7 +889,7 @@ MVP 레벨 상한은 `50`으로 둔다.
 
 20·40·60·80을 만든 정산 응답과 홈 갱신 이벤트에 새 단계·보상을 함께 포함한다. 트랜잭션이 실패하면 이전 외형을 유지하고, 같은 정산을 재시도해도 마일스톤과 보상은 중복 지급하지 않는다.
 
-인정 성공 수는 서버가 `quest_type = PERSONAL`인 일반 개인 퀘스트를 최종 `SUCCESS`로 정산하는 순간 그 사용자의 활성 배츄에 퀘스트당 1회만 지급한다. 튜토리얼·구조·보스 퀘스트와 `FAILURE`, `CANCELED`, `EXPIRED`, `INVALID`, `DISPUTE_UNRESOLVED`는 제외한다. 튜토리얼을 성공해도 부화만 시키고 인정 성공 수는 0에서 시작한다.
+인정 성공 수는 파트너가 최종 승인한 `quest_type = PERSONAL` 일반 개인 퀘스트를 서버가 `SUCCESS`로 정산하는 순간 그 사용자의 활성 배츄에 퀘스트당 1회만 지급한다. 튜토리얼·구조·보스 퀘스트와 `FAILURE`, `CANCELED`, `INVALID`는 제외한다. 튜토리얼을 성공해도 부화만 시키고 인정 성공 수는 0에서 시작한다.
 
 성공 정산 트랜잭션은 정산 시점의 활성 배츄 ID를 `credited_monster_id`로 고정하고 인정 성공 수를 올린다. 이때 활성 배츄가 `EGG`라면 스타터·추가 알 구분 없이 같은 정산에서 `(monster_id, HATCH)`를 한 번만 기록하고 `BABY`로 부화시킨다. 임계값에 도달하거나 데이터 복구로 건너뛰면 누락된 마일스톤을 낮은 순서부터 한 번씩 처리한다. 외형 단계와 인정 성공 수는 시즌 종료·실패·활성 배츄 교체로 감소하지 않는다. 60회 숙련 기록은 달성 배츄에 연결하고, 오라·칭호·장신구는 그 종에 맞는 계정 귀속 보상으로 한 번만 지급해 교환·선물을 금지한다.
 
@@ -1300,7 +1296,7 @@ PvP에서 큰 코인을 지급하면 강한 사람이 계속 더 강해질 수 �
 
 > 결정 상태: `[확정]` · 출시 범위: `[MVP]`
 
-두 사람의 유효한 일반 개인 퀘스트가 공동 확정 `SUCCESS` 또는 `FAILURE`로 정산될 때마다 `케미 게이지`가 1칸 오른다.
+유효한 일반 개인 퀘스트가 파트너의 최종 승인으로 `SUCCESS` 또는 `FAILURE`로 정산될 때마다 `케미 게이지`가 1칸 오른다.
 
 ```text
 이번 주 케미 게이지
@@ -1314,9 +1310,8 @@ PvP에서 큰 코인을 지급하면 강한 사람이 계속 더 강해질 수 �
 게이지 집계 규칙은 다음과 같다.
 
 * 승인 후 실제 시작된 일반 개인 퀘스트만 집계한다.
-* `SUCCESS`와 두 사람이 공동 확정한 `FAILURE`는 퀘스트별 1회 집계한다.
-* `REJECTED`, `CANCELED`, `EXPIRED`, `INVALID`, 미해결 `DISPUTED`, `DISPUTE_UNRESOLVED`, 튜토리얼·구조 퀘스트는 제외한다.
-* `DISPUTED`는 두 사람이 합의를 거쳐 `SUCCESS` 또는 `FAILURE`로 확정한 시점에 한 번만 집계한다.
+* 파트너가 최종 승인한 `SUCCESS`와 `FAILURE`는 퀘스트별 1회 집계한다.
+* `REJECTED`, `CANCELED`, `APPROVAL_EXPIRED`, `INVALID`, 튜토리얼·구조 퀘스트는 제외한다.
 * 정산 완료 시각을 기준으로 매주 월요일 00:00부터 일요일 23:59까지 KST로 집계한다.
 * MVP 간이 협동 보스는 토요일 00:00부터 일요일 23:59까지 KST에 플레이한다. 주말 전에 10개를 채우면 토요일에 해금되고, 주말 중 10개에 도달하면 즉시 해금된다.
 
@@ -1530,7 +1525,7 @@ LV.20
 8 / 10
 
 처리할 항목 1
-[결과 입력하기]
+[실제 결과 확인]
 
 [새 퀘스트 만들기]
 ```
@@ -1556,12 +1551,12 @@ LV.20
 | 커플 연결     | 초대 코드 생성·미리보기·확정·철회   |
 | 스타팅 배츄 선택 | 몬스터 외형 선택              |
 | 홈         | 몬스터, 퀘스트, 파트너 비교, 처리 대기함 |
-| 인앱 대기함   | 승인·결과·분쟁·기한 처리 항목       |
+| 인앱 대기함   | 시작 승인·실제 결과·최종 승인·기한 처리 항목 |
 | 퀘스트 목록    | 승인 대기·진행 중·결과 대기·완료    |
 | 퀘스트 생성    | 제목, 조건, 난이도, 코인, 마감 입력 |
-| 퀘스트 승인    | 승인·수정 요청·거절            |
-| 결과 확인     | 성공·실패 선택               |
-| 분쟁 조정     | 1회 응답 변경과 남은 기한 확인      |
+| 퀘스트 시작 승인 | 성공·실패 예상 선택, 승인·수정 요청·거절 |
+| 파트너 결과 확인 | 성공 조건·인증 자료 확인, 실제 성공·실패 선택 |
+| 결과 최종 승인 | 선택 결과 수정·최종 승인·판정 거절·남은 기한 |
 | 정산 결과     | 코인·경험치·연승 변화           |
 | 구조 퀘스트    | 잔액 고갈 복구용 시스템 퀘스트      |
 | 몬스터       | 계정 레벨·인정 성공 수·외형 성장·숙련 보상 |
@@ -1601,24 +1596,25 @@ LV.20
 
 난이도 ★★
 걸기 100C
-결과 입력 내일 오전 9시 ~ 모레 오전 9시
+결과 확인 내일 오전 9시 ~ 모레 오전 9시
 ```
 
-## 파트너 승인
+## 파트너 시작 승인
 
 사용자 2가 조건을 확인한다.
 
 ```text
-“1시 전에 자기면 별 2개 적당하네.”
+“1시 전에 자기면 별 2개 적당하네. 성공할 것 같아.”
 
-[승인하기]
+[성공 예상]
+[시작 승인]
 ```
 
-사용자 1의 100C가 잠기고 ★★ 보너스 예산 75C가 예약된다.
+파트너의 성공 예상이 두 사람 화면에 표시된다. 사용자 1의 100C가 잠기고 ★★ 보너스 예산 75C가 예약된다.
 
 ## 퀘스트 성공
 
-다음 날 두 사람 모두 성공을 선택한다.
+다음 날 사용자 2가 성공 조건과 선택 인증 자료를 확인해 `SUCCESS`를 선택하고 최종 승인한다.
 
 ```text
 QUEST CLEAR!
@@ -1653,7 +1649,7 @@ HP +70
 
 ## MVP 간이 협동 보스 시나리오
 
-그 주에 두 사람이 일반 개인 퀘스트를 성공 또는 실패로 공동 확정해 유효하게 10개 정산하면 간이 협동 보스가 열린다.
+그 주에 파트너 최종 승인으로 일반 개인 퀘스트를 `SUCCESS` 또는 `FAILURE`로 유효하게 10개 정산하면 간이 협동 보스가 열린다.
 
 주말에 첫 사용자가 참여하면 `WAITING_PARTNER`가 된다. 두 번째 사용자가 참여할 때 서버가 두 사람의 현재 전투력 `2,830 + 3,120 = 5,950`을 동시에 저장한다. 요구 전투력 5,200을 넘겨 클리어하고 두 사람 모두 일반 뽑기권 1장을 받는다.
 
@@ -1667,7 +1663,7 @@ HP +70
 
 BETCHU의 알림은 관리 앱처럼 딱딱하지 않고, 몬스터가 직접 말하는 느낌으로 만든다.
 
-커플 연결 최종 확인·만료 임박, 퀘스트 승인·수정 요청·공동 취소 요청·동의·거절·결과 입력·분쟁·마감, 간이 보스 해금·파트너 참여 대기·주말 마감 알림과 인앱 대기함은 거래성 P0 기능이다. 푸시를 거부해도 홈 배지와 인앱 대기함에서 같은 항목과 남은 시간을 확인할 수 있어야 한다. 출석·이벤트·홍보 알림은 P1이며 기본 수신 동의를 강제하지 않는다.
+커플 연결 최종 확인·만료 임박, 퀘스트 시작 승인·수정 요청·공동 취소 요청·동의·거절·파트너 실제 결과 선택·최종 승인·마감, 간이 보스 해금·파트너 참여 대기·주말 마감 알림과 인앱 대기함은 거래성 P0 기능이다. 푸시를 거부해도 홈 배지와 인앱 대기함에서 같은 항목과 남은 시간을 확인할 수 있어야 한다. 출석·이벤트·홍보 알림은 P1이며 기본 수신 동의를 강제하지 않는다.
 
 P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 아이템 추가·최종 확인·만료, 선물 수락·거절·만료도 해당 기능의 필수 거래성 알림으로 추가한다. 수령자가 선물 수신을 끈 경우에는 새 선물 알림도 만들지 않는다.
 
@@ -1686,7 +1682,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 ## 승인 완료
 
-> 사용자 2가 퀘스트를 승인했어.
+> 사용자 2가 성공을 예상하고 퀘스트 시작을 승인했어.
 > 이제 진짜 지켜야 해!
 
 ## 마감 임박
@@ -1696,18 +1692,23 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 ## 결과 확인
 
-> 네 확인이 있어야 정산할 수 있어.
-> 결과를 알려줘!
+> 파트너의 실제 결과 확인이 필요해.
+> 성공 조건과 인증 자료를 확인해줘!
 
-## 결과 입력 마감
+## 최종 승인 마감
 
-> 결과 입력 마감까지 2시간 남았어.
-> 기한이 지나면 걸어둔 코인이 사라져.
+> 결과 최종 승인 마감까지 2시간 남았어.
+> 기한이 지나면 퀘스트가 무효 처리되고 원금만 반환돼.
 
-## 분쟁 조정
+## 최종 승인 대기
 
-> 두 사람의 결과가 달라.
-> 24시간 안에 한 번 더 확인해줘.
+> 선택한 실제 결과를 한 번 더 확인해줘.
+> 최종 승인 뒤에 정산이 시작돼.
+
+## 무효 처리
+
+> 결과가 최종 승인되지 않아 퀘스트가 무효 처리됐어.
+> 걸어둔 원금은 반환됐어.
 
 ## 성공
 
@@ -1802,7 +1803,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 인증 이미지는 필수가 아닌 선택 사항이다.
 
-* 결과당 최대 3장, 장당 최대 10MB, 총 20MB
+* 퀘스트당 최대 3장, 장당 최대 10MB, 총 20MB
 * JPEG·PNG·WebP만 허용하고 서버가 실제 파일 형식·크기·악성 파일 여부를 검사
 * 업로드 후 서버에서 재인코딩해 EXIF·GPS 등 메타데이터를 제거하고 변환 성공 즉시 원본 삭제
 * 비공개 객체 저장소의 `object_key`만 저장하고 영구 공개 URL은 생성하지 않음
@@ -1830,7 +1831,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 * 성공·실패·희귀도·기한을 색상만으로 구분하지 않음
 * 시스템 모션 감소 설정 시 뽑기·진화·실패 애니메이션을 정적 화면으로 대체하고 건너뛰기 제공
 * 초당 3회 이상 점멸 효과 금지
-* 결과 입력 화면에서 남은 시간을 텍스트로 알리고 24시간 기한 안에는 언제든 재진입 가능
+* 파트너 결과 선택·최종 승인 화면에서 남은 시간을 텍스트로 알리고 24시간 기한 안에는 언제든 재진입 가능
 
 참고 기준은 [개인정보 보호법 제22조의2](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1006183947)와 [WCAG 2.2](https://www.w3.org/TR/WCAG22/)다.
 
@@ -1843,8 +1844,8 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 | 위험 | 해결 방법 | 적용 상태 |
 | --- | --- | --- |
 | 너무 쉬운 약속으로 코인 파밍 | 난이도별 보너스율·저난도 일일 보너스 상한·일 2개 서버 예약 한도 | `[확정][MVP]` |
-| 분쟁·미응답으로 손실 회피 | 24시간 블라인드 응답, 만료 시 소각, 분쟁 만료 규칙 | `[확정][MVP]` |
-| 파트너가 반복적으로 응답하지 않음 | 거래성 알림·인앱 대기함, 반복 만료 시 베팅 중지, 연결 종료·차단 | `[확정][MVP]` |
+| 판정 거절·최종 승인 누락으로 손실 회피 | `INVALID` 원금 반환을 별도 기록하고 7일 3회면 신규 코인 베팅 일시 중지 | `[확정][MVP]` |
+| 파트너가 반복적으로 최종 승인하지 않음 | 거래성 알림·인앱 대기함, 반복 무효 시 베팅 중지, 연결 종료·차단 | `[확정][MVP]` |
 | 강한 사람이 PvP를 계속 이김 | 선택 상성, 능력치 보정, 패배 보상 | `[제안][후속]` |
 | 코인을 전부 잃음 | P0 구조 퀘스트 | `[확정][MVP]` |
 | 뽑기 중복으로 흥미 저하 | MVP 자동 조각, P2 보관·교환 선택, 후속 강화 | 조각 `[확정][MVP]`, 보관·교환 `[확정][P2]`, 강화 `[제안][후속]` |
@@ -1863,7 +1864,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 
 > 결정 상태: `[확정]` · 출시 범위: `[MVP]`
 
-1차 버전에는 커플 연결과 안전한 종료, 퀘스트 버전별 승인·정산, 경험치·계정 레벨업, 영구 인정 성공 수 기반 4단계 배츄 외형 성장과 60회 숙련 보상, 세 종류의 뽑기, 장비·전투력, 파트너 비교 카드와 자동 판정 간이 협동 보스까지 포함한다. 80회 달성 선택권은 MVP에서 기록하되, 복수 배츄 보관함·선택·교체는 후속 P2에서 연다. 선택형 PvP·정식 레이드·월간 시즌과 고급 진화 애니메이션은 후속 버전으로 분리한다.
+1차 버전에는 커플 연결과 안전한 종료, 퀘스트 버전별 시작 승인·최종 정산, 경험치·계정 레벨업, 영구 인정 성공 수 기반 4단계 배츄 외형 성장과 60회 숙련 보상, 세 종류의 뽑기, 장비·전투력, 파트너 비교 카드와 자동 판정 간이 협동 보스까지 포함한다. 80회 달성 선택권은 MVP에서 기록하되, 복수 배츄 보관함·선택·교체는 후속 P2에서 연다. 선택형 PvP·정식 레이드·월간 시즌과 고급 진화 애니메이션은 후속 버전으로 분리한다.
 
 ## MVP 필수 기능
 
@@ -1876,9 +1877,10 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 | P0   | 코인 지갑           |
 | P0   | 구조 퀘스트          |
 | P0   | 퀘스트 생성          |
-| P0   | 초안·회수·불변 버전·승인 마감·수정 요청·승인·거절 |
+| P0   | 초안·회수·불변 버전·시작 승인 마감·수정 요청·거절 |
 | P0   | 코인 잠금           |
-| P0   | 성공·실패·미응답·분쟁 공동 판정 |
+| P0   | 파트너 성공·실패 예상과 시작 승인 |
+| P0   | 파트너 실제 결과 선택·최종 승인·무효 처리 |
 | P0   | 코인 정산           |
 | P0   | 거래성 푸시·인앱 대기함  |
 | P0   | 경험치·레벨업         |
@@ -1910,7 +1912,7 @@ P2 기능 출시 뒤에는 중복 처리 선택 마감, 교환 제안·상대 �
 | 분야 | 완료 기준 |
 | --- | --- |
 | 코인·뽑기 정합성 | 잠금·정산·뽑기 트랜잭션, 멱등 키와 DB 고유 제약 검증 |
-| 계정 안전 | 연결 종료·차단·탈퇴 시 즉시 접근 차단과 수행 마감 기준 반환·소각 검증 |
+| 계정 안전 | 연결 종료·차단·탈퇴 시 즉시 접근 차단과 최종 승인 여부 기준 취소·무효·원금 반환 검증 |
 | 개인정보 | 비공개 인증 저장, 권한 검사, 보관·삭제·내보내기 검증 |
 | 연령·동의 | 만 14세 이상 정책과 동의 버전 기록 |
 | 접근성 | 27.4절 기준과 모션 감소·스크린리더 실기기 점검 |
@@ -2140,7 +2142,7 @@ couple_rule_acknowledgements
 couple_betting_incidents
 - couple_id
 - quest_id (UNIQUE)
-- incident_type (RESPONSE_TIMEOUT, DISPUTE_UNRESOLVED)
+- incident_type (PARTNER_JUDGMENT_REJECTED, PARTNER_FINAL_APPROVAL_REJECTED, RESULT_CONFIRMATION_TIMEOUT)
 - occurred_at
 - PRIMARY KEY (couple_id, quest_id)
 
@@ -2346,7 +2348,7 @@ quests
 - quest_type (PERSONAL, COUPLE, LONG_TERM, BOSS, TUTORIAL, RESCUE)
 - source_type (TEMPLATE, CUSTOM, SYSTEM)
 - template_id (NULL 허용)
-- status (DRAFT, PENDING_APPROVAL, CHANGE_REQUESTED, ACTIVE, AWAITING_RESULT, SUCCESS, FAILURE, DISPUTED, APPROVAL_EXPIRED, EXPIRED, REJECTED, DISCARDED, CANCELED, INVALID, CANCELED_RELATIONSHIP_ENDED)
+- status (DRAFT, PENDING_APPROVAL, CHANGE_REQUESTED, ACTIVE, AWAITING_RESULT, PENDING_FINAL_APPROVAL, SUCCESS, FAILURE, APPROVAL_EXPIRED, REJECTED, DISCARDED, CANCELED, INVALID, CANCELED_RELATIONSHIP_ENDED)
 - row_version
 - current_quest_version_id (NULL 허용)
 - approved_quest_version_id (NULL 허용)
@@ -2355,8 +2357,6 @@ quests
 - activity_slot_reserved_at
 - xp_slot_date_kst
 - coin_slot_reserved_at
-- disputed_at
-- dispute_deadline_at
 - discarded_at
 - canceled_reason
 - created_at
@@ -2365,7 +2365,7 @@ quests
 - FK (id, approved_quest_version_id) → quest_versions(quest_id, id)
 - 사용자 생성 PERSONAL 퀘스트의 PENDING_APPROVAL·CHANGE_REQUESTED·REJECTED·APPROVAL_EXPIRED는 current_quest_version_id NOT NULL, approved_quest_version_id NULL, approved_at NULL
 - 사용자 생성 PERSONAL 퀘스트의 DRAFT·DISCARDED는 최초 작성이면 current_quest_version_id NULL, 회수·폐기 전 제출 이력이 있으면 NOT NULL이며 approved_quest_version_id와 approved_at은 항상 NULL
-- 사용자 생성 PERSONAL 퀘스트의 ACTIVE·AWAITING_RESULT·DISPUTED·SUCCESS·FAILURE·EXPIRED·CANCELED·INVALID는 approved_quest_version_id = current_quest_version_id이며 둘 다 NOT NULL, approved_at NOT NULL
+- 사용자 생성 PERSONAL 퀘스트의 ACTIVE·AWAITING_RESULT·PENDING_FINAL_APPROVAL·SUCCESS·FAILURE·CANCELED·INVALID는 approved_quest_version_id = current_quest_version_id이며 둘 다 NOT NULL, approved_at NOT NULL
 - CANCELED_RELATIONSHIP_ENDED는 승인 전 종료면 approved_quest_version_id·approved_at NULL, 승인 후 종료면 approved_quest_version_id = current_quest_version_id이며 approved_at NOT NULL
 
 quest_drafts
@@ -2396,7 +2396,7 @@ quest_versions
 - result_at
 - minimum_duration_minutes
 - approval_deadline_at
-- response_deadline_at
+- result_confirmation_deadline_at
 - evidence_method (NONE, OPTIONAL_PHOTO)
 - submitted_by
 - submitted_at
@@ -2410,10 +2410,12 @@ quest_approvals
 - quest_version_id
 - partner_id
 - decision (APPROVE, REQUEST_CHANGE, REJECT)
+- predicted_result (SUCCESS, FAILURE, APPROVE일 때만 필수)
 - request_message
 - decided_at
 - UNIQUE (quest_id, partner_id, quest_version_id)
 - FK (quest_id, quest_version_id) → quest_versions(quest_id, id)
+- APPROVE는 predicted_result NOT NULL, REQUEST_CHANGE·REJECT는 predicted_result NULL이며 판단 행은 삽입 후 수정·삭제 금지
 
 quest_recall_events
 - id
@@ -2436,35 +2438,38 @@ quest_cancel_requests
 - status (PENDING, CONFIRMED, REJECTED, EXPIRED)
 - active PENDING 요청 기준 quest_id UNIQUE
 
-quest_results
+quest_partner_results
 - id
 - quest_id (UNIQUE)
-- creator_result
-- creator_responded_at
-- partner_result
-- partner_responded_at
-- creator_revision_count
-- partner_revision_count
-- dispute_round
-- resolved_result (SUCCESS, FAILURE, EXPIRED, INVALID)
-- resolution_source
+- partner_id
+- selected_result (SUCCESS, FAILURE, 선택 전 NULL 허용)
+- selection_revision
+- selected_at
+- final_decision (APPROVE, REJECT, 결정 전 NULL 허용)
+- final_decided_at
+- invalid_reason (PARTNER_JUDGMENT_REJECTED, PARTNER_FINAL_APPROVAL_REJECTED, RESULT_CONFIRMATION_TIMEOUT, SYSTEM_ERROR, RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL, 그 밖에는 NULL)
 - resolved_at
+- `ACTIVE → AWAITING_RESULT` 전환 때 선택값이 비어 있는 요약 행을 생성해 최초 선택 전 마감도 같은 행에서 처리
+- selected_result가 NULL이면 selection_revision = 0·selected_at = NULL, 값이 있으면 selection_revision >= 1·selected_at NOT NULL
+- final_decision = APPROVE이면 selected_result·final_decided_at·resolved_at NOT NULL이고 invalid_reason NULL
+- final_decision = REJECT이면 final_decided_at·invalid_reason·resolved_at NOT NULL
 
-quest_result_responses
+quest_partner_result_events
 - id
-- quest_id
-- user_id
-- phase (INITIAL, DISPUTE)
-- dispute_round (INITIAL은 0)
-- result (SUCCESS, FAILURE)
+- quest_partner_result_id
+- actor_user_id (스케줄러·시스템 이벤트는 NULL 허용)
+- event_type (SELECT, CHANGE, JUDGMENT_REJECT, FINAL_APPROVE, FINAL_REJECT, TIMEOUT_INVALIDATE, SYSTEM_INVALIDATE, RELATIONSHIP_INVALIDATE)
+- selected_result (SELECT·CHANGE·FINAL_APPROVE일 때 필수, 그 밖에는 NULL 허용)
+- idempotency_key (UNIQUE)
 - created_at
-- UNIQUE (quest_id, user_id, phase, dispute_round)
+- 선택 변경 이력을 포함해 추가만 허용하며 UPDATE·DELETE 금지
 
 quest_settlements
 - id
 - quest_id (UNIQUE)
 - resolved_result
 - resolution_source
+- invalid_reason (INVALID일 때 필수, 그 밖에는 NULL)
 - stake
 - reward
 - wallet_transaction_id
@@ -2489,7 +2494,6 @@ rescue_quest_claims
 evidence_assets
 - id
 - quest_id (NOT NULL)
-- quest_result_id (NULL 허용, 결과 제출 시 연결)
 - uploader_id
 - object_key
 - mime_type
@@ -2499,6 +2503,7 @@ evidence_assets
 - retention_reason (NORMAL, SAFETY_REPORT)
 - hold_until
 - storage_scope (NORMAL, RESTRICTED_PENDING, RESTRICTED)
+- submitted_for_review_at (NULL 허용, 파트너 판정에 제출할 때 기록)
 - created_at
 - expires_at
 - deletion_requested_at
@@ -2847,40 +2852,40 @@ weekly_power_baselines
 ## 중요한 백엔드 원칙
 
 1. 잔액을 직접 수정하지 않고 모든 변화를 `wallet_transactions`에 기록한다. 원장 합계와 지갑 스냅샷은 항상 재검산 가능해야 한다.
-2. 일반 개인 퀘스트는 `DRAFT` 생성 시 작성자 전용 `quest_drafts`만 저장하고 코인·활동·XP·보너스 슬롯을 예약하지 않는다. 수정은 `DRAFT` 또는 `CHANGE_REQUESTED`에서 예상 `row_version`이 맞을 때만 허용한다. 폐기는 작업 초안을 삭제하고 `DISCARDED`로 끝낸다. 제출 시 서버가 도전자의 `tutorial_completed_at`과 최소 수행 시간, `approval_deadline_at = due_at - minimum_duration_minutes`를 검증한다. 튜토리얼이 미완료면 `TUTORIAL_REQUIRED`, 마감이 미래가 아니면 기존 편집 상태를 유지하며, 직전 제출 버전과 서버 diff가 비어 있어도 `UNCHANGED_QUEST_VERSION`으로 거절한다. 유효한 제출은 불변 `quest_versions` 삽입, `current_quest_version_id`·상태·`row_version` 갱신과 outbox 기록을 한 트랜잭션으로 처리한다. 승인·수정 요청·거절·회수는 `quests` 행을 잠그고 현재 버전과 `row_version`을 확인한 뒤 서버 시각을 먼저 검사한다. 마감과 같거나 늦으면 항상 `APPROVAL_EXPIRED`가 우선한다. 그 전에는 회수 이벤트 삽입과 `PENDING_APPROVAL → DRAFT`, 승인 판단 행 삽입과 `PENDING_APPROVAL → CHANGE_REQUESTED` 또는 `REJECTED`를 각각 상태·`row_version`·outbox와 한 트랜잭션으로 처리한다. 재제출한 새 버전은 이전 버전의 승인을 재사용하지 않는다. 파트너 승인은 요청한 버전이 `current_quest_version_id`와 정확히 같을 때만 처리한다. 승인 트랜잭션은 해당 `couples`·`quests` 행을 먼저 잠그고 `CONNECTED`인지, 도전자의 튜토리얼이 최종 종료됐는지, 활성 배츄가 존재하는지 재검사한 뒤 `user_quest_counters`와 결과 예정일의 `daily_activity_budgets`를 잠가 동시 진행 수와 XP 슬롯을 각각 1개 예약하고 `activity_slot_reserved_at`, `xp_slot_date_kst`를 기록한다. `stake > 0`이면 지갑·`daily_reward_budgets`도 잠가 난이도·출처와 남은 전체·저난도 예산으로 `reward_reserved_amount`를 확정하고, 같은 트랜잭션에서 APPROVE 판단 행·`approved_at`·코인 슬롯·보너스 예약·코인 잠금·`coin_slot_reserved_at`·`approved_quest_version_id`·상태·`row_version`·원장·outbox를 처리한다. 0C는 코인 예산만 사용하지 않으며 튜토리얼·구조 퀘스트는 반복 활동 슬롯에서 제외한다.
-3. `activity_slot_reserved_at`이 있는 일반 개인 퀘스트가 종료될 때만 활성 진행 수를 1 줄인다. 성공 정산은 `reward_reserved_amount`만 지급하고 전체 예약 보너스 및 해당 시 저난도 예약 보너스를 발행 칸으로 옮긴다. 실패·만료·마감 전 취소·마감 전 관계 종료는 예약 보너스만 해제하고 이미 사용한 코인·XP 일일 슬롯은 줄이지 않는다. 서버 `INVALID`는 실제 `coin_slot_reserved_at`과 `xp_slot_date_kst`가 있는 경우에만 해당 슬롯과 예약 보너스를 복구한다. 퀘스트·지갑·활동 예산·코인 예산·원장·`quest_settlements` 중 하나라도 실패하면 전부 롤백한다.
+2. 일반 개인 퀘스트는 `DRAFT` 생성 시 작성자 전용 `quest_drafts`만 저장하고 코인·활동·XP·보너스 슬롯을 예약하지 않는다. 수정은 `DRAFT` 또는 `CHANGE_REQUESTED`에서 예상 `row_version`이 맞을 때만 허용한다. 폐기는 작업 초안을 삭제하고 `DISCARDED`로 끝낸다. 제출 시 서버가 도전자의 `tutorial_completed_at`과 최소 수행 시간, `approval_deadline_at = due_at - minimum_duration_minutes`를 검증한다. 튜토리얼이 미완료면 `TUTORIAL_REQUIRED`, 마감이 미래가 아니면 기존 편집 상태를 유지하며, 직전 제출 버전과 서버 diff가 비어 있어도 `UNCHANGED_QUEST_VERSION`으로 거절한다. 유효한 제출은 불변 `quest_versions` 삽입, `current_quest_version_id`·상태·`row_version` 갱신과 outbox 기록을 한 트랜잭션으로 처리한다. 시작 승인·수정 요청·거절·회수는 `quests` 행을 잠그고 현재 버전과 `row_version`을 확인한 뒤 서버 시각을 먼저 검사한다. 마감과 같거나 늦으면 항상 `APPROVAL_EXPIRED`가 우선한다. 그 전에는 회수 이벤트 삽입과 `PENDING_APPROVAL → DRAFT`, 승인 판단 행 삽입과 `PENDING_APPROVAL → CHANGE_REQUESTED` 또는 `REJECTED`를 각각 상태·`row_version`·outbox와 한 트랜잭션으로 처리한다. 재제출한 새 버전은 이전 버전의 승인을 재사용하지 않는다. 파트너 시작 승인은 요청한 버전이 `current_quest_version_id`와 정확히 같고 `predicted_result`가 `SUCCESS` 또는 `FAILURE`일 때만 처리한다. 시작 승인 트랜잭션은 해당 `couples`·`quests` 행을 먼저 잠그고 `CONNECTED`인지, 도전자의 튜토리얼이 최종 종료됐는지, 활성 배츄가 존재하는지 재검사한 뒤 `user_quest_counters`와 결과 예정일의 `daily_activity_budgets`를 잠가 동시 진행 수와 XP 슬롯을 각각 1개 예약하고 `activity_slot_reserved_at`, `xp_slot_date_kst`를 기록한다. `stake > 0`이면 지갑·`daily_reward_budgets`도 잠가 난이도·출처와 남은 전체·저난도 예산으로 `reward_reserved_amount`를 확정하고, 같은 트랜잭션에서 예상값을 포함한 APPROVE 판단 행·`approved_at`·코인 슬롯·보너스 예약·코인 잠금·`coin_slot_reserved_at`·`approved_quest_version_id`·상태·`row_version`·원장·outbox를 처리한다. 0C는 코인 예산만 사용하지 않으며 튜토리얼·구조 퀘스트는 반복 활동 슬롯에서 제외한다.
+3. `activity_slot_reserved_at`이 있는 일반 개인 퀘스트가 종료될 때만 활성 진행 수를 1 줄인다. 파트너가 최종 승인한 성공 정산은 `reward_reserved_amount`만 지급하고 전체 예약 보너스 및 해당 시 저난도 예약 보너스를 발행 칸으로 옮긴다. 파트너가 최종 승인한 실패·마감 전 공동 취소·마감 전 관계 종료는 예약 보너스만 해제하고 이미 사용한 코인·XP 일일 슬롯은 줄이지 않는다. `INVALID`는 실제 `coin_slot_reserved_at`과 `xp_slot_date_kst`가 있는 경우에만 해당 슬롯과 예약 보너스를 복구한다. 퀘스트·파트너 판정·지갑·활동 예산·코인 예산·원장·`quest_settlements` 중 하나라도 실패하면 전부 롤백한다.
 4. `quest_settlements.quest_id UNIQUE`로 한 퀘스트를 한 번만 정산한다. 같은 요청이 반복되면 새 지급 없이 기존 정산 결과를 반환한다.
-5. 퀘스트 제출·회수·폐기·수정 요청·거절·승인·취소·정산과 구조 퀘스트·뽑기·연결 종료·차단·탈퇴처럼 공유 상태, 코인 또는 접근 권한을 바꾸는 요청에는 `Idempotency-Key`를 필수로 받는다. 제출은 `expectedRowVersion`, 회수는 `questVersionId + expectedRowVersion`, 수정 요청·거절·승인은 `questVersionId + expectedRowVersion`이 현재 값과 맞을 때만 처리한다. 초안 `PATCH`는 `Idempotency-Key` 대신 `expectedRowVersion`으로 덮어쓰기를 막는다. 초안 내용 변경을 포함해 `quests`에 영향을 주는 PATCH·제출·회수·수정 요청·거절·승인·폐기·취소·결과 상태 변경과 마감 작업이 성공할 때마다 같은 트랜잭션에서 `row_version`을 정확히 1 올린다. 모든 퀘스트 읽기와 성공한 변경 응답은 새 `rowVersion`을 반환하고, 승인 대기 응답은 현재 `questVersionId`도 함께 반환한다.
-6. 최초·분쟁 응답은 `quest_result_responses`에 추가만 하고 수정·삭제하지 않는다. 최초 응답은 예상 `version`으로 상태 충돌을 막는다. 분쟁 최종 응답은 공유 퀘스트 버전 대신 `dispute_round`를 요구하며, 같은 라운드에서 서로 다른 사용자의 1회 삽입은 교환 가능한 요청으로 받아들인다. 같은 사용자의 중복 제출, 라운드 불일치 또는 이미 정산된 상태만 `409 Conflict`로 거절한다. `quest_results`에는 현재 판정용 요약을 저장한다.
-7. 두 사람의 최초 응답이 모두 제출되거나 최초 응답 기한이 끝나기 전에는 API·알림·로그에서 상대방의 응답값을 가린다. 분쟁 전환 후에는 최초 두 값을 함께 공개하되, 같은 `dispute_round`의 최종 응답값은 양쪽 제출 또는 기한 종료 전까지 가리고 제출 여부만 공개한다.
-8. 승인·결과·분쟁·공동 취소 요청·초대·간이 보스 마감은 클라이언트 시간이 아니라 서버 시각과 재시도 가능한 스케줄러로 처리한다. `PENDING_APPROVAL`이 승인 마감에 도달하면 `APPROVAL_EXPIRED`로 한 번만 전환하고 코인·활동·XP·보너스 슬롯을 건드리지 않으며, 화면에는 `EXPIRED`로 표시한다. P2에서는 중복 선택 24시간, 교환 24시간, 선물 72시간 만료와 월요일 정식 레이드 인스턴스 생성도 같은 스케줄러 계약을 사용한다. 마감 작업은 모두 결정적인 멱등 키와 고유 제약을 사용한다. 초대 생성·참여 시 `couple_pairing_slots`로 양쪽 사용자를 예약하고 종료 상태에서 해제해 여러 연결 요청에 동시에 들어가지 못하게 한다. 이전 커플의 `relationship_end_jobs`가 `COMPLETED`가 아니면 새 초대 참여와 연결 확정을 거절한다.
+5. 퀘스트 제출·회수·폐기·수정 요청·거절·시작 승인·취소·실제 결과 선택·최종 승인·무효 처리·정산과 구조 퀘스트·뽑기·연결 종료·차단·탈퇴처럼 공유 상태, 코인 또는 접근 권한을 바꾸는 요청에는 `Idempotency-Key`를 필수로 받는다. 제출은 `expectedRowVersion`, 회수는 `questVersionId + expectedRowVersion`, 수정 요청·거절·시작 승인은 `questVersionId + expectedRowVersion`이 현재 값과 맞을 때만 처리한다. 결과 선택·수정·최종 승인·판정 거절은 `expectedRowVersion`과 현재 선택값을 검사한다. 초안 `PATCH`는 `Idempotency-Key` 대신 `expectedRowVersion`으로 덮어쓰기를 막는다. 초안 내용 변경을 포함해 `quests`에 영향을 주는 PATCH·제출·회수·수정 요청·거절·시작 승인·폐기·취소·결과 상태 변경과 마감 작업이 성공할 때마다 같은 트랜잭션에서 `row_version`을 정확히 1 올린다. 모든 퀘스트 읽기와 성공한 변경 응답은 새 `rowVersion`을 반환하고, 승인 대기 응답은 현재 `questVersionId`도 함께 반환한다.
+6. 파트너의 실제 결과 선택·수정·판정 거절·최종 승인·최종 거절은 `quest_partner_result_events`에 추가만 하고 수정·삭제하지 않는다. 현재 작업 값은 `quest_partner_results`에 투영하되 예상 `row_version`과 파트너 역할을 검증한다. 최종 승인 트랜잭션은 선택된 결과를 다시 확인하고 `quest_settlements.quest_id UNIQUE`를 이용해 정확히 한 번만 `SUCCESS` 또는 `FAILURE`로 정산한다.
+7. 시작 승인 때의 `predicted_result`는 `ACTIVE`부터 두 사람 모두에게 표시하되 실제 결과·보상 계산에는 사용하지 않는다. `AWAITING_RESULT`와 `PENDING_FINAL_APPROVAL`에서 도전자에게는 파트너의 선택·변경 버튼을 제공하지 않고 확인 대기 상태와 마감만 반환한다. 파트너가 선택한 실제 결과는 최종 확인 화면과 감사 로그에 사용하며 최종 승인 전에는 정산 결과로 표시하지 않는다.
+8. 시작 승인·결과 확인·최종 승인·공동 취소 요청·초대·간이 보스 마감은 클라이언트 시간이 아니라 서버 시각과 재시도 가능한 스케줄러로 처리한다. `PENDING_APPROVAL`이 승인 마감에 도달하면 `APPROVAL_EXPIRED`로 한 번만 전환하고 코인·활동·XP·보너스 슬롯을 건드리지 않으며, 화면에는 `EXPIRED`로 표시한다. `AWAITING_RESULT` 또는 `PENDING_FINAL_APPROVAL`이 `result_confirmation_deadline_at`에 도달하면 한 번만 `INVALID`로 전환하고 잠긴 원금 반환·예약 및 슬롯 복구·무보상 처리를 같은 트랜잭션에서 커밋한다. P2에서는 중복 선택 24시간, 교환 24시간, 선물 72시간 만료와 월요일 정식 레이드 인스턴스 생성도 같은 스케줄러 계약을 사용한다. 마감 작업은 모두 결정적인 멱등 키와 고유 제약을 사용한다. 초대 생성·참여 시 `couple_pairing_slots`로 양쪽 사용자를 예약하고 종료 상태에서 해제해 여러 연결 요청에 동시에 들어가지 못하게 한다. 이전 커플의 `relationship_end_jobs`가 `COMPLETED`가 아니면 새 초대 참여와 연결 확정을 거절한다.
 9. `POST /gacha/draw`는 사용자가 확인한 `expectedProbabilityVersionId`를 요구한다. 트랜잭션 시작 시 해당 뽑기 종류의 `ACTIVE` 버전을 잠그고 ID가 다르면 차감 없이 `409 Conflict`로 새 확률표 확인을 요구한다. 일치하면 코인 또는 뽑기권 차감, 그 버전으로 서버 추첨, 확률 버전 기록, 천장 갱신, 뽑기 기록, 최초 획득 개별 단위 생성 또는 중복 조각 증가를 한 트랜잭션으로 처리한다. P2 중복 보관 선택이 열린 뒤에는 중복 조각 증가 대신 `PENDING_DISPOSITION` 단위를 생성한다.
 10. 사용된 확률 버전은 수정하지 않는다. 새 버전은 모든 가중치가 양수이고 합계·아이템 참조가 유효한지 활성화 트랜잭션에서 검사한 뒤에만 `ACTIVE`로 바꾼다. 천장은 뽑기 종류별로 잠그고 목표 등급 이상 획득 시에만 초기화하며, 확률 버전 변경으로 초기화하지 않는다.
 11. MVP 중복 아이템의 조각 수량은 `item_fragments`에 원자적으로 누적하고 음수가 될 수 없다. 보유 판정은 `CONVERTED`를 제외한 현재 소유자의 같은 정의 개별 단위를 기준으로 하며, 뽑기 기록과 조각 증가 사이에 중간 커밋을 두지 않는다.
 12. 전투력은 서버가 기본 능력치와 장착 아이템의 유효 보너스로 계산하며, 별도 `power` 값을 저장하거나 클라이언트에서 받지 않는다.
-13. 케미 게이지는 별도 누적값으로 저장하지 않는다. 해당 주의 일반 개인 퀘스트 중 공동 확정 `SUCCESS` 또는 `FAILURE`만 `COUNT(DISTINCT quest_id)`하고 `EXPIRED`, `INVALID`, `DISPUTE_UNRESOLVED`, 튜토리얼·구조 퀘스트를 제외한다.
+13. 케미 게이지는 별도 누적값으로 저장하지 않는다. 해당 주의 일반 개인 퀘스트 중 파트너의 최종 승인으로 정산된 `SUCCESS` 또는 `FAILURE`만 `COUNT(DISTINCT quest_id)`하고 `INVALID`, 튜토리얼·구조 퀘스트를 제외한다.
 14. MVP 애플리케이션은 사용자당 스타팅 배츄 한 마리와 활성 배츄 한 마리만 허용한다. `POST /monsters/starter`는 `STARLIGHT`, `WAVE`, `SUNSET`, `FOREST` 중 선택한 종류와 이름, 계정 성장 행, 활성 배츄 참조를 한 트랜잭션에서 만들며 스타터 부분 고유 제약으로 동시 요청과 재시도의 중복 생성을 막는다. DB는 80회 보상의 소급 지급을 위해 복수 배츄를 수용하되, P2 전에는 추가 생성·선택·교체 API를 열지 않는다.
-15. 계정 `user_progressions.base_hp`, `base_attack`은 장비를 제외한 현재 계정 레벨의 최대 기본 능력치이며 모든 배츄가 공유한다. 일반 개인 퀘스트가 최종 `SUCCESS`로 정산되면 코인 처리와 함께 `user_progressions`·`user_active_monsters`·해당 `monsters`·마일스톤 행을 잠그고 XP·연승·레벨·기본 능력치를 갱신한 뒤, 잠근 활성 배츄에 인정 성공 수를 정확히 1회 기록한다. 이 잠금 뒤 `credited_monster_id`를 고정하므로 활성 교체와 정산이 경합해도 한 성공이 두 배츄에 들어가지 않는다. 튜토리얼·구조·보스 퀘스트와 실패·취소·만료·무효·미해결 분쟁은 인정 성공 수에서 제외한다. 튜토리얼 성공은 인정 성공 수를 올리지 않고 `(monster_id, HATCH)` 마일스톤과 `EGG → BABY`를 같은 정산에서 처리한다. 스타터인지 추가 알인지와 관계없이 활성 배츄가 아직 `EGG`라면 첫 인정 성공 정산이 수를 `0 → 1`로 올리는 동시에 같은 `HATCH` 마일스톤을 만들고 부화시킨다. 인정 성공 수가 처음 20·40·60·80에 도달한 정산에서 각각 `INTERMEDIATE`, `FINAL`, 종별 오라·칭호·전투력 0 귀속 장신구, `SUCCESS_80` 달성 기록을 고유 마일스톤으로 지급한다. 정산에는 `credited_monster_id`, 인정 성공 수와 성장 단계의 전후 값을 저장하고 일반 개인 성공은 전후 수가 정확히 1 차이 나야 한다. MVP는 80회에 마일스톤과 outbox 이벤트만 만든다. P2 배포 시의 소급 스캔과 이후 상시 작업자가 선택권이 없는 모든 `SUCCESS_80` 이벤트를 소비해 마일스톤당 한 번만 `egg_choice_offer`로 변환한다. 새 종이 활성화되면 `PENDING_CONTENT`도 다시 평가해 새 불변 후보 버전을 만들고 `PENDING_SELECTION`으로 전환한다. XP·성장·마일스톤 중 하나라도 실패하면 코인과 정산도 전부 롤백한다. 실패 정산은 계정 연승 초기화만 함께 처리한다.
+15. 계정 `user_progressions.base_hp`, `base_attack`은 장비를 제외한 현재 계정 레벨의 최대 기본 능력치이며 모든 배츄가 공유한다. 일반 개인 퀘스트가 파트너의 최종 승인으로 `SUCCESS` 정산되면 코인 처리와 함께 `user_progressions`·`user_active_monsters`·해당 `monsters`·마일스톤 행을 잠그고 XP·연승·레벨·기본 능력치를 갱신한 뒤, 잠근 활성 배츄에 인정 성공 수를 정확히 1회 기록한다. 이 잠금 뒤 `credited_monster_id`를 고정하므로 활성 교체와 정산이 경합해도 한 성공이 두 배츄에 들어가지 않는다. 튜토리얼·구조·보스 퀘스트와 `FAILURE`·`CANCELED`·`INVALID`는 인정 성공 수에서 제외한다. 튜토리얼 성공은 인정 성공 수를 올리지 않고 `(monster_id, HATCH)` 마일스톤과 `EGG → BABY`를 같은 정산에서 처리한다. 스타터인지 추가 알인지와 관계없이 활성 배츄가 아직 `EGG`라면 첫 인정 성공 정산이 수를 `0 → 1`로 올리는 동시에 같은 `HATCH` 마일스톤을 만들고 부화시킨다. 인정 성공 수가 처음 20·40·60·80에 도달한 정산에서 각각 `INTERMEDIATE`, `FINAL`, 종별 오라·칭호·전투력 0 귀속 장신구, `SUCCESS_80` 달성 기록을 고유 마일스톤으로 지급한다. 정산에는 `credited_monster_id`, 인정 성공 수와 성장 단계의 전후 값을 저장하고 일반 개인 성공은 전후 수가 정확히 1 차이 나야 한다. MVP는 80회에 마일스톤과 outbox 이벤트만 만든다. P2 배포 시의 소급 스캔과 이후 상시 작업자가 선택권이 없는 모든 `SUCCESS_80` 이벤트를 소비해 마일스톤당 한 번만 `egg_choice_offer`로 변환한다. 새 종이 활성화되면 `PENDING_CONTENT`도 다시 평가해 새 불변 후보 버전을 만들고 `PENDING_SELECTION`으로 전환한다. XP·성장·마일스톤 중 하나라도 실패하면 코인과 정산도 전부 롤백한다. 파트너가 최종 승인한 실패 정산은 계정 연승 초기화만 함께 처리한다.
 16. 연결 종료·차단·탈퇴는 `couples` 행을 먼저 잠그고, 커플 `ENDED` 전환, 양쪽 `couple_members` 종료·`left_at` 기록, 관계 접근 차단, 미판정 주간 보스 취소와 `relationship_end_jobs` 생성을 먼저 독립 커밋한다. 후속 작업은 대상 퀘스트와 P2의 미완료 교환·선물·정식 레이드를 각각 `relationship_end_job_items`로 고정한 뒤, 6.5절의 반환·소각·예약 해제·잠금 코인 반환을 자원별로 멱등 처리한다. 각 자원 완료와 `processed_resource_count`를 함께 갱신하고 모든 자원이 끝나기 전에는 상위 작업을 `COMPLETED`로 바꾸지 않는다. 활성 멤버십 제약은 즉시 해제하되 종료 작업 완료 전에는 새 초대 참여와 연결 확정을 거절한다.
 17. 인증 자료는 `quest_id`로 업로드를 시작하고 완료 호출 후 검사·재인코딩한다. `READY` 처리본만 미디어 게이트웨이가 매 요청 권한을 확인해 전달하며, 안전 신고 보존본은 제한 저장소와 `hold_until`로 분리한다.
 18. 간이 협동 보스 참여는 `couples` 행을 먼저 잠그고 `CONNECTED`를 재검사한다. 첫 참여는 시각만 기록한다. 두 번째 참여 트랜잭션에서 커플·두 참가자·보스 행을 잠그고 양쪽 전투력을 동시에 저장해 한 번만 판정하며, 클리어한 때만 양쪽 뽑기권 지급과 결과 저장을 함께 처리한다.
 19. 기존 커플은 월요일, 배츄를 이미 가진 새 커플은 연결 완료 시, 기준값이 없는 신규 사용자는 스타팅 배츄 생성 시 `weekly_power_baselines`를 관계별로 한 번 기록하고 `현재 전투력 - 기준 전투력`을 비교 카드의 `weeklyCombatPowerDelta`로 계산한다.
 20. 상태 변경 트랜잭션은 같은 DB 트랜잭션에서 `notification_outbox`를 기록한다. 발송 작업자는 고유 `idempotency_key`로 재시도하며 푸시 실패가 비즈니스 정산을 반복시키지 않게 한다. 발송 직전에 연결·차단·설정 상태를 다시 확인하고 무효가 된 예약 알림은 취소한다. 로그아웃·토큰 갱신·탈퇴 시 기존 기기 토큰을 폐기한다.
 21. 구조 퀘스트 완료 시 사용자·`wallets`·최근 `rescue_quest_claims` 행을 잠그고, 가용 잔액 100C 미만·잠긴 잔액 0C·최근 7일 1회·30일 2회 조건을 완료 트랜잭션 안에서 다시 검사한다. 조건이 유효할 때만 지급 원장과 청구 기록을 함께 커밋한다.
-22. 튜토리얼은 `users.tutorial_completed_at`이 없는 사용자에게 한 번만 생성하고 어떤 최종 결과든 완료 시각을 기록해 반복 생성하지 않는다. 실패·미응답·관계 종료 시에는 잠긴 100C만 반환하며 배츄는 `EGG`로 남는다. 성공 때만 최초 보너스 100C와 10XP를 지급하고, 활성 배츄 ID를 정산에 기록하며 인정 성공 수 변화 없이 `(monster_id, HATCH)` 고유 마일스톤과 `EGG → BABY`를 생성한다. 완료 시각·지갑·성장 단계·마일스톤·정산을 한 트랜잭션으로 처리한다. 성공하지 못한 사용자의 부화는 15번의 첫 인정 성공 규칙으로 보장한다.
+22. 튜토리얼은 `users.tutorial_completed_at`이 없는 사용자에게 한 번만 생성하고 `SUCCESS`, `FAILURE`, `INVALID` 또는 관계 종료 중 하나로 끝나면 완료 시각을 기록해 반복 생성하지 않는다. `FAILURE`·`INVALID`·관계 종료 시에는 잠긴 100C만 반환하며 배츄는 `EGG`로 남는다. `SUCCESS` 때만 최초 보너스 100C와 10XP를 지급하고, 활성 배츄 ID를 정산에 기록하며 인정 성공 수 변화 없이 `(monster_id, HATCH)` 고유 마일스톤과 `EGG → BABY`를 생성한다. 완료 시각·지갑·성장 단계·마일스톤·정산을 한 트랜잭션으로 처리한다. 성공하지 못한 사용자의 부화는 15번의 첫 인정 성공 규칙으로 보장한다.
 23. 신규 로그인은 `PENDING_ELIGIBILITY` 사용자에 연결된 제한 온보딩 세션만 발급한다. 서버는 `policy_versions`의 현재 `ACTIVE`이며 `required = true`인 각 정책 버전을 기준으로 동의를 판단한다. 연령 기준 통과와 현재 필수 버전 동의가 모두 저장된 뒤에만 사용자를 `ACTIVE`로 바꾸고 일반 API를 허용한다. 만 14세 미만 응답·연령 확인 거절 시 모든 제한 세션을 즉시 `REVOKED`로 바꾸고 임시 사용자·OAuth 프로필을 24시간 이내 삭제한다. 로그아웃·소셜 계정 철회·탈퇴 시에도 관련 세션을 즉시 폐기하고 이후 액세스·리프레시 토큰을 거부한다.
-24. 인증 업로드 URL 발급 시 활성 선택 동의, 현재 커플 권한, 퀘스트 상태가 `ACTIVE`, `AWAITING_RESULT`, `DISPUTED` 중 하나인지, 결과당 3장·총 20MB 예약 한도를 한 트랜잭션에서 검사한다. `UPLOADING`은 1시간, 완료되지 않았거나 연결되지 않은 임시 객체와 `FAILED` 원본은 최대 24시간 뒤 멱등 삭제한다.
+24. 인증 업로드 URL 발급 시 활성 선택 동의, 현재 커플 권한, 퀘스트 상태가 `ACTIVE`, `AWAITING_RESULT`, `PENDING_FINAL_APPROVAL` 중 하나인지, 퀘스트당 3장·총 20MB 예약 한도를 한 트랜잭션에서 검사한다. 파트너 판정에 사용할 자료는 별도 제출 호출로 `submitted_for_review_at`을 기록하며 `READY` 상태만 허용한다. `UPLOADING`은 1시간, 완료되지 않았거나 제출되지 않은 임시 객체와 `FAILED` 원본은 최대 24시간 뒤 멱등 삭제한다.
 25. 연령 기준과 필수 동의를 모두 통과해 사용자를 처음 `ACTIVE`로 바꾸는 트랜잭션에서 지갑 생성, `SIGNUP_GRANT` 1,000C 원장과 `signup_grant_issued_at`을 함께 기록한다. 사용자당 `SIGNUP_GRANT` 원장 고유 제약으로 재로그인·재연결·재시도가 중복 지급을 만들지 못하게 한다.
 26. 장비 장착·해제 시 사용자 장비 행과 대상 `inventory_item_units`를 잠그고 소유자, `AVAILABLE`·`EQUIPPED` 상태, 귀속, 아이템 슬롯을 서버가 검사한다. 다른 사용자의 단위, 예약·처리 대기 단위 또는 슬롯이 다른 아이템은 장착할 수 없으며, 단위 상태·장비 참조 갱신과 새 전투력 계산을 한 트랜잭션으로 처리한다.
 27. 하나의 상위 요청이 여러 퀘스트·지갑 원장을 만들 때는 원래 `Idempotency-Key`와 대상 `quest_id`로 결정적인 하위 키를 파생한다. 같은 상위 키 재시도는 같은 하위 키를 사용하고 서로 다른 퀘스트 원장이 `(wallet_id, idempotency_key)`에서 충돌하지 않게 한다.
-28. 코인 퀘스트 승인은 지갑·예산과 함께 `couples` 위험 상태 행을 잠그고 베팅 중지가 아닌지 재검사한다. 일반 개인 퀘스트의 `EXPIRED`·`DISPUTE_UNRESOLVED` 정산도 같은 커플 행을 잠근 뒤 고유한 `couple_betting_incidents` 기록을 남긴다. 세 번째 사건이면 `betting_suspension_generation + 1`, `betting_suspended_at`과 사유 갱신을 한 트랜잭션으로 처리한다.
+28. 코인 퀘스트 시작 승인은 지갑·예산과 함께 `couples` 위험 상태 행을 잠그고 베팅 중지가 아닌지 재검사한다. 일반 개인 퀘스트가 `PARTNER_JUDGMENT_REJECTED`, `PARTNER_FINAL_APPROVAL_REJECTED`, `RESULT_CONFIRMATION_TIMEOUT`으로 `INVALID` 정산되면 같은 커플 행을 잠근 뒤 고유한 `couple_betting_incidents` 기록을 남긴다. `SYSTEM_ERROR`와 관계 종료에 따른 무효는 집계하지 않는다. 최근 위험 집계 구간의 세 번째 사건이면 `betting_suspension_generation + 1`, `betting_suspended_at`과 사유 갱신을 한 트랜잭션으로 처리한다.
 29. `POST /reports`는 신고 행 생성과 대상 인증 자료의 `retention_reason = SAFETY_REPORT`, `hold_until`, `storage_scope = RESTRICTED_PENDING` 전환을 한 DB 트랜잭션으로 처리한다. 삭제·TTL 작업은 활성 hold를 건너뛰며, 저장소 격리 작업이 성공한 뒤에만 `RESTRICTED`로 바꾸고 원본 삭제를 허용한다.
 30. 정산 규칙 확인 API는 `Idempotency-Key`를 요구하고 커플 행을 잠근 뒤 현재 `betting_suspension_generation`에 사용자별 최초 확인 시각을 기록한다. 재시도는 그 최초 시각을 바꾸지 않는다. 두 사람의 확인 시각이 모두 현재 `betting_suspended_at` 이후일 때만 중지 상태와 사유를 지우고 `betting_risk_window_started_at`을 두 번째 최초 확인 시각으로 갱신하며, 이 시각 이전 사건은 다음 집계에서 제외한다.
 
 31. 인증 자료의 일반 보관 기한은 이벤트가 제안하는 새 기한을 `candidate_expiry`로 계산하고, 기존 `expires_at`이 `NULL`이면 새 기한을 저장하며 아니면 `LEAST(기존 expires_at, candidate_expiry)`만 저장한다. 정산의 제안값은 `settled_at + 30일`, 연결 종료의 제안값은 `ended_at + 30일`이다. 연결 종료 첫 트랜잭션은 미정산 자료까지 해당 커플의 모든 인증 자료에 종료 제안값을 먼저 적용하고, 후속 정산도 같은 `LEAST` 규칙을 사용해 기한을 다시 늘리지 못한다. 제출자 삭제 또는 선택 인증 자료 동의 철회 요청은 대상을 즉시 `BLOCKED`로 바꾸고 `deletion_requested_at = now`, `deletion_due_at = now + 7일`로 저장한다. 삭제 작업은 `expires_at`과 `deletion_due_at` 중 더 빠른 시각을 사용하며 멱등 실행한다. 활성 안전 보존이 있는 경우 일반 서비스 접근은 계속 차단하되 제한 보존본은 `hold_until`까지 유지하고, 기한 종료 후 삭제한다.
 32. `POST /auth/reauth`는 현재 인증 수단을 다시 확인한 뒤 계정 탈퇴 전용·5분 만료·1회용 `reauth_grants`를 발급한다. `DELETE /users/me`는 사용자·재인증 권한·현재 탈퇴 작업을 잠그고 유효한 권한을 원자적으로 소비한다. 첫 트랜잭션에서 `users.status = DELETION_PENDING`, 모든 세션 폐기, 현재 관계의 16번 즉시 차단 처리, 사용한 `reauth_grant_id`와 `account_deletion_jobs` 생성을 함께 커밋한다. 재시도는 새 권한 소비 전에 `(user_id, idempotency_key, reauth_grant_id)`가 같은 기존 작업을 조회하고, 탈퇴 조회 전용 제한 세션과 같은 재인증 토큰 지문이 모두 확인된 경우에만 기존 결과를 반환한다. 신규 탈퇴는 권한이 미소비·미만료인 경우에만 생성한다. 후속 작업은 일반 인증 자료를 7일 이내, 그 밖의 일반 개인정보를 30일 이내 삭제·익명화하고, 안전 신고·법적 의무로 분리 보존하는 최소 정보는 각 `hold_until`을 적용한다.
 
-33. 퀘스트 응답 DTO는 호출자 역할과 상태별로 직렬화한다. 파트너에게 `PENDING_APPROVAL`은 현재 제출 버전, `CHANGE_REQUESTED`는 마지막 제출 버전, `ACTIVE` 이후는 승인된 버전을 기준으로 제목·성공 조건·난이도·건 코인·예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 변경 항목을 보여준다. 회수 상태에서는 이미 전달된 불변 버전과 응답 전용 `auditProjectionStatus = RECALLED`만 허용한다. 작성자의 전체 잔액·잠긴 잔액·지갑 원장·뽑기·구매 내역·남은 개인 예산·제출 전 초안은 반환하지 않는다. `GET /wallet`, 지갑 원장과 작성자 전용 승인 견적은 본인에게만 허용한다.
+33. 퀘스트 응답 DTO는 호출자 역할과 상태별로 직렬화한다. 파트너에게 `PENDING_APPROVAL`은 현재 제출 버전, `CHANGE_REQUESTED`는 마지막 제출 버전, `ACTIVE` 이후는 승인된 버전을 기준으로 제목·성공 조건·난이도·건 코인·예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 변경 항목을 보여준다. `ACTIVE` 이후에는 시작 승인 때 고정된 `predictedResult`도 두 사람에게 반환한다. 회수 상태에서는 이미 전달된 불변 버전과 응답 전용 `auditProjectionStatus = RECALLED`만 허용한다. 작성자의 전체 잔액·잠긴 잔액·지갑 원장·뽑기·구매 내역·남은 개인 예산·제출 전 초안은 반환하지 않는다. `GET /wallet`, 지갑 원장과 작성자 전용 승인 견적은 본인에게만 허용한다.
 34. P2 중복 선택은 요청의 `expectedStatus = PENDING`을 요구하고 뽑기 행·개별 단위·선택 행을 함께 잠근다. PENDING 행에는 아직 알 수 없는 요청 멱등 키를 저장하지 않고, 24시간 안의 최초 사용자 선택을 커밋할 때 그 요청의 키를 기록한다. `KEEP_FOR_EXCHANGE`는 단위를 `AVAILABLE`로, `CONVERT_TO_FRAGMENTS` 또는 만료 작업은 단위를 `CONVERTED`로 바꾸고 조각을 한 번만 지급한다. 선택 재시도는 같은 결과를 반환하고, 만료와 사용자 선택이 경합해도 둘 중 하나만 커밋한다.
 35. P2 교환 생성·수정·확정은 커플, 현재 예약 주와 필요 시 완료 주의 교환 예산, 제안, 현재 불변 제안 버전, 현재 버전에 실제로 들어온 개별 단위와 활성 예약을 정해진 순서로 잠근다. 각 사용자는 자기 단위만 선택·예약할 수 있고 최초 생성자가 파트너 단위를 지정하거나 잠글 수 없다. 파트너 단위의 정의는 현재 버전의 `requested_item_definition_id`와 같아야 한다. 연결 7일·현재 연결·주 3회·양쪽 여분 1개 유지·등급 또는 교환 가치·양도 가능 상태를 매번 서버에서 재검사한다. 자기 단위 추가·교체는 상대 단위를 새 버전에 복사하고 본인의 이전 예약을 `RELEASED`로 바꾼 뒤 새 단위를 예약하며, 이전 확인을 무효화하되 최초 `expires_at`은 연장하지 않는다. 완료 주가 예약 주와 다르면 예약 슬롯을 완료 주로 원자 이동한다. 완료 주 한도가 찼으면 마지막 확인과 완료를 롤백하고 사용자가 만료 전 재시도하게 한다. 같은 현재 버전에 양쪽 단위가 모두 있고 양쪽이 확인한 경우에만 ACTIVE 예약을 `CONSUMED`, 주간 수를 `reserved → completed`로 바꾸고 두 단위의 소유자를 맞바꿔 `AVAILABLE + UNBOUND`로 저장하며 이전 이벤트를 추가한다. 취소·거절·24시간 만료·연결 종료·차단은 예약과 주간 예약 수를 멱등하게 해제한다.
 36. P2 선물은 `item_gifts.row_version`, 수령자의 `user_interaction_settings.row_version`, 현재 연결과 수신 설정을 생성·수락 때 확인한다. `gift_duplicate_policy = REJECT_IF_OWNED`이면 상점·보유 아이템 선물 모두 수령자의 같은 정의 보유 여부를 검사한다. 상점 선물은 현재 활성 불변 가격 버전, 전투력 0·유효 꾸미기 슬롯을 검증하고 코인을 잠근 뒤, 수락 시 생성 때의 가격 스냅샷대로 소각하며 수령자 `AVAILABLE + TRANSFER_LOCKED` 꾸미기 단위를 생성한다. 가격·아이템·시행 시각은 불변이고 사용된 버전도 `ACTIVE → RETIRED` 상태 변경만 허용한다. 보유 아이템 선물은 현재 예약 주와 필요 시 완료 주 예산, 보내는 사람의 주 1회 한도와 허용된 개별 단위를 잠근다. 완료 주 한도가 찼으면 수락 전체를 롤백한다. 수락 시 ACTIVE 예약을 `CONSUMED`, 주간 수를 `reserved → completed`로 바꾸고 같은 단위의 소유자를 바꿔 `AVAILABLE + TRANSFER_LOCKED`로 저장한다. `TRANSFER_LOCKED` 단위는 조각 변환·재선물·재교환할 수 없다. 수신 설정을 끄는 트랜잭션은 요청의 `Idempotency-Key`를 정리 작업에 기록하고 당시 PENDING 선물을 `gift_settings_cleanup_items`로 스냅샷한 뒤 작업 ID를 반환한다. 같은 키 재시도는 기존 작업을 반환한다. 작업이 각 선물을 `REJECTED_SETTINGS_DISABLED`로 바꾸며 코인·단위 반환을 한 번만 처리하고, 모든 자원이 끝나야 상위 작업을 완료한다. 거절·72시간 만료·연결 종료·차단도 코인 또는 단위 예약을 한 번만 반환하고, 완료된 보유 아이템 선물 횟수는 되돌리지 않는다.
@@ -2939,9 +2944,10 @@ POST /quests/{questId}/cancel
 POST /quests/{questId}/confirm-cancel
 POST /quests/{questId}/reject-cancel
 
-POST  /quests/{questId}/result
-PATCH /quests/{questId}/dispute-result
-GET   /quests/{questId}/settlement
+PUT  /quests/{questId}/partner-result
+POST /quests/{questId}/partner-result/reject
+POST /quests/{questId}/partner-result/final-approve
+GET  /quests/{questId}/settlement
 
 GET  /rescue-quest
 POST /rescue-quest/complete
@@ -2963,6 +2969,7 @@ POST /coop-boss/weekly/participate
 
 POST   /quests/{questId}/evidence/upload-url
 POST   /evidence/{evidenceId}/complete
+POST   /quests/{questId}/evidence/submit
 GET    /evidence/{evidenceId}/content
 DELETE /evidence/{evidenceId}
 
@@ -2975,17 +2982,19 @@ GET    /users/me/deletion
 DELETE /consents/{policyType}
 ```
 
-초대 생성·참여·최종 확인, 퀘스트 제출·회수·폐기·수정 요청·거절·승인·취소·결과 응답·분쟁 응답·정산, 구조 퀘스트·뽑기·장비 장착·해제·간이 협동 참여와 `POST /couples/me/end`, `POST /couples/me/settlement-rules/acknowledge`, `POST /users/{userId}/block`, `POST /reports`, `DELETE /users/me`는 `Idempotency-Key`를 요구한다. 서버는 재요청 시 이미 커밋된 동일 상태와 최초 처리 시각·정산 결과를 반환하며 추가 원장·환불·알림을 만들지 않는다. 초안 `PATCH`는 `expectedRowVersion`, 승인·수정 요청·거절은 `questVersionId`와 `expectedRowVersion`을 요구한다.
+초대 생성·참여·최종 확인, 퀘스트 제출·회수·폐기·수정 요청·거절·시작 승인·취소·인증 자료 제출·파트너 실제 결과 선택·판정 거절·최종 승인·정산, 구조 퀘스트·뽑기·장비 장착·해제·간이 협동 참여와 `POST /couples/me/end`, `POST /couples/me/settlement-rules/acknowledge`, `POST /users/{userId}/block`, `POST /reports`, `DELETE /users/me`는 `Idempotency-Key`를 요구한다. 서버는 재요청 시 이미 커밋된 동일 상태와 최초 처리 시각·정산 결과를 반환하며 추가 원장·환불·알림을 만들지 않는다. 초안 `PATCH`는 `expectedRowVersion`, 시작 승인·수정 요청·거절은 `questVersionId`와 `expectedRowVersion`을 요구한다.
 
-`POST /quests`는 작성자만 볼 수 있는 `DRAFT`를 만들고 어떤 자원도 잠그지 않는다. `PATCH /quests/{questId}/draft`는 `expectedRowVersion`을 요구하고 `DRAFT` 또는 `CHANGE_REQUESTED`에서만 수정하며, `PENDING_APPROVAL`이면 먼저 회수해야 한다. `DELETE /quests/{questId}/draft`는 같은 두 편집 상태에서만 `Idempotency-Key`와 `expectedRowVersion`을 받아 작업 초안을 지우고 `DISCARDED`로 끝낸다. 한 번도 제출하지 않은 폐기 초안은 파트너에게 계속 숨기고, 전달 이력이 있으면 파트너에게 과거 불변 버전과 `DISCARDED` 감사 상태만 유지한다. `POST /quests/{questId}/submit`은 `expectedRowVersion`을 요구하며, 도전자의 튜토리얼이 아직 최종 종료되지 않았으면 `TUTORIAL_REQUIRED`를 반환한다. 서버 계산 승인 마감이 이미 지났으면 새 버전 없이 `APPROVAL_DEADLINE_NOT_FUTURE`를 반환하고 편집 상태를 유지한다. 직전 제출본과 변경점이 없으면 `UNCHANGED_QUEST_VERSION`을 반환한다. 유효한 경우에만 새 불변 버전을 만들고 `questVersionId`, `versionNo`, `approvalDeadlineAt`, `changedFields`, 새 `rowVersion`을 반환한다. 작성자만 `questVersionId + expectedRowVersion`으로 `POST /quests/{questId}/recall`을 호출할 수 있다. 파트너의 수정 요청·거절·승인도 같은 두 필드를 요구하고 요청 문구와 대상 버전을 기록한다. 이 네 가지 승인 대기 변이는 행 잠금 뒤 마감을 먼저 검사해 마감 도달 시 `APPROVAL_EXPIRED`가 우선한다. 모든 성공 변경 응답은 갱신된 `rowVersion`을 반환한다.
+`POST /quests`는 작성자만 볼 수 있는 `DRAFT`를 만들고 어떤 자원도 잠그지 않는다. `PATCH /quests/{questId}/draft`는 `expectedRowVersion`을 요구하고 `DRAFT` 또는 `CHANGE_REQUESTED`에서만 수정하며, `PENDING_APPROVAL`이면 먼저 회수해야 한다. `DELETE /quests/{questId}/draft`는 같은 두 편집 상태에서만 `Idempotency-Key`와 `expectedRowVersion`을 받아 작업 초안을 지우고 `DISCARDED`로 끝낸다. 한 번도 제출하지 않은 폐기 초안은 파트너에게 계속 숨기고, 전달 이력이 있으면 파트너에게 과거 불변 버전과 `DISCARDED` 감사 상태만 유지한다. `POST /quests/{questId}/submit`은 `expectedRowVersion`을 요구하며, 도전자의 튜토리얼이 아직 최종 종료되지 않았으면 `TUTORIAL_REQUIRED`를 반환한다. 서버 계산 승인 마감이 이미 지났으면 새 버전 없이 `APPROVAL_DEADLINE_NOT_FUTURE`를 반환하고 편집 상태를 유지한다. 직전 제출본과 변경점이 없으면 `UNCHANGED_QUEST_VERSION`을 반환한다. 유효한 경우에만 새 불변 버전을 만들고 `questVersionId`, `versionNo`, `approvalDeadlineAt`, `changedFields`, 새 `rowVersion`을 반환한다. 작성자만 `questVersionId + expectedRowVersion`으로 `POST /quests/{questId}/recall`을 호출할 수 있다. 파트너의 수정 요청·거절·시작 승인도 같은 두 필드를 요구하고 요청 문구와 대상 버전을 기록하며, 시작 승인은 `predictedResult`도 필수로 받는다. 이 네 가지 승인 대기 변이는 행 잠금 뒤 마감을 먼저 검사해 마감 도달 시 `APPROVAL_EXPIRED`가 우선한다. 모든 성공 변경 응답은 갱신된 `rowVersion`을 반환한다.
 
 `GET /quests`, `GET /quests/{questId}`, `GET /quests/{questId}/versions`와 `GET /home`, `GET /actions/pending`의 **퀘스트 항목**은 모두 같은 상태·역할 투영기를 사용하고 각 퀘스트의 현재 `rowVersion`을 반환한다. 새 `DRAFT`는 작성자에게만 보인다. 회수된 퀘스트는 파트너의 활성 목록에서 제거하고, 파트너에게 이미 전달됐던 불변 버전과 응답 전용 `auditProjectionStatus = RECALLED`만 다시 볼 수 있게 하며 현재 작업 초안은 숨긴다. `RECALLED`는 DB 퀘스트 상태가 아니다. `CHANGE_REQUESTED`는 마지막 제출 버전과 파트너의 수정 요청만, `PENDING_APPROVAL`은 현재 `questVersionId`와 제출 버전만, `ACTIVE` 이후는 `approvedQuestVersionId`의 내용을 기준으로 반환한다. 작성자만 현재 `quest_drafts`를 받을 수 있다.
 
-파트너용 퀘스트 응답에는 현재 허용된 버전의 제목·성공 조건·난이도·건 코인·예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 변경 항목을 포함한다. 전체 가용·잠긴 잔액, 전체 지갑 원장, 뽑기·구매 내역, 남은 개인 코인 퀘스트 횟수·보너스 한도와 제출 전 초안은 포함하지 않는다. `GET /quests/{questId}/approval-quote`는 작성자 전용이며 현재 초안 또는 제출본의 허용 베팅 범위와 본인의 남은 개인 한도만 반환한다.
+파트너용 퀘스트 응답에는 현재 허용된 버전의 제목·성공 조건·난이도·건 코인·예상 성공 보너스·수행 및 결과 시각·최소 수행 시간·승인 마감·인증 방식·현재 버전 ID와 번호·서버 계산 변경 항목을 포함한다. `ACTIVE` 이후에는 시작 승인 때 고정된 `predictedResult`도 두 사람에게 반환한다. 전체 가용·잠긴 잔액, 전체 지갑 원장, 뽑기·구매 내역, 남은 개인 코인 퀘스트 횟수·보너스 한도와 제출 전 초안은 포함하지 않는다. `GET /quests/{questId}/approval-quote`는 작성자 전용이며 현재 초안 또는 제출본의 허용 베팅 범위와 본인의 남은 개인 한도만 반환한다.
 
-`POST /quests/{questId}/result`는 호출자의 역할에 맞는 블라인드 응답과 응답 시각을 추가 기록하고 현재 `responseDeadlineAt`과 `version`을 반환한다. 이 요청은 예상 `version`이 다르면 `409 Conflict`를 반환한다. 분쟁에 들어간 뒤 `PATCH /quests/{questId}/dispute-result`은 사용자별 한 번만 허용하고 `disputeRound`를 요구한다. 같은 라운드의 양쪽 제출은 도착 순서와 무관하게 각각 저장하며, 양쪽 제출 또는 기한 종료 시 10절 규칙으로 한 번 판정한다. `GET /quests/{questId}`, `GET /home`, `GET /actions/pending`은 두 최초 응답이 모두 제출되거나 최초 기한이 끝나기 전까지 상대방 응답값을 반환하지 않는다. 같은 `disputeRound`의 최종값도 양쪽 제출 또는 기한 종료 전에는 반환하지 않고 사용자별 `submitted`만 반환한다.
+`POST /quests/{questId}/approve`는 `{ questVersionId, expectedRowVersion, predictedResult }`를 받고, 요청한 버전이 현재 버전과 같고 `predictedResult`가 `SUCCESS` 또는 `FAILURE`이며 서버 시각이 `approvalDeadlineAt`보다 빠를 때만 시작 승인한다. 도전자의 `tutorial_completed_at`이 없으면 자원 변화 없이 `TUTORIAL_REQUIRED`를 반환한다. 응답에는 `status`, `approvedQuestVersionId`, `predictedResult`, 새 `rowVersion`, `budgetDateKst`, 해당 퀘스트의 `lockedStake`, `rewardReservedAmount`, `dueAt`, `resultAt`, `resultConfirmationDeadlineAt`만 포함하며 작성자의 남은 개인 예산은 파트너에게 반환하지 않는다. 마감과 같거나 늦으면 자원 변화 없이 `APPROVAL_EXPIRED`와 갱신된 `rowVersion`을 반환한다. 승인 시 잔액이나 한도가 부족하면 전체를 롤백하고 파트너에게는 금액 없는 `QUEST_REQUIRES_REVISION`, 작성자 개인 알림에는 조정 가능한 범위를 제공한다. 서버는 템플릿 퀘스트의 `templateId`로 난이도와 최소 수행 시간을 고정하고, `sourceType = CUSTOM`이면 표시 난이도와 무관하게 베팅금을 최대 100C, 성공 보너스율을 50%로 제한한다.
 
-`POST /quests/{questId}/approve`는 요청한 `questVersionId`가 현재 버전과 같고 서버 시각이 `approvalDeadlineAt`보다 빠르며 도전자의 `tutorial_completed_at`이 존재할 때만 승인한다. 튜토리얼이 아직 최종 종료되지 않았으면 자원 변화 없이 `TUTORIAL_REQUIRED`를 반환한다. 응답에는 `status`, `approvedQuestVersionId`, 새 `rowVersion`, `budgetDateKst`, 해당 퀘스트의 `lockedStake`, `rewardReservedAmount`, `dueAt`, `resultAt`만 포함하며 작성자의 남은 개인 예산은 파트너에게 반환하지 않는다. 마감과 같거나 늦으면 자원 변화 없이 `APPROVAL_EXPIRED`와 갱신된 `rowVersion`을 반환한다. 승인 시 잔액이나 한도가 부족하면 전체를 롤백하고 파트너에게는 금액 없는 `QUEST_REQUIRES_REVISION`, 작성자 개인 알림에는 조정 가능한 범위를 제공한다. 서버는 템플릿 퀘스트의 `templateId`로 난이도와 최소 수행 시간을 고정하고, `sourceType = CUSTOM`이면 표시 난이도와 무관하게 베팅금을 최대 100C, 성공 보너스율을 50%로 제한한다.
+`PUT /quests/{questId}/partner-result`는 파트너만 `{ selectedResult, expectedRowVersion }`을 보내 호출한다. `AWAITING_RESULT`에서는 최초 선택을 저장하고 `PENDING_FINAL_APPROVAL`로 전환하며, `PENDING_FINAL_APPROVAL`에서는 최종 승인 전 선택값을 수정한다. 두 경우 모두 `resultConfirmationDeadlineAt` 이전이어야 하고 새 `selectionRevision`, `selectedResult`, `status`, `rowVersion`을 반환한다. 도전자는 호출할 수 없으며 조회 응답에는 확인 대기 상태만 제공한다.
+
+`POST /quests/{questId}/partner-result/reject`는 파트너가 `{ expectedRowVersion }`으로 호출한다. `AWAITING_RESULT`에서 호출하면 `PARTNER_JUDGMENT_REJECTED`, `PENDING_FINAL_APPROVAL`에서 호출하면 `PARTNER_FINAL_APPROVAL_REJECTED`로 `INVALID` 정산하고 잠긴 원금만 반환한다. `POST /quests/{questId}/partner-result/final-approve`는 `PENDING_FINAL_APPROVAL`에서 파트너가 `{ selectedResult, selectionRevision, expectedRowVersion }`을 보내 현재 작업 값과 일치할 때만 호출할 수 있다. 서버는 선택값에 따라 `SUCCESS` 또는 `FAILURE` 정산을 한 번 커밋하고 같은 요청 재시도에는 최초 정산을 반환한다. 마감 스케줄러는 최종 승인이 없는 두 대기 상태를 `RESULT_CONFIRMATION_TIMEOUT`의 `INVALID`로 한 번만 정산한다.
 
 `GET /gacha/probabilities`는 각 뽑기의 `probabilityVersionId`를 반환한다. `POST /gacha/draw`는 사용자가 확인한 `expectedProbabilityVersionId`를 본문에 포함해야 하며 현재 활성 버전과 다르면 코인·뽑기권을 차감하지 않고 `409 Conflict`와 새 버전 ID를 반환한다. 성공한 `gacha_draws.probability_version_id`는 요청에서 확인한 버전과 같아야 한다.
 
@@ -2993,9 +3002,9 @@ DELETE /consents/{policyType}
 
 `POST /couples/me/end`는 관계 접근 차단을 커밋한 뒤 `relationshipStatus = ENDED`, `relationshipCleanupStatus = PROCESSING`, `relationshipEndJobId`, `targetResourceCount`, `processedResourceCount`를 즉시 반환한다. 재호출은 같은 작업을 반환한다. `GET /couples/me`는 같은 관계 정리 상태와 대상·처리 수를 제공하고, 모든 스냅샷 자원이 끝난 `COMPLETED`에서 최종 사용 가능·잠긴 잔액을 함께 반환한다.
 
-`POST /quests/{questId}/evidence/upload-url`은 아직 결과 행이 없어도 `questId`에 연결된 임시 업로드를 만든다. 업로드 뒤 `POST /evidence/{evidenceId}/complete`가 검사·재인코딩을 시작하며, `processingStatus = READY`인 처리본만 `GET /evidence/{evidenceId}/content`가 권한 검사 후 `no-store`로 전달한다.
+`POST /quests/{questId}/evidence/upload-url`은 `questId`에 연결된 임시 업로드를 만든다. 업로드 뒤 `POST /evidence/{evidenceId}/complete`가 검사·재인코딩을 시작하며, `processingStatus = READY`인 처리본만 `GET /evidence/{evidenceId}/content`가 권한 검사 후 `no-store`로 전달한다.
 
-업로드 URL 발급은 활성 선택 동의, 현재 커플 권한, 허용 퀘스트 상태, 장당 10MB·결과당 3장·총 20MB 한도를 확인한다. `POST /quests/{questId}/result`는 같은 퀘스트·제출자의 `READY`인 `evidenceIds`만 받아 결과 행에 연결한다. 완료되지 않았거나 결과에 연결되지 않은 임시 업로드는 서버 TTL 작업이 삭제한다.
+업로드 URL 발급은 활성 선택 동의, 현재 커플 권한, 허용 퀘스트 상태, 장당 10MB·퀘스트당 3장·총 20MB 한도를 확인한다. 도전자의 `POST /quests/{questId}/evidence/submit`은 같은 퀘스트·본인 소유·`READY`인 `evidenceIds`만 받아 `submittedForReviewAt`을 한 번 기록하고 파트너 결과 확인 화면에 공개한다. 완료되지 않았거나 검토용으로 제출되지 않은 임시 업로드는 서버 TTL 작업이 삭제한다.
 
 `DELETE /evidence/{evidenceId}`는 제출자만 호출할 수 있고 대상을 즉시 `BLOCKED`로 바꾸며 `202 Accepted`, `accessBlockedAt`, `ordinaryDeletionDueAt`을 반환한다. 일반 저장본은 7일 이내 삭제하고, 활성 신고에 따른 제한 보존본은 신고 유무를 상대방에게 노출하지 않은 채 27.2절의 예외 기한을 적용한다.
 
@@ -3080,7 +3089,7 @@ MVP에서는 `home` API 하나에서 다음 정보를 한 번에 내려주는 �
 진행 중 퀘스트
 승인 대기 퀘스트
 결과 확인 대기 퀘스트
-분쟁·마감 포함 처리 대기 항목
+실제 결과 선택·최종 승인·마감 포함 처리 대기 항목
 파트너 전투력·연승·주간 성장 비교
 케미 게이지
 이번 주 간이 협동 보스
@@ -3115,7 +3124,8 @@ MVP에서는 `home` API 하나에서 다음 정보를 한 번에 내려주는 �
 * 최소 수행 시간 기반 승인 마감과 승인 후 불변 처리
 * 난이도별 베팅 상한과 일일 보너스 예약
 * 사용 가능·잠긴 코인과 원장 트랜잭션
-* 24시간 결과 입력·분쟁·미응답 자동 정산
+* 파트너 실제 결과 선택·수정과 최종 승인
+* 24시간 최종 승인 마감과 미승인 `INVALID` 자동 정산
 * 구조 퀘스트
 * 거래성 푸시와 인앱 대기함
 * 비공개 인증 자료 업로드·권한·삭제
@@ -3200,9 +3210,10 @@ BETCHU는 다운로드 수보다 **커플 두 명이 함께 행동하는지**가
 | 커플 연결 완료율 | 초대 미리보기 후 실제 연결했는가 |
 | 첫 퀘스트 생성·정산률 | 연결 후 핵심 루프를 끝까지 완료했는가 |
 | 주간 커플당 유효 정산 퀘스트 | 실제 게임 반복 횟수 |
-| 승인 평균 소요 시간 | 파트너가 빠르게 반응하는가 |
-| 도전자·파트너별 미응답률 | 어느 역할에서 정산이 막히는가 |
-| 분쟁 발생률·미합의 종료율 | 조건과 조정 흐름이 명확한가 |
+| 시작 승인 평균 소요 시간 | 파트너가 빠르게 퀘스트 시작에 동의하는가 |
+| 결과 확인 후 최종 승인 평균 소요 시간 | 파트너 판정이 정산까지 원활히 이어지는가 |
+| 최종 승인 미응답률 | 결과 확인 기한 때문에 정산이 막히는가 |
+| `INVALID` 발생률·사유별 비율 | 판정 거절·최종 거절·기한 만료 흐름이 과도하지 않은가 |
 | 케미 게이지 달성률 | 공동 목표가 반복 행동을 만드는가 |
 | 해금 커플 중 간이 보스 양쪽 참여율 | 두 사람이 실제 협동 기능에 들어오는가 |
 | 간이 보스 클리어율 | 장비·전투력 성장이 작동하는가 |
@@ -3218,8 +3229,8 @@ BETCHU는 다운로드 수보다 **커플 두 명이 함께 행동하는지**가
 일주일 동안
 - 각자 퀘스트 5개 이상 완료
 - 뽑기 2회 이상 진행
-- 결과 확인 누락 20% 이하
-- 의견 불일치 10% 이하
+- 최종 승인 기한 만료 `INVALID` 20% 이하
+- 파트너 판정·최종 승인 거절 `INVALID` 10% 이하
 - 케미 해금 커플은 두 사람 모두 간이 보스 참여
 - 다음 주에도 새 퀘스트 생성
 ```
