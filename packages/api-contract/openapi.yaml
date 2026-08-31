@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: BETCHU API
+  version: 0.1.0
+  description: BETCHU 모바일 앱과 백엔드가 공유하는 계약의 시작점
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+paths:
+  /system/health:
+    get:
+      operationId: getSystemHealth
+      summary: 백엔드 기본 상태 확인
+      tags: [system]
+      security: []
+      responses:
+        "200":
+          description: Backend is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemHealth"
+components:
+  schemas:
+    SystemHealth:
+      type: object
+      additionalProperties: false
+      required: [status, service]
+      properties:
+        status:
+          type: string
+          const: UP
+        service:
+          type: string
+          const: betchu-backend

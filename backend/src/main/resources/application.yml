@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: betchu-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/betchu}
+    username: ${DB_USERNAME:betchu}
+    password: ${DB_PASSWORD:betchu_local}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+betchu:
+  business-time-zone: Asia/Seoul
+  security:
+    enabled: ${BETCHU_SECURITY_ENABLED:false}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081,http://localhost:19006}
+  object-storage:
+    endpoint: ${OBJECT_STORAGE_ENDPOINT:http://localhost:9000}
+    bucket: ${OBJECT_STORAGE_BUCKET:betchu-evidence-local}
+    access-key: ${OBJECT_STORAGE_ACCESS_KEY:betchu}
+    secret-key: ${OBJECT_STORAGE_SECRET_KEY:betchu_minio_local}
+  clamav:
+    host: ${CLAMAV_HOST:localhost}
+    port: ${CLAMAV_PORT:3310}

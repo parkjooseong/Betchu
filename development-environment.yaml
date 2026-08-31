@@ -1,0 +1,441 @@
+schema_version: "1.0"
+
+project:
+  name: "BETCHU"
+  phase: "implementation-start"
+  environment_decision: "implemented-baseline"
+  description: "iOS와 Android를 함께 지원하는 2인용 커플 퀘스트·배츄 육성 게임"
+  product_documents:
+    readme: "README.md"
+    plan: "docs/betchu기획안.md"
+    design_brief: "docs/betchu디자인의뢰서.md"
+    mvp_wireframe: "docs/wireframes/betchu-mvp-wireframe-v2.png"
+    p2_wireframe: "docs/wireframes/betchu-p2-wireframe-v2.png"
+
+architecture:
+  style: "modular-monolith"
+  reason:
+    - "MVP에서 마이크로서비스 운영 복잡도를 만들지 않는다."
+    - "코인 원장, 퀘스트 정산, 성장과 뽑기를 하나의 DB 트랜잭션으로 처리하기 쉽다."
+    - "기능별 모듈 경계를 유지해 P2 기능을 나중에 분리할 수 있다."
+  runtime_units:
+    mobile_app:
+      responsibility: "사용자 UI, 로컬 화면 상태, 푸시 수신, 인증 이미지 선택"
+    api_server:
+      responsibility: "인증, 권한, 비즈니스 규칙, 트랜잭션, API, 비공개 미디어 게이트웨이"
+    background_worker:
+      responsibility: "마감 처리, 알림 발송, 인증 이미지 검사·재인코딩, 보관 기간 삭제"
+      deployment: "MVP에서는 백엔드와 같은 코드베이스를 별도 Spring profile로 실행"
+    relational_database:
+      responsibility: "모든 영구 상태와 원장의 단일 진실 원천"
+    private_object_storage:
+      responsibility: "인증 이미지 처리본 비공개 저장"
+
+repository_layout:
+  root: "."
+  directories:
+    mobile: "frontend"
+    backend: "backend"
+    api_contract: "packages/api-contract"
+    infrastructure: "infra"
+    database_migrations: "backend/src/main/resources/db/migration"
+    documents: "docs"
+  rules:
+    - "모바일과 백엔드는 한 저장소에서 관리하되 빌드 도구와 배포 단위를 분리한다."
+    - "OpenAPI 계약은 packages/api-contract/openapi.yaml에서 먼저 변경한다."
+    - "DB 스키마 변경은 Flyway 마이그레이션으로만 수행한다."
+
+version_policy:
+  strategy: "YAML에는 안정된 기준 major/minor를 기록하고 실제 patch는 생성 시 lockfile과 wrapper에 고정"
+  update_rule:
+    - "기능 개발 중 major 버전을 자동으로 올리지 않는다."
+    - "보안 patch와 지원되는 minor 업데이트는 테스트 통과 후 반영한다."
+    - "Expo SDK는 한 번에 한 major씩 순차 업그레이드한다."
+
+developer_workstation:
+  primary_windows_environment:
+    operating_system: "Windows 11 23H2 이상"
+    linux_environment: "WSL 2.1.5 이상, Ubuntu 24.04 LTS 권장"
+    container_runtime: "Docker Desktop, WSL 2 backend"
+    notes:
+      - "소스는 가능하면 WSL Linux 파일시스템에 두어 컨테이너 bind mount 성능을 확보한다."
+      - "현재 Windows 마운트 경로를 계속 사용할 경우 파일 감시와 빌드 성능을 확인한다."
+  macos_requirement:
+    required_for:
+      - "iOS Simulator"
+      - "로컬 iOS 네이티브 빌드"
+      - "App Store 제출 전 최종 검증"
+    tool: "Xcode 26.4 이상"
+    alternative: "초기에는 EAS Build를 사용하더라도 실제 iPhone 검증과 최종 제출에는 macOS 담당 환경을 확보"
+  android_tools:
+    ide: "Android Studio stable"
+    sdk:
+      min_android: "Android 7 / API 24"
+      compile_sdk: 36
+      target_sdk: 36
+  ios_target:
+    minimum_version: "16.4"
+  editors:
+    mobile: "Visual Studio Code 또는 WebStorm"
+    backend: "IntelliJ IDEA 권장"
+
+toolchain:
+  git:
+    version: "2.45 이상"
+  node:
+    version: "24.x LTS"
+    manager: "Volta 또는 mise"
+  package_manager:
+    name: "pnpm"
+    version: "10.x"
+    lockfile_required: true
+  java:
+    distribution: "Eclipse Temurin"
+    version: "21 LTS"
+  gradle:
+    version: "9.7.1"
+    use_wrapper: true
+  docker:
+    engine: "현재 지원 stable"
+    compose: "Docker Compose v2"
+
+mobile:
+  framework:
+    name: "Expo"
+    sdk: "57.x stable"
+    react_native: "0.86.x"
+    react: "19.2.x"
+    language: "TypeScript strict"
+    routing: "Expo Router"
+    development_builds: true
+    expo_go_policy: "간단한 UI 확인에만 사용하고 OAuth·푸시·네이티브 기능 검증은 development build 사용"
+  state_management:
+    server_state: "TanStack Query"
+    local_state: "Zustand"
+    forms: "React Hook Form + Zod"
+    rule: "서버 정산 결과를 클라이언트에서 추측하거나 다시 계산하지 않는다."
+  styling:
+    approach: "React Native StyleSheet + Figma에서 전달된 design tokens"
+    requirements:
+      - "색상·간격·타이포그래피를 token module로 중앙 관리"
+      - "iOS와 Android 접근성 글자 확대 지원"
+      - "성공·실패·희귀도를 색상만으로 구분하지 않음"
+  api_client:
+    contract: "OpenAPI 3.1"
+    generation: "OpenAPI 계약에서 TypeScript 타입을 생성하고, 공통 openapi-fetch client에서 인증·오류·Idempotency-Key 처리"
+  device_features:
+    secure_storage: "expo-secure-store"
+    notifications: "expo-notifications"
+    image_selection: "expo-image-picker"
+    image_upload: "백엔드가 발급한 1회 업로드 세션 사용"
+  testing:
+    unit: "Jest"
+    component: "React Native Testing Library"
+    end_to_end: "Maestro"
+    accessibility:
+      - "스크린리더 label과 role 테스트"
+      - "글자 200% 확대 실기기 점검"
+      - "모션 감소 설정 점검"
+  build_and_release:
+    development: "Expo development build"
+    preview: "EAS Build preview profile"
+    production: "EAS Build production profile 또는 검증된 로컬 release build"
+    ota_policy: "네이티브 호환 범위를 넘는 변경은 OTA로 배포하지 않음"
+
+backend:
+  framework:
+    language: "Java 21"
+    spring_boot: "4.1.x stable"
+    spring_framework: "7.0.x"
+    build: "Gradle Kotlin DSL"
+    packaging: "OCI container"
+  modules:
+    - "auth"
+    - "users"
+    - "couples"
+    - "quests"
+    - "wallet"
+    - "growth"
+    - "gacha"
+    - "inventory"
+    - "battle"
+    - "media"
+    - "notifications"
+    - "safety"
+  core_dependencies:
+    web: "Spring MVC"
+    validation: "Jakarta Bean Validation"
+    security: "Spring Security + OAuth2 Client/Resource Server"
+    persistence: "Spring Data JPA, 중요 잠금·원장 쿼리는 명시적 SQL 또는 JdbcClient 사용"
+    migration: "Flyway"
+    observability: "Spring Boot Actuator + Micrometer + OpenTelemetry"
+    api_documentation: "contract-first OpenAPI 3.1"
+  transaction_rules:
+    - "코인 잔액과 원장은 같은 PostgreSQL 트랜잭션에서 변경한다."
+    - "퀘스트 최종 정산, XP, 인정 성공 수와 보상도 한 트랜잭션에서 반영한다."
+    - "승인·취소·정산·뽑기·장착에는 Idempotency-Key와 DB 고유 제약을 사용한다."
+    - "동시 요청은 행 잠금과 결정적인 잠금 순서로 직렬화한다."
+    - "Redis나 모바일 캐시를 잔액·정산의 진실 원천으로 사용하지 않는다."
+  authentication:
+    providers_planned:
+      - "Kakao"
+      - "Google"
+      - "Apple"
+    session:
+      access_token: "짧은 만료 JWT"
+      refresh_token: "서버에서 해시 저장하고 기기별 폐기 가능"
+    secrets: "운영 secret manager에서 주입"
+  time_and_numbers:
+    storage_timezone: "UTC"
+    business_timezone: "Asia/Seoul"
+    timestamp_format: "ISO-8601 with offset"
+    identifiers: "UUID"
+    coins: "정수형, 부동소수점 금지"
+    experience: "정수형"
+  testing:
+    unit: "JUnit 5 + AssertJ + Mockito"
+    integration: "Spring Boot Test + Testcontainers"
+    database: "테스트도 PostgreSQL 컨테이너 사용, H2로 정합성 테스트를 대체하지 않음"
+    api_contract: "OpenAPI schema validation + 대표 요청·응답 예시 테스트"
+    concurrency:
+      - "중복 승인"
+      - "중복 최종 정산"
+      - "동시 뽑기"
+      - "동시 장착"
+      - "관계 종료와 정산 경합"
+
+data_services:
+  postgresql:
+    version: "18.x"
+    source_of_truth: true
+    extensions:
+      - "pgcrypto"
+    rules:
+      - "현재 지원되는 minor patch 사용"
+      - "개발·테스트·운영의 major 버전을 동일하게 유지"
+      - "운영 자동 백업과 시점 복구 활성화"
+  redis:
+    status: "optional-after-load-test"
+    version_if_enabled: "8.2.x extended-support"
+    allowed_uses:
+      - "rate limit"
+      - "짧은 수명의 읽기 캐시"
+    forbidden_uses:
+      - "코인 잔액 원장"
+      - "퀘스트 최종 상태"
+      - "뽑기 천장 원본"
+  object_storage:
+    local: "MinIO private bucket"
+    production: "AWS S3 또는 동등한 S3-compatible private object storage"
+    public_access: false
+    direct_reusable_urls: false
+    access_path: "백엔드 미디어 게이트웨이가 매 요청마다 현재 커플·퀘스트 권한을 확인하고 스트리밍"
+  malware_scanner:
+    local: "ClamAV container"
+    production: "격리된 malware scan worker"
+  media_processing:
+    accepted_formats:
+      - "JPEG"
+      - "PNG"
+      - "WebP"
+    limits:
+      per_file_mb: 10
+      per_quest_files: 3
+      per_quest_total_mb: 20
+    pipeline:
+      - "실제 파일 형식과 크기 확인"
+      - "악성 파일 검사"
+      - "안전한 포맷으로 재인코딩"
+      - "EXIF·GPS 제거"
+      - "원본 삭제"
+      - "READY 처리본만 권한 확인 후 제공"
+
+local_environment:
+  orchestration: "infra/compose.yaml"
+  services:
+    postgres:
+      port: 5432
+      required: true
+    minio_api:
+      port: 9000
+      required: true
+    minio_console:
+      port: 9001
+      required: true
+    clamav:
+      port: 3310
+      required: true
+    redis:
+      port: 6379
+      required: false
+  application_ports:
+    backend: 8080
+    mobile_metro: 8081
+  seed_policy:
+    - "개발용 사용자·커플·퀘스트·아이템만 별도 seed profile에서 생성"
+    - "실제 개인정보와 운영 인증 이미지를 로컬 환경에 복사하지 않음"
+
+environment_variables:
+  rules:
+    - "비밀값은 Git에 커밋하지 않는다."
+    - ".env.example에는 변수명과 설명만 기록한다."
+    - "EXPO_PUBLIC_ 접두사 변수에는 공개돼도 되는 값만 둔다."
+    - "운영 값은 secret manager와 배포 플랫폼 설정에서 주입한다."
+  mobile_public:
+    - "EXPO_PUBLIC_APP_ENV"
+    - "EXPO_PUBLIC_API_BASE_URL"
+    - "EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY"
+  backend_required:
+    - "SPRING_PROFILES_ACTIVE"
+    - "DB_URL"
+    - "DB_USERNAME"
+    - "DB_PASSWORD"
+    - "JWT_PRIVATE_KEY"
+    - "JWT_PUBLIC_KEY"
+    - "KAKAO_CLIENT_ID"
+    - "KAKAO_CLIENT_SECRET"
+    - "GOOGLE_CLIENT_ID"
+    - "GOOGLE_CLIENT_SECRET"
+    - "APPLE_CLIENT_ID"
+    - "APPLE_TEAM_ID"
+    - "APPLE_KEY_ID"
+    - "APPLE_PRIVATE_KEY"
+    - "OBJECT_STORAGE_ENDPOINT"
+    - "OBJECT_STORAGE_BUCKET"
+    - "OBJECT_STORAGE_ACCESS_KEY"
+    - "OBJECT_STORAGE_SECRET_KEY"
+    - "CLAMAV_HOST"
+    - "CLAMAV_PORT"
+    - "EXPO_PUSH_ACCESS_TOKEN"
+  optional_observability:
+    - "OTEL_EXPORTER_OTLP_ENDPOINT"
+    - "SENTRY_DSN"
+
+api_conventions:
+  protocol: "HTTPS JSON REST"
+  contract: "OpenAPI 3.1"
+  base_path: "/api/v1"
+  naming: "camelCase JSON, plural resource paths"
+  error_format: "RFC 9457 Problem Details + stable BETCHU errorCode"
+  pagination: "cursor-based"
+  optimistic_concurrency: "expectedRowVersion"
+  idempotency_header: "Idempotency-Key"
+  request_trace_header: "X-Request-Id"
+  media_cache_control: "no-store"
+
+quality_gates:
+  mobile_pull_request:
+    - "pnpm lint"
+    - "pnpm typecheck"
+    - "pnpm test"
+  backend_pull_request:
+    - "./gradlew spotlessCheck"
+    - "./gradlew test"
+    - "./gradlew integrationTest"
+  shared:
+    - "OpenAPI validation"
+    - "Flyway migration validation"
+    - "dependency vulnerability scan"
+    - "secret scan"
+  release:
+    - "Android·iOS 실기기 핵심 Flow A~F 통과"
+    - "스크린리더·글자 확대·모션 감소 점검"
+    - "중복 정산·코인 원장 동시성 테스트 통과"
+    - "관계 종료 후 상대 데이터 접근 차단 테스트 통과"
+    - "인증 이미지 EXIF 제거·권한·삭제 수명주기 테스트 통과"
+
+ci_cd:
+  provider: "GitHub Actions"
+  workflows_planned:
+    pull_request:
+      - "mobile quality gates"
+      - "backend unit and Testcontainers integration tests"
+      - "OpenAPI and migration checks"
+    main:
+      - "backend OCI image build"
+      - "staging deploy"
+      - "mobile preview build when requested"
+    release:
+      - "production approval gate"
+      - "database backup verification"
+      - "backend deploy and health check"
+      - "EAS production build"
+
+deployment:
+  environments:
+    - "local"
+    - "test"
+    - "staging"
+    - "production"
+  recommended_initial_platform:
+    backend: "AWS ECS Fargate 또는 동등한 managed container service"
+    database: "AWS RDS PostgreSQL Multi-AZ"
+    object_storage: "AWS S3 private bucket"
+    secrets: "AWS Secrets Manager"
+    logs_and_metrics: "OpenTelemetry-compatible managed service"
+  requirements:
+    - "staging과 production의 DB·bucket·OAuth 앱을 분리"
+    - "운영 DB는 public network에 노출하지 않음"
+    - "TLS 강제"
+    - "최소 권한 IAM"
+    - "일일 백업과 복구 훈련"
+    - "개인정보·원장 로그의 접근 감사"
+
+bootstrap_order:
+  - step: 1
+    task: "저장소 디렉터리와 공통 .editorconfig, .gitattributes, .gitignore 생성"
+    status: "completed"
+  - step: 2
+    task: "packages/api-contract/openapi.yaml에 인증·사용자·커플·퀘스트 최소 계약 작성"
+    status: "in_progress"
+    note: "health endpoint 계약을 먼저 생성했으며 도메인 계약은 vertical slice에서 추가"
+  - step: 3
+    task: "infra/compose.yaml에 PostgreSQL·MinIO·ClamAV 구성"
+    status: "completed_config_only"
+    note: "현재 개발 PC에 Docker가 없어 실제 컨테이너 기동은 미검증"
+  - step: 4
+    task: "Spring Boot backend 생성, Flyway V1과 health endpoint 구현"
+    status: "completed"
+  - step: 5
+    task: "Expo SDK 57 mobile 생성, Router·토큰·API client 기본 구조 구현"
+    status: "completed"
+  - step: 6
+    task: "로그인·커플 연결·스타팅 배츄의 첫 vertical slice 완성"
+    status: "pending"
+  - step: 7
+    task: "퀘스트 승인·정산·원장 동시성 테스트 구현"
+    status: "pending"
+  - step: 8
+    task: "성장·뽑기·장비·간이 협동 보스 순서로 확장"
+    status: "pending"
+
+local_commands:
+  note: "현재 생성된 scaffold와 infra/compose.yaml에서 사용하는 명령"
+  infrastructure_start: "docker compose -f infra/compose.yaml up -d"
+  backend_start: "cd backend && ./gradlew bootRun"
+  backend_test: "cd backend && ./gradlew test integrationTest"
+  mobile_install: "pnpm --dir frontend install --frozen-lockfile"
+  mobile_start: "pnpm --dir frontend start"
+  mobile_android: "pnpm --dir frontend android"
+  mobile_ios: "pnpm --dir frontend ios"
+
+out_of_scope_for_initial_scaffold:
+  - "마이크로서비스와 Kubernetes"
+  - "GraphQL"
+  - "실시간 공개 채팅"
+  - "다른 커플과의 공개 매칭"
+  - "결제·환전"
+  - "AI API"
+  - "P2 교환·선물·정식 레이드·커플 PvP 실제 구현"
+
+official_references:
+  expo_sdk: "https://docs.expo.dev/versions/v57.0.0/"
+  expo_create_project: "https://docs.expo.dev/get-started/create-a-project/"
+  spring_boot: "https://spring.io/projects/spring-boot/"
+  spring_boot_requirements: "https://docs.spring.io/spring-boot/system-requirements.html"
+  spring_boot_testcontainers: "https://docs.spring.io/spring-boot/reference/testing/testcontainers.html"
+  testcontainers_postgresql: "https://java.testcontainers.org/modules/databases/postgres/"
+  node_releases: "https://nodejs.org/en/about/previous-releases"
+  postgresql_versioning: "https://www.postgresql.org/support/versioning/"
+  redis_versioning: "https://redis.io/docs/latest/operate/oss_and_stack/install/version-mgmt/"
+  docker_windows_wsl: "https://docs.docker.com/desktop/setup/install/windows-install/"

@@ -11,7 +11,7 @@
 </div>
 
 > [!NOTE]
-> BETCHU는 현재 **서비스 기획 및 MVP 범위 정의 단계**입니다. 이 저장소에는 아직 앱·서버 구현이나 실행 환경이 없습니다. 이 README는 현재 확정된 MVP 규칙을 요약하며, [서비스 기획안 v0.1](./docs/betchu기획안.md)의 세부 규칙·상태·데이터 구조·API 계약은 이후 이 README의 흐름에 맞춰 동기화합니다.
+> BETCHU는 현재 **MVP 개발 환경 구축과 기능 구현 시작 단계**입니다. `frontend`에는 Expo 모바일 앱, `backend`에는 Spring Boot API scaffold가 있으며 실제 서비스 기능은 아직 구현 전입니다. 이 README는 현재 확정된 MVP 규칙을 요약하고 [서비스 기획안 v0.1](./docs/betchu기획안.md)의 세부 계약을 기준으로 구현합니다.
 
 ## 서비스 소개
 
@@ -256,10 +256,33 @@ PENDING_FINAL_APPROVAL ── reject / deadline ──→ INVALID
 - 뽑기 결과와 천장은 서버에서 결정하며 사용한 확률 버전과 결과를 함께 기록합니다.
 - 성장 단계·인정 성공 수·보상은 코인 및 XP 정산과 같은 트랜잭션에서 반영합니다.
 
+## 개발 환경 빠른 시작
+
+요구 환경은 Node.js 24 LTS, pnpm 10, Java 21, Docker Desktop입니다. 전체 기준은 [개발 환경 정의](./development-environment.yaml)를 참고합니다.
+
+```bash
+# 1. PostgreSQL, MinIO, ClamAV
+docker compose -f infra/compose.yaml up -d
+
+# 2. 백엔드
+cd backend
+./gradlew bootRun
+
+# 3. 새 터미널에서 프론트엔드
+cd frontend
+cp .env.example .env.local
+pnpm install --frozen-lockfile
+pnpm start
+```
+
+Windows에서는 백엔드 실행에 `gradlew.bat bootRun`을 사용합니다. Android Emulator에서 API에 연결할 때는 `frontend/.env.local`의 주소를 `http://10.0.2.2:8080/api/v1`로 변경합니다.
+
 ## 프로젝트 문서
 
 - [서비스 기획안 v0.1](./docs/betchu기획안.md) — 전체 게임 규칙, 화면, MVP 범위, 데이터 구조와 API 예시
+- [디자인 의뢰서](./docs/betchu디자인의뢰서.md) — 디자이너 작업 범위, 화면·아트 목록, 프로토타입과 납품 기준
+- [개발 환경 정의](./development-environment.yaml) — 모바일·백엔드 기술 스택, 로컬 서비스, 테스트·배포 기준과 시작 순서
 - [MVP 모바일 와이어프레임](./docs/wireframes/betchu-mvp-wireframe-v2.png) — 홈의 승인 대기·진행 중·결과 대기 현황을 포함한 핵심 화면 흐름
 - [P2 확장 와이어프레임](./docs/wireframes/betchu-p2-wireframe-v2.png) — 새 알, 중복 처리, 교환·선물·꾸미기·정식 레이드·커플 PvP 화면
 
-기술 스택과 로컬 실행 방법은 구현 구조가 확정된 뒤 이 문서에 추가할 예정입니다.
+프론트엔드와 백엔드의 세부 명령은 각 디렉터리의 README에서 확인할 수 있습니다.

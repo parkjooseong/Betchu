@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.claude/
+CLAUDE.md
+*.iml
+.DS_Store
+backend.zip
+**/.env
+**/.env.*
+!**/.env.example
