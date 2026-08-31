@@ -259,7 +259,7 @@ PENDING_FINAL_APPROVAL ── reject / deadline ──→ INVALID
 ## 프로젝트 문서
 
 - [서비스 기획안 v0.1](./docs/betchu기획안.md) — 전체 게임 규칙, 화면, MVP 범위, 데이터 구조와 API 예시
-- [MVP 모바일 와이어프레임](./docs/wireframes/betchu-mvp-wireframe.png) — 스타팅 배츄부터 간이 협동 보스까지의 핵심 화면 흐름
-- [P2 확장 와이어프레임](./docs/wireframes/betchu-p2-wireframe.png) — 새 알, 중복 처리, 교환·선물·꾸미기·정식 레이드 화면
+- [MVP 모바일 와이어프레임](./docs/wireframes/betchu-mvp-wireframe-v2.png) — 홈의 승인 대기·진행 중·결과 대기 현황을 포함한 핵심 화면 흐름
+- [P2 확장 와이어프레임](./docs/wireframes/betchu-p2-wireframe-v2.png) — 새 알, 중복 처리, 교환·선물·꾸미기·정식 레이드·커플 PvP 화면
 
 기술 스택과 로컬 실행 방법은 구현 구조가 확정된 뒤 이 문서에 추가할 예정입니다.
