@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: BETCHU API
-  version: 0.2.0
-  description: 스타팅 배츄 미리보기 계약. 계정 활성화와 배츄 생성은 포함하지 않습니다.
+  version: 0.3.0
+  description: BETCHU Google 로그인, 연령·정책 동의, 계정 활성화와 안전한 커플 연결 계약
 servers:
   - url: http://localhost:8080/api/v1
     description: Local development
@@ -11,7 +11,7 @@ paths:
     get:
       operationId: getSystemHealth
       summary: 백엔드 기본 상태 확인
-      tags: [system]
+      tags: [ system ]
       security: []
       responses:
         "200":
@@ -24,7 +24,7 @@ paths:
     get:
       operationId: getStarterCatalog
       summary: 스타팅 배츄 네 종류와 공통 시작 능력치 조회
-      tags: [monsters]
+      tags: [ monsters ]
       security: []
       responses:
         "200":
@@ -38,10 +38,9 @@ paths:
       operationId: previewStarter
       summary: 종류와 이름을 검증하고 알의 시작 상태 미리보기
       description: >
-        상태를 변경하지 않는 공개 미리보기입니다. 계정, 배츄, 지갑 또는 코인을
-        생성하지 않으며 Idempotency-Key를 요구하지 않습니다.
-        실제 스타팅 선택은 가입 활성화와 커플 연결 이후 별도 API로 구현합니다.
-      tags: [monsters]
+        상태를 변경하지 않는 공개 미리보기입니다. 계정, 배츄, 지갑 또는 코인을 생성하지 않으며 Idempotency-Key를 요구하지 않습니다. 실제 스타팅 선택은 가입 활성화와 커플
+        연결 이후 별도 API로 구현합니다.
+      tags: [ monsters ]
       security: []
       requestBody:
         required: true
@@ -65,12 +64,482 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/StarterSelectionProblem"
+  /auth/providers:
+    get:
+      operationId: getAuthProviders
+      security: []
+      responses:
+        "200":
+          description: Configured login providers and registration readiness
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthProviders"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /auth/login/start:
+    post:
+      operationId: startLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginStartRequest"
+      responses:
+        "200":
+          description: One-use attempt; retain loginSecret locally and open authorizationUrl
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginStart"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "503":
+          $ref: "#/components/responses/AuthUnavailable"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /auth/oauth/google/callback:
+    get:
+      operationId: googleOAuthCallback
+      security: []
+      description: Server-only Google OAuth redirect. The allowlisted app receives loginId and status SUCCESS or
+        FAILED. Only SUCCESS also carries a one-use handoffCode valid for at most 120 seconds. No access
+        token, refresh token, or loginSecret is redirected. The app removes callback credentials from the URL
+        immediately and supplies both local loginSecret and callback handoffCode to complete login.
+      parameters:
+        - in: query
+          name: state
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: code
+          schema:
+            type: string
+        - in: query
+          name: error
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Return to the allowlisted app callback
+          headers:
+            Location:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /auth/login:
+    post:
+      operationId: completeLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Atomically verify both the local loginSecret and callback-only handoffCode, consume a verified
+            attempt, and issue revocable tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "409":
+          $ref: "#/components/responses/AuthConflict"
+        "503":
+          $ref: "#/components/responses/AuthUnavailable"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /auth/refresh:
+    post:
+      operationId: refreshSession
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: Rotate the refresh token; the previous refresh token becomes unusable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "503":
+          $ref: "#/components/responses/AuthUnavailable"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /auth/logout:
+    post:
+      operationId: logoutSession
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Current session revoked immediately
+          including its access and refresh tokens: null
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current account and current policy consent status; available to limited onboarding sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /policy-versions/current:
+    get:
+      operationId: getCurrentPolicyVersions
+      security: []
+      parameters:
+        - in: query
+          name: locale
+          schema:
+            type: string
+            default: ko-KR
+            enum:
+              - ko-KR
+      responses:
+        "200":
+          description: Ready only when current effective approved TERMS and PRIVACY documents exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentPolicies"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /onboarding/age-eligibility:
+    post:
+      operationId: confirmAgeEligibility
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgeEligibilityRequest"
+      responses:
+        "200":
+          description: Age confirmed; account activates only if all current required policies are accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "204":
+          description: Age rejected or declined; pending user and every limited session deleted immediately
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "409":
+          $ref: "#/components/responses/AuthConflict"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /consents/{policyType}:
+    put:
+      operationId: acceptPolicy
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: policyType
+          required: true
+          schema:
+            $ref: "#/components/schemas/PolicyType"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsentRequest"
+      responses:
+        "200":
+          description: Idempotent acceptance of the current effective policy version; may activate the account and grant
+            signup coins once
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "409":
+          $ref: "#/components/responses/AuthConflict"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - onboarding
+  /couples/me:
+    get:
+      operationId: getMyCouple
+      responses:
+        "200":
+          description: Current accessible relationship and pending invitation; both null when unconnected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoupleState"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/invites:
+    post:
+      operationId: createCoupleInvite
+      parameters:
+        - $ref: "#/components/parameters/CoupleIdempotencyKey"
+      description: A fresh key rotates the existing invitation. A repeated key returns the original metadata with
+        code null, even after expiry or rotation; the raw code is never stored or shown again.
+      responses:
+        "200":
+          description: New invitation or idempotent metadata replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedCoupleInvite"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/invites/{inviteId}:
+    delete:
+      operationId: revokeCoupleInvite
+      parameters:
+        - $ref: "#/components/parameters/CoupleInviteId"
+      responses:
+        "204":
+          description: Revoked; repeat revocation is safe.
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/invites/preview:
+    post:
+      operationId: previewCoupleInvite
+      requestBody:
+        $ref: "#/components/requestBodies/CoupleCode"
+      responses:
+        "200":
+          description: Only the inviter nickname/profile image; no wallet or other private data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoupleInvitePreview"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/join:
+    post:
+      operationId: joinCoupleInvite
+      requestBody:
+        $ref: "#/components/requestBodies/CoupleCode"
+      responses:
+        "200":
+          description: Reserves this user as the invitee; does not connect until both users confirm. Repeating this
+            claim returns the same pending state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PendingCoupleInvite"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/pending/{inviteId}/confirm:
+    post:
+      operationId: confirmCoupleInvite
+      parameters:
+        - $ref: "#/components/parameters/CoupleInviteId"
+      responses:
+        "200":
+          description: This user's confirmation or an idempotent replay; the second confirmation connects atomically.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoupleState"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/pending/{inviteId}/reject:
+    post:
+      operationId: rejectCoupleInvite
+      parameters:
+        - $ref: "#/components/parameters/CoupleInviteId"
+      responses:
+        "204":
+          description: Rejected and both slots released; repeats are safe.
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/me/end:
+    post:
+      operationId: endMyCouple
+      parameters:
+        - $ref: "#/components/parameters/CoupleIdempotencyKey"
+      responses:
+        "200":
+          description: Unilateral immediate relationship end. Current increment has no quest/resources to settle.
+            Replays never end a later relationship.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoupleEndResult"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /couples/me/block:
+    post:
+      operationId: blockMyPartner
+      parameters:
+        - $ref: "#/components/parameters/CoupleIdempotencyKey"
+      responses:
+        "200":
+          description: Immediately ends and blocks the current partner; no arbitrary target ID. Replays never block a
+            later partner.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoupleEndResult"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
 components:
   schemas:
     SystemHealth:
       type: object
       additionalProperties: false
-      required: [status, service]
+      required: [ status, service ]
       properties:
         status:
           type: string
@@ -80,11 +549,11 @@ components:
           const: betchu-backend
     StarterSpecies:
       type: string
-      enum: [STARLIGHT, WAVE, SUNSET, FOREST]
+      enum: [ STARLIGHT, WAVE, SUNSET, FOREST ]
     Starter:
       type: object
       additionalProperties: false
-      required: [species, displayName, description]
+      required: [ species, displayName, description ]
       properties:
         species:
           $ref: "#/components/schemas/StarterSpecies"
@@ -95,7 +564,7 @@ components:
     InitialStats:
       type: object
       additionalProperties: false
-      required: [level, hp, atk, power, exp, nextLevelRequiredExp]
+      required: [ level, hp, atk, power, exp, nextLevelRequiredExp ]
       properties:
         level:
           type: integer
@@ -118,7 +587,7 @@ components:
     NameRules:
       type: object
       additionalProperties: false
-      required: [minLength, maxLength]
+      required: [ minLength, maxLength ]
       properties:
         minLength:
           type: integer
@@ -129,18 +598,17 @@ components:
     GrowthMilestone:
       type: object
       additionalProperties: false
-      required: [type, requiredSuccessCount, description]
+      required: [ type, requiredSuccessCount, description ]
       properties:
         type:
           type: string
-          enum: [HATCH, INTERMEDIATE, FINAL, MASTERY, SUCCESS_80]
+          enum: [ HATCH, INTERMEDIATE, FINAL, MASTERY, SUCCESS_80 ]
         requiredSuccessCount:
           type: integer
-          enum: [1, 20, 40, 60, 80]
+          enum: [ 1, 20, 40, 60, 80 ]
           description: >
-            일반 개인 퀘스트 인정 성공 수 기준입니다. HATCH는 튜토리얼 성공으로도
-            가능하며 이 경우 인정 성공 수는 0을 유지합니다. 80회는 MVP 자격 기록이며
-            새 알 선택은 P2입니다. 성장은 파트너 최종 승인과 서버 정산 커밋 후 반영됩니다.
+            일반 개인 퀘스트 인정 성공 수 기준입니다. HATCH는 튜토리얼 성공으로도 가능하며 이 경우 인정 성공 수는 0을 유지합니다. 80회는 MVP 자격 기록이며 새 알 선택은
+            P2입니다. 성장은 파트너 최종 승인과 서버 정산 커밋 후 반영됩니다.
         description:
           type: string
     GrowthMilestones:
@@ -152,7 +620,7 @@ components:
     StarterCatalog:
       type: object
       additionalProperties: false
-      required: [starters, initialStats, nameRules, growthMilestones]
+      required: [ starters, initialStats, nameRules, growthMilestones ]
       properties:
         starters:
           type: array
@@ -169,20 +637,19 @@ components:
     StarterPreviewRequest:
       type: object
       additionalProperties: false
-      required: [species, name]
+      required: [ species, name ]
       properties:
         species:
           $ref: "#/components/schemas/StarterSpecies"
         name:
           type: string
           description: >
-            NFC 정규화 후 양끝 Unicode White_Space를 제거합니다. 이후 Unicode code point
-            1~10개여야 하며 Cc/Cf 제어·서식 문자와 내부 줄바꿈(U+2028, U+2029 포함)은
-            거절합니다. UTF-16 code unit 수가 아닙니다. 원문을 로그나 오류에 반영하지 않습니다.
+            NFC 정규화 후 양끝 Unicode White_Space를 제거합니다. 이후 Unicode code point 1~10개여야 하며 Cc/Cf 제어·서식 문자와 내부
+            줄바꿈(U+2028, U+2029 포함)은 거절합니다. UTF-16 code unit 수가 아닙니다. 원문을 로그나 오류에 반영하지 않습니다.
     StarterPreview:
       type: object
       additionalProperties: false
-      required: [previewOnly, starter, name, stage, recognizedSuccessCount, stats, growthMilestones]
+      required: [ previewOnly, starter, name, stage, recognizedSuccessCount, stats, growthMilestones ]
       properties:
         previewOnly:
           type: boolean
@@ -206,7 +673,7 @@ components:
           $ref: "#/components/schemas/GrowthMilestones"
     StarterSelectionProblem:
       type: object
-      required: [type, title, status, detail, errorCode]
+      required: [ type, title, status, detail, errorCode ]
       properties:
         type:
           type: string
@@ -221,3 +688,436 @@ components:
         errorCode:
           type: string
           const: INVALID_STARTER_SELECTION
+    ApiProblem:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - errorCode
+      properties:
+        type:
+          type: string
+          const: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        errorCode:
+          type: string
+    AuthProviders:
+      type: object
+      required:
+        - providers
+        - registrationAvailable
+      properties:
+        providers:
+          type: array
+          items:
+            type: object
+            required:
+              - provider
+              - displayName
+              - enabled
+            properties:
+              provider:
+                type: string
+                const: GOOGLE
+              displayName:
+                type: string
+              enabled:
+                type: boolean
+        registrationAvailable:
+          type: boolean
+    LoginStartRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - provider
+        - redirectUri
+      properties:
+        provider:
+          type: string
+          const: GOOGLE
+        redirectUri:
+          type: string
+          maxLength: 1000
+    LoginStart:
+      type: object
+      required:
+        - loginId
+        - loginSecret
+        - authorizationUrl
+        - expiresAt
+      properties:
+        loginId:
+          type: string
+          format: uuid
+        loginSecret:
+          type: string
+        authorizationUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - loginId
+        - loginSecret
+        - handoffCode
+      properties:
+        loginId:
+          type: string
+          format: uuid
+        loginSecret:
+          type: string
+          minLength: 1
+          maxLength: 128
+        handoffCode:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: One-use callback proof; valid for at most 120 seconds and stored only as a hash on the server
+    RefreshRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+          maxLength: 128
+    AuthTokens:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - user
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          const: 300
+        user:
+          $ref: "#/components/schemas/UserMe"
+    UserMe:
+      type: object
+      required:
+        - id
+        - nickname
+        - status
+        - ageEligible
+        - requiredPolicyVersionIds
+        - missingPolicyVersionIds
+        - evidenceConsent
+        - availableCoins
+        - lockedCoins
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+          minLength: 1
+          maxLength: 30
+        status:
+          type: string
+          enum:
+            - PENDING_ELIGIBILITY
+            - ACTIVE
+            - DELETION_PENDING
+            - DELETED
+        ageEligible:
+          type: boolean
+        requiredPolicyVersionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        missingPolicyVersionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        evidenceConsent:
+          type: boolean
+        availableCoins:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+        lockedCoins:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+    PolicyType:
+      type: string
+      enum:
+        - TERMS
+        - PRIVACY
+        - EVIDENCE_OPTIONAL
+    PolicyVersion:
+      type: object
+      required:
+        - id
+        - policyType
+        - version
+        - locale
+        - required
+        - documentUrl
+        - effectiveAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        policyType:
+          $ref: "#/components/schemas/PolicyType"
+        version:
+          type: string
+        locale:
+          type: string
+          const: ko-KR
+        required:
+          type: boolean
+        documentUrl:
+          type: string
+          format: uri
+        effectiveAt:
+          type: string
+          format: date-time
+    CurrentPolicies:
+      type: object
+      required:
+        - ready
+        - policies
+      properties:
+        ready:
+          type: boolean
+        policies:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyVersion"
+    AgeEligibilityRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - eligible
+      properties:
+        eligible:
+          type:
+            - boolean
+            - "null"
+    ConsentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - policyVersionId
+        - locale
+      properties:
+        policyVersionId:
+          type: string
+          format: uuid
+        locale:
+          type: string
+          const: ko-KR
+    CouplePublicProfile:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nickname
+        - profileImage
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+        profileImage:
+          type:
+            - string
+            - "null"
+    CurrentCouple:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - connectedAt
+        - partner
+      properties:
+        id:
+          type: string
+          format: uuid
+        connectedAt:
+          type: string
+          format: date-time
+        partner:
+          $ref: "#/components/schemas/CouplePublicProfile"
+    PendingCoupleInvite:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - role
+        - expiresAt
+        - partner
+        - myConfirmed
+        - partnerConfirmed
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PENDING_CONFIRMATION
+        role:
+          type: string
+          enum:
+            - INVITER
+            - INVITEE
+        expiresAt:
+          type: string
+          format: date-time
+        partner:
+          oneOf:
+            - $ref: "#/components/schemas/CouplePublicProfile"
+            - type: "null"
+        myConfirmed:
+          type: boolean
+        partnerConfirmed:
+          type: boolean
+    CoupleState:
+      type: object
+      additionalProperties: false
+      required:
+        - couple
+        - pendingInvite
+      properties:
+        couple:
+          oneOf:
+            - $ref: "#/components/schemas/CurrentCouple"
+            - type: "null"
+        pendingInvite:
+          oneOf:
+            - $ref: "#/components/schemas/PendingCoupleInvite"
+            - type: "null"
+    CreatedCoupleInvite:
+      type: object
+      additionalProperties: false
+      required:
+        - inviteId
+        - code
+        - expiresAt
+      properties:
+        inviteId:
+          type: string
+          format: uuid
+        code:
+          type:
+            - string
+            - "null"
+          description: 16 random characters in four hyphen-separated groups; null on replay.
+        expiresAt:
+          type: string
+          format: date-time
+    CoupleInvitePreview:
+      type: object
+      additionalProperties: false
+      required:
+        - inviteId
+        - inviter
+        - expiresAt
+      properties:
+        inviteId:
+          type: string
+          format: uuid
+        inviter:
+          $ref: "#/components/schemas/CouplePublicProfile"
+        expiresAt:
+          type: string
+          format: date-time
+    CoupleEndResult:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          const: COMPLETED
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    AuthBadRequest:
+      description: Invalid request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    AuthUnauthorized:
+      description: Invalid, expired, consumed or revoked credentials
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    AuthConflict:
+      description: Login pending, obsolete policy version, or account state conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    AuthUnavailable:
+      description: Required external authentication settings are unavailable
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+  parameters:
+    CoupleIdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CoupleInviteId:
+      name: inviteId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBodies:
+    CoupleCode:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - code
+            properties:
+              code:
+                type: string
+                maxLength: 64
+security:
+  - BearerAuth: []

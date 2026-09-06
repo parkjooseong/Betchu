@@ -1,6 +1,8 @@
 package com.betchu.backend.starter;
 
 import com.betchu.backend.starter.StarterModels.SelectionProblem;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice(assignableTypes = StarterController.class)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class StarterExceptionHandler {
 
   @ExceptionHandler({InvalidStarterSelectionException.class, HttpMessageNotReadableException.class})
