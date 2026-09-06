@@ -295,7 +295,7 @@ public class CoupleService {
             UUID jobId = UUID.randomUUID();
             int targets =
                 jdbc.queryForObject(
-                    "SELECT count(*) FROM quests WHERE couple_id=? AND status='DRAFT'",
+                    "SELECT count(*) FROM quests WHERE couple_id=? AND (status='DRAFT' OR (quest_type='TUTORIAL' AND status IN ('PENDING_APPROVAL','ACTIVE','AWAITING_RESULT','PENDING_FINAL_APPROVAL')))",
                     Integer.class,
                     coupleId);
             jdbc.update(
@@ -315,7 +315,8 @@ public class CoupleService {
             jdbc.update(
                 """
                 INSERT INTO relationship_end_job_items(relationship_end_job_id,resource_type,resource_id,status)
-                SELECT ?,'QUEST',id,'PENDING' FROM quests WHERE couple_id=? AND status='DRAFT'
+                SELECT ?,'QUEST',id,'PENDING' FROM quests WHERE couple_id=?
+                  AND (status='DRAFT' OR (quest_type='TUTORIAL' AND status IN ('PENDING_APPROVAL','ACTIVE','AWAITING_RESULT','PENDING_FINAL_APPROVAL')))
                 """,
                 jobId,
                 coupleId);

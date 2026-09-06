@@ -13,7 +13,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @SpringBootTest(
     properties = {
       "betchu.couples.cleanup-delay-ms=3600000",
-      "betchu.couples.retention-delay-ms=3600000"
+      "betchu.couples.retention-delay-ms=3600000",
+      "betchu.tutorial.maintenance-delay-ms=3600000"
     })
 @ExtendWith(PostgresIntegrationTestSupport.PostgresAvailable.class)
 public abstract class PostgresIntegrationTestSupport {

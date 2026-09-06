@@ -108,6 +108,8 @@ public class SecurityConfig {
     source.registerCorsConfiguration(
         "/api/v1/quests/**", cors(origins, List.of("GET", "POST", "PATCH", "DELETE")));
     source.registerCorsConfiguration("/api/v1/quests", cors(origins, List.of("GET", "POST")));
+    source.registerCorsConfiguration("/api/v1/tutorials", cors(origins, List.of("GET", "POST")));
+    source.registerCorsConfiguration("/api/v1/tutorials/**", cors(origins, List.of("GET", "POST")));
     source.registerCorsConfiguration("/api/v1/monsters/starter", cors(origins, List.of("POST")));
     source.registerCorsConfiguration("/api/v1/monsters/me", cors(origins, List.of("GET")));
     source.registerCorsConfiguration("/api/v1/monsters/partner", cors(origins, List.of("GET")));

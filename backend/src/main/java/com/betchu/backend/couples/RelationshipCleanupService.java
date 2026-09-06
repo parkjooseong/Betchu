@@ -1,6 +1,7 @@
 package com.betchu.backend.couples;
 
 import com.betchu.backend.common.GameAccess;
+import com.betchu.backend.tutorial.TutorialSettlementService;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -18,12 +19,17 @@ public class RelationshipCleanupService {
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transactions;
   private final GameAccess access;
+  private final TutorialSettlementService tutorials;
 
   public RelationshipCleanupService(
-      JdbcTemplate jdbc, PlatformTransactionManager manager, GameAccess access) {
+      JdbcTemplate jdbc,
+      PlatformTransactionManager manager,
+      GameAccess access,
+      TutorialSettlementService tutorials) {
     this.jdbc = jdbc;
     this.transactions = new TransactionTemplate(manager);
     this.access = access;
+    this.tutorials = tutorials;
   }
 
   @Scheduled(
@@ -73,18 +79,38 @@ public class RelationshipCleanupService {
                   jobId,
                   questId);
           if (items.isEmpty() || "COMPLETED".equals(items.getFirst())) return;
-          List<String> statuses =
-              jdbc.queryForList(
-                  "SELECT status FROM quests WHERE id=? AND couple_id=? FOR UPDATE",
-                  String.class,
+          var statuses =
+              jdbc.query(
+                  """
+              SELECT q.status,q.quest_type,q.stake_locked_at,v.due_at,c.ended_at
+              FROM quests q JOIN couples c ON c.id=q.couple_id
+              LEFT JOIN quest_versions v ON v.id=COALESCE(q.approved_quest_version_id,q.current_quest_version_id)
+              WHERE q.id=? AND q.couple_id=? FOR UPDATE OF q
+              """,
+                  (row, index) ->
+                      new CleanupQuest(
+                          row.getString("status"),
+                          row.getString("quest_type"),
+                          row.getTimestamp("stake_locked_at") != null,
+                          row.getTimestamp("due_at"),
+                          row.getTimestamp("ended_at")),
                   questId,
                   couple);
           if (statuses.isEmpty()) throw new IllegalStateException("Cleanup resource is missing");
-          if ("DRAFT".equals(statuses.getFirst())) {
+          CleanupQuest quest = statuses.getFirst();
+          if ("TUTORIAL".equals(quest.type())) {
+            if (quest.dueAt() == null || quest.endedAt() == null)
+              throw new IllegalStateException("Tutorial cleanup requires its original dates");
+            boolean beforeDue = !quest.locked() || quest.endedAt().before(quest.dueAt());
+            tutorials.settle(
+                questId,
+                beforeDue ? "CANCELED_RELATIONSHIP_ENDED" : "INVALID",
+                beforeDue ? null : "RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL");
+          } else if ("DRAFT".equals(quest.status())) {
             jdbc.update(
                 "UPDATE quests SET status='CANCELED_RELATIONSHIP_ENDED',canceled_reason='RELATIONSHIP_ENDED',row_version=row_version+1 WHERE id=?",
                 questId);
-          } else if (!"CANCELED_RELATIONSHIP_ENDED".equals(statuses.getFirst())) {
+          } else if (!"CANCELED_RELATIONSHIP_ENDED".equals(quest.status())) {
             throw new IllegalStateException("Cleanup resource is not cancelable");
           }
           Timestamp now = jdbc.queryForObject("SELECT clock_timestamp()", Timestamp.class);
@@ -154,5 +180,33 @@ public class RelationshipCleanupService {
                 couple);
           });
     }
+    purgeExpiredTutorialResponses();
   }
+
+  private void purgeExpiredTutorialResponses() {
+    List<UUID> couples =
+        jdbc.queryForList(
+            """
+        SELECT DISTINCT q.couple_id FROM quests q JOIN tutorial_request_receipts r ON r.quest_id=q.id
+        JOIN couples c ON c.id=q.couple_id WHERE c.status='ENDED'
+          AND c.ended_at<=clock_timestamp()-interval '30 days' AND r.response_json IS NOT NULL LIMIT 50
+        """,
+            UUID.class);
+    for (UUID couple : couples) {
+      transactions.executeWithoutResult(
+          tx -> {
+            access.lockRelationship(couple);
+            jdbc.update(
+                """
+            UPDATE tutorial_request_receipts r SET response_json=NULL FROM quests q,couples c
+            WHERE r.quest_id=q.id AND q.couple_id=c.id AND c.id=? AND c.status='ENDED'
+              AND c.ended_at<=clock_timestamp()-interval '30 days'
+            """,
+                couple);
+          });
+    }
+  }
+
+  private record CleanupQuest(
+      String status, String type, boolean locked, Timestamp dueAt, Timestamp endedAt) {}
 }

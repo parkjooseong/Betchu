@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: BETCHU API
-  version: 0.4.0
-  description: BETCHU 계정·커플 연결, 배츄 영구 등록과 홈, 작성자 전용 퀘스트 초안 계약
+  version: 0.5.0
+  description: BETCHU 계정·커플 연결, 배츄와 홈, 개인 초안, 일회 튜토리얼 승인·정산 계약
 servers:
   - url: http://localhost:8080/api/v1
     description: Local development
@@ -856,6 +856,727 @@ paths:
                 $ref: "#/components/schemas/ApiProblem"
       tags:
         - couples
+  /tutorials:
+    get:
+      operationId: getTutorials
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialOverview"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+    post:
+      operationId: createTutorial
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialCreateRequest"
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}:
+    get:
+      operationId: getTutorial
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/approve:
+    post:
+      operationId: approveTutorial
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialApprovalRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/reject:
+    post:
+      operationId: rejectTutorial
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialRejectRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/select-result:
+    post:
+      operationId: selectTutorialResult
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialResultRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/final-approve:
+    post:
+      operationId: finalApproveTutorial
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialResultRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/reject-result:
+    post:
+      operationId: rejectTutorialResult
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialVersionRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/cancel:
+    post:
+      operationId: requestTutorialCancellation
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialVersionRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/confirm-cancel:
+    post:
+      operationId: confirmTutorialCancellation
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialVersionRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /tutorials/{questId}/reject-cancel:
+    post:
+      operationId: rejectTutorialCancellation
+      tags:
+        - Tutorials
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialVersionRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorialView"
+        "400":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "403":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: 요청·권한·현재 버전·기한을 확인해 주세요.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
 components:
   schemas:
     SystemHealth:
@@ -1778,6 +2499,411 @@ components:
             - string
             - "null"
           format: date-time
+    TutorialTemplate:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - category
+        - successCriteria
+        - difficulty
+        - stake
+        - reward
+        - xp
+        - minimumDurationMinutes
+        - evidenceMethod
+      properties:
+        title:
+          const: 자기 전에 물 한 잔 더 마시기
+        category:
+          const: EATING
+        successCriteria:
+          const: 자기 전에 물 한 잔을 더 마셔요.
+        difficulty:
+          const: 1
+        stake:
+          const: 100
+        reward:
+          const: 100
+        xp:
+          const: 10
+        minimumDurationMinutes:
+          const: 0
+        evidenceMethod:
+          const: NONE
+    TutorialTerms:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - category
+        - successCriteria
+        - difficulty
+        - stake
+        - reward
+        - xp
+        - minimumDurationMinutes
+        - evidenceMethod
+        - dueAt
+        - resultAt
+        - approvalDeadlineAt
+        - resultConfirmationDeadlineAt
+      properties:
+        title:
+          const: 자기 전에 물 한 잔 더 마시기
+        category:
+          const: EATING
+        successCriteria:
+          const: 자기 전에 물 한 잔을 더 마셔요.
+        difficulty:
+          const: 1
+        stake:
+          const: 100
+        reward:
+          const: 100
+        xp:
+          const: 10
+        minimumDurationMinutes:
+          const: 0
+        evidenceMethod:
+          const: NONE
+        dueAt:
+          type: string
+          format: date-time
+        resultAt:
+          type: string
+          format: date-time
+        approvalDeadlineAt:
+          type: string
+          format: date-time
+        resultConfirmationDeadlineAt:
+          type: string
+          format: date-time
+    TutorialCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - dueAt
+        - resultAt
+      properties:
+        dueAt:
+          type: string
+          format: date-time
+        resultAt:
+          type: string
+          format: date-time
+    TutorialApprovalRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questVersionId
+        - expectedRowVersion
+        - predictedResult
+      properties:
+        questVersionId:
+          type: string
+          format: uuid
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        predictedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+    TutorialRejectRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questVersionId
+        - expectedRowVersion
+      properties:
+        questVersionId:
+          type: string
+          format: uuid
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+    TutorialVersionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedRowVersion
+      properties:
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+    TutorialResultRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedRowVersion
+        - selectedResult
+      properties:
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        selectedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+    TutorialPartnerSelection:
+      type: object
+      additionalProperties: false
+      required:
+        - selectedResult
+        - selectionRevision
+        - selectedAt
+      properties:
+        selectedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+        selectionRevision:
+          type: integer
+          minimum: 1
+        selectedAt:
+          type: string
+          format: date-time
+    TutorialCancelRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - requestedBy
+        - status
+        - requestedAt
+        - respondedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        requestedBy:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - PENDING
+            - CONFIRMED
+            - REJECTED
+            - EXPIRED
+        requestedAt:
+          type: string
+          format: date-time
+        respondedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+    TutorialSettlement:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - resolvedResult
+        - invalidReason
+        - stake
+        - reward
+        - xp
+        - creditedMonsterId
+        - recognizedSuccessBefore
+        - recognizedSuccessAfter
+        - growthStageBefore
+        - growthStageAfter
+        - settledAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        resolvedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+            - INVALID
+            - CANCELED
+            - CANCELED_RELATIONSHIP_ENDED
+        invalidReason:
+          anyOf:
+            - type: string
+            - type: "null"
+        stake:
+          type: integer
+          minimum: 0
+        reward:
+          type: integer
+          minimum: 0
+        xp:
+          type: integer
+          minimum: 0
+        creditedMonsterId:
+          anyOf:
+            - type: string
+              format: uuid
+            - type: "null"
+        recognizedSuccessBefore:
+          anyOf:
+            - type: integer
+              minimum: 0
+            - type: "null"
+        recognizedSuccessAfter:
+          anyOf:
+            - type: integer
+              minimum: 0
+            - type: "null"
+        growthStageBefore:
+          anyOf:
+            - type: string
+            - type: "null"
+        growthStageAfter:
+          anyOf:
+            - type: string
+            - type: "null"
+        settledAt:
+          type: string
+          format: date-time
+    TutorialView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - coupleId
+        - creatorId
+        - viewerRole
+        - status
+        - rowVersion
+        - questVersionId
+        - approvedQuestVersionId
+        - predictedResult
+        - terms
+        - allowedActions
+        - cancelRequest
+        - settlement
+        - serverTime
+      properties:
+        id:
+          type: string
+          format: uuid
+        coupleId:
+          type: string
+          format: uuid
+        creatorId:
+          type: string
+          format: uuid
+        viewerRole:
+          type: string
+          enum:
+            - CREATOR
+            - PARTNER
+        status:
+          type: string
+          enum:
+            - PENDING_APPROVAL
+            - ACTIVE
+            - AWAITING_RESULT
+            - PENDING_FINAL_APPROVAL
+            - SUCCESS
+            - FAILURE
+            - INVALID
+            - REJECTED
+            - APPROVAL_EXPIRED
+            - CANCELED
+            - CANCELED_RELATIONSHIP_ENDED
+        rowVersion:
+          type: integer
+          minimum: 0
+        questVersionId:
+          type: string
+          format: uuid
+        approvedQuestVersionId:
+          anyOf:
+            - type: string
+              format: uuid
+            - type: "null"
+        predictedResult:
+          anyOf:
+            - type: string
+              enum:
+                - SUCCESS
+                - FAILURE
+            - type: "null"
+        terms:
+          $ref: "#/components/schemas/TutorialTerms"
+        allowedActions:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - APPROVE
+              - REJECT
+              - SELECT_RESULT
+              - FINAL_APPROVE
+              - REJECT_RESULT
+              - CANCEL
+              - CONFIRM_CANCEL
+              - REJECT_CANCEL
+        partnerSelection:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialPartnerSelection"
+            - type: "null"
+          description: PARTNER 역할에만 포함된다. CREATOR 응답에서는 선택값이 최종 확정되기 전·후 모두 이 속성을 생략한다.
+        cancelRequest:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialCancelRequest"
+            - type: "null"
+        settlement:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialSettlement"
+            - type: "null"
+        serverTime:
+          type: string
+          format: date-time
+      allOf:
+        - if:
+            properties:
+              viewerRole:
+                const: CREATOR
+            required:
+              - viewerRole
+          then:
+            not:
+              required:
+                - partnerSelection
+    TutorialOverview:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+        - completedAt
+        - template
+        - canStart
+        - own
+        - partner
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        completedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        template:
+          $ref: "#/components/schemas/TutorialTemplate"
+        canStart:
+          type: boolean
+        own:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialView"
+            - type: "null"
+        partner:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialView"
+            - type: "null"
   securitySchemes:
     BearerAuth:
       type: http
