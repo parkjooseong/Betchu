@@ -39,7 +39,7 @@ public class StarterService {
           new GrowthMilestone(INTERMEDIATE, 20, "인정 성공 20회에 중간 성장해요."),
           new GrowthMilestone(FINAL, 40, "인정 성공 40회에 최종 진화해요."),
           new GrowthMilestone(MASTERY, 60, "인정 성공 60회에 종별 오라·칭호·전투력 0 숙련 장신구를 받아요."),
-          new GrowthMilestone(SUCCESS_80, 80, "MVP에서는 80회 달성을 기록하고, 새 배츄 알 선택권은 후속 P2에서 제공해요."));
+          new GrowthMilestone(SUCCESS_80, 80, "인정 성공 80회 달성을 기록해요. 새 배츄 알 고르기는 추후 제공돼요."));
 
   public Catalogue catalogue() {
     return new Catalogue(STARTERS, INITIAL_STATS, NAME_RULES, GROWTH_MILESTONES);

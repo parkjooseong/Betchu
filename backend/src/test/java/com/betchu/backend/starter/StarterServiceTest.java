@@ -38,7 +38,7 @@ class StarterServiceTest {
         .extracting(GrowthMilestone::requiredSuccessCount)
         .containsExactly(1, 20, 40, 60, 80);
     assertThat(catalogue.growthMilestones().getFirst().description()).contains("튜토리얼");
-    assertThat(catalogue.growthMilestones().getLast().description()).contains("P2");
+    assertThat(catalogue.growthMilestones().getLast().description()).contains("추후 제공");
   }
 
   @ParameterizedTest
