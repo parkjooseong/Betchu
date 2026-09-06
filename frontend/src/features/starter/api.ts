@@ -58,13 +58,14 @@ async function withTimeout<T>(request: (signal: AbortSignal) => Promise<T>): Pro
   try {
     return await request(controller.signal);
   } catch (error) {
-    if (error instanceof SyntaxError) {
+    const name = error && typeof error === 'object' && 'name' in error ? error.name : undefined;
+    if (name === 'SyntaxError') {
       throw new Error(invalidResponseMessage);
     }
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (name === 'AbortError') {
       throw new Error('응답이 늦어지고 있어요. 연결을 확인한 뒤 다시 시도해 주세요.');
     }
-    if (error instanceof TypeError) {
+    if (name === 'TypeError') {
       throw new Error('서버에 연결할 수 없어요. 연결을 확인한 뒤 다시 시도해 주세요.');
     }
     throw error;

@@ -81,7 +81,7 @@ it('aborts slow requests so the user can retry', async () => {
   getMock.mockImplementation(
     (_path, options) =>
       new Promise((_resolve, reject) => {
-        options?.signal?.addEventListener('abort', () => {
+        (options as { signal?: AbortSignal } | undefined)?.signal?.addEventListener('abort', () => {
           const error = new Error('Aborted');
           error.name = 'AbortError';
           reject(error);

@@ -58,6 +58,312 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/auth/providers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getAuthProviders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/login/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['startLogin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/oauth/google/callback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Server-only Google OAuth redirect. The allowlisted app receives loginId and status SUCCESS or FAILED. Only SUCCESS also carries a one-use handoffCode valid for at most 120 seconds. No access token, refresh token, or loginSecret is redirected. The app removes callback credentials from the URL immediately and supplies both local loginSecret and callback handoffCode to complete login. */
+    get: operations['googleOAuthCallback'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['completeLogin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['refreshSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['logoutSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/users/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getCurrentUser'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/policy-versions/current': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getCurrentPolicyVersions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/onboarding/age-eligibility': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['confirmAgeEligibility'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/consents/{policyType}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['acceptPolicy'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getMyCouple'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/invites': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A fresh key rotates the existing invitation. A repeated key returns the original metadata with code null, even after expiry or rotation; the raw code is never stored or shown again. */
+    post: operations['createCoupleInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/invites/{inviteId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['revokeCoupleInvite'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/invites/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['previewCoupleInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/join': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['joinCoupleInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/pending/{inviteId}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['confirmCoupleInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/pending/{inviteId}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectCoupleInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/me/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['endMyCouple'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/me/block': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['blockMyPartner'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -140,10 +446,196 @@ export interface components {
       /** @constant */
       errorCode: 'INVALID_STARTER_SELECTION';
     };
+    ApiProblem: {
+      /** @constant */
+      type: 'about:blank';
+      title: string;
+      status: number;
+      detail: string;
+      errorCode: string;
+    };
+    AuthProviders: {
+      providers: {
+        /** @constant */
+        provider: 'GOOGLE';
+        displayName: string;
+        enabled: boolean;
+      }[];
+      registrationAvailable: boolean;
+    };
+    LoginStartRequest: {
+      /** @constant */
+      provider: 'GOOGLE';
+      redirectUri: string;
+    };
+    LoginStart: {
+      /** Format: uuid */
+      loginId: string;
+      loginSecret: string;
+      /** Format: uri */
+      authorizationUrl: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    LoginRequest: {
+      /** Format: uuid */
+      loginId: string;
+      loginSecret: string;
+      /** @description One-use callback proof; valid for at most 120 seconds and stored only as a hash on the server */
+      handoffCode: string;
+    };
+    RefreshRequest: {
+      refreshToken: string;
+    };
+    AuthTokens: {
+      accessToken: string;
+      refreshToken: string;
+      /** @constant */
+      expiresIn: 300;
+      user: components['schemas']['UserMe'];
+    };
+    UserMe: {
+      /** Format: uuid */
+      id: string;
+      nickname: string;
+      /** @enum {string} */
+      status: 'PENDING_ELIGIBILITY' | 'ACTIVE' | 'DELETION_PENDING' | 'DELETED';
+      ageEligible: boolean;
+      requiredPolicyVersionIds: string[];
+      missingPolicyVersionIds: string[];
+      evidenceConsent: boolean;
+      availableCoins: number | null;
+      lockedCoins: number | null;
+    };
+    /** @enum {string} */
+    PolicyType: 'TERMS' | 'PRIVACY' | 'EVIDENCE_OPTIONAL';
+    PolicyVersion: {
+      /** Format: uuid */
+      id: string;
+      policyType: components['schemas']['PolicyType'];
+      version: string;
+      /** @constant */
+      locale: 'ko-KR';
+      required: boolean;
+      /** Format: uri */
+      documentUrl: string;
+      /** Format: date-time */
+      effectiveAt: string;
+    };
+    CurrentPolicies: {
+      ready: boolean;
+      policies: components['schemas']['PolicyVersion'][];
+    };
+    AgeEligibilityRequest: {
+      eligible: boolean | null;
+    };
+    ConsentRequest: {
+      /** Format: uuid */
+      policyVersionId: string;
+      /** @constant */
+      locale: 'ko-KR';
+    };
+    CouplePublicProfile: {
+      /** Format: uuid */
+      id: string;
+      nickname: string;
+      profileImage: string | null;
+    };
+    CurrentCouple: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      connectedAt: string;
+      partner: components['schemas']['CouplePublicProfile'];
+    };
+    PendingCoupleInvite: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status: 'ACTIVE' | 'PENDING_CONFIRMATION';
+      /** @enum {string} */
+      role: 'INVITER' | 'INVITEE';
+      /** Format: date-time */
+      expiresAt: string;
+      partner: components['schemas']['CouplePublicProfile'] | null;
+      myConfirmed: boolean;
+      partnerConfirmed: boolean;
+    };
+    CoupleState: {
+      couple: components['schemas']['CurrentCouple'] | null;
+      pendingInvite: components['schemas']['PendingCoupleInvite'] | null;
+    };
+    CreatedCoupleInvite: {
+      /** Format: uuid */
+      inviteId: string;
+      /** @description 16 random characters in four hyphen-separated groups; null on replay. */
+      code: string | null;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    CoupleInvitePreview: {
+      /** Format: uuid */
+      inviteId: string;
+      inviter: components['schemas']['CouplePublicProfile'];
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    CoupleEndResult: {
+      /** @constant */
+      status: 'COMPLETED';
+    };
   };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
+  responses: {
+    /** @description Invalid request */
+    AuthBadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description Invalid, expired, consumed or revoked credentials */
+    AuthUnauthorized: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description Login pending, obsolete policy version, or account state conflict */
+    AuthConflict: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description Required external authentication settings are unavailable */
+    AuthUnavailable: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+  };
+  parameters: {
+    CoupleIdempotencyKey: string;
+    CoupleInviteId: string;
+  };
+  requestBodies: {
+    CoupleCode: {
+      content: {
+        'application/json': {
+          code: string;
+        };
+      };
+    };
+  };
   headers: never;
   pathItems: never;
 }
@@ -224,6 +716,616 @@ export interface operations {
         };
         content: {
           'application/problem+json': components['schemas']['StarterSelectionProblem'];
+        };
+      };
+    };
+  };
+  getAuthProviders: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Configured login providers and registration readiness */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthProviders'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  startLogin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginStartRequest'];
+      };
+    };
+    responses: {
+      /** @description One-use attempt; retain loginSecret locally and open authorizationUrl */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LoginStart'];
+        };
+      };
+      400: components['responses']['AuthBadRequest'];
+      503: components['responses']['AuthUnavailable'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  googleOAuthCallback: {
+    parameters: {
+      query: {
+        state: string;
+        code?: string;
+        error?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Return to the allowlisted app callback */
+      302: {
+        headers: {
+          Location?: string;
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['AuthBadRequest'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  completeLogin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginRequest'];
+      };
+    };
+    responses: {
+      /** @description Atomically verify both the local loginSecret and callback-only handoffCode, consume a verified attempt, and issue revocable tokens */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthTokens'];
+        };
+      };
+      400: components['responses']['AuthBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      409: components['responses']['AuthConflict'];
+      503: components['responses']['AuthUnavailable'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  refreshSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RefreshRequest'];
+      };
+    };
+    responses: {
+      /** @description Rotate the refresh token; the previous refresh token becomes unusable */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuthTokens'];
+        };
+      };
+      400: components['responses']['AuthBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      503: components['responses']['AuthUnavailable'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  logoutSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current session revoked immediately */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: components['responses']['AuthUnauthorized'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getCurrentUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current account and current policy consent status; available to limited onboarding sessions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserMe'];
+        };
+      };
+      401: components['responses']['AuthUnauthorized'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getCurrentPolicyVersions: {
+    parameters: {
+      query?: {
+        locale?: 'ko-KR';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Ready only when current effective approved TERMS and PRIVACY documents exist */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurrentPolicies'];
+        };
+      };
+      400: components['responses']['AuthBadRequest'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  confirmAgeEligibility: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AgeEligibilityRequest'];
+      };
+    };
+    responses: {
+      /** @description Age confirmed; account activates only if all current required policies are accepted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserMe'];
+        };
+      };
+      /** @description Age rejected or declined; pending user and every limited session deleted immediately */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['AuthBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      409: components['responses']['AuthConflict'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  acceptPolicy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        policyType: components['schemas']['PolicyType'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConsentRequest'];
+      };
+    };
+    responses: {
+      /** @description Idempotent acceptance of the current effective policy version; may activate the account and grant signup coins once */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserMe'];
+        };
+      };
+      400: components['responses']['AuthBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      409: components['responses']['AuthConflict'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getMyCouple: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current accessible relationship and pending invitation; both null when unconnected. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoupleState'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  createCoupleInvite: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['CoupleIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description New invitation or idempotent metadata replay. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreatedCoupleInvite'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  revokeCoupleInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        inviteId: components['parameters']['CoupleInviteId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Revoked; repeat revocation is safe. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  previewCoupleInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: components['requestBodies']['CoupleCode'];
+    responses: {
+      /** @description Only the inviter nickname/profile image; no wallet or other private data. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoupleInvitePreview'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  joinCoupleInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: components['requestBodies']['CoupleCode'];
+    responses: {
+      /** @description Reserves this user as the invitee; does not connect until both users confirm. Repeating this claim returns the same pending state. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PendingCoupleInvite'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  confirmCoupleInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        inviteId: components['parameters']['CoupleInviteId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description This user's confirmation or an idempotent replay; the second confirmation connects atomically. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoupleState'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectCoupleInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        inviteId: components['parameters']['CoupleInviteId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Rejected and both slots released; repeats are safe. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  endMyCouple: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['CoupleIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Unilateral immediate relationship end. Current increment has no quest/resources to settle. Replays never end a later relationship. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoupleEndResult'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  blockMyPartner: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['CoupleIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Immediately ends and blocks the current partner; no arbitrary target ID. Replays never block a later partner. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoupleEndResult'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
         };
       };
     };
