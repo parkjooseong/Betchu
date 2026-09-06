@@ -11,7 +11,7 @@
 </div>
 
 > [!NOTE]
-> BETCHU는 현재 **MVP 개발 환경 구축과 기능 구현 시작 단계**입니다. `frontend`에는 Expo 모바일 앱, `backend`에는 Spring Boot API scaffold가 있으며 실제 서비스 기능은 아직 구현 전입니다. 이 README는 현재 확정된 MVP 규칙을 요약하고 [서비스 기획안 v0.1](./docs/betchu기획안.md)의 세부 계약을 기준으로 구현합니다.
+> BETCHU는 현재 **MVP 기능 구현 시작 단계**입니다. 첫 작업은 스타팅 배츄 4종 조회·종류와 이름 선택·시작 상태 미리보기이며, 모바일 UI는 `frontend` 브랜치, API는 `backend` 브랜치에서 개발합니다. 미리보기는 계정·커플·배츄를 생성하거나 코인을 지급하지 않습니다. 실제 가입과 커플 연결은 다음 구현 단계입니다. 이 README는 현재 확정된 MVP 규칙을 요약하고 [서비스 기획안 v0.1](./docs/betchu기획안.md)의 세부 계약을 기준으로 구현합니다.
 
 ## 서비스 소개
 
@@ -257,6 +257,24 @@ PENDING_FINAL_APPROVAL ── reject / deadline ──→ INVALID
 - 성장 단계·인정 성공 수·보상은 코인 및 XP 정산과 같은 트랜잭션에서 반영합니다.
 
 ## 개발 환경 빠른 시작
+
+### 작업 브랜치
+
+- `frontend`: Expo 앱과 API 생성 타입
+- `backend`: Spring Boot API와 서버 테스트
+- 공통 API 계약은 두 브랜치의 `packages/api-contract/openapi.yaml`에 동일하게 반영합니다.
+
+현재 두 브랜치는 병합 전이므로 앱과 새 API를 함께 실행할 때는 각각의 작업 폴더를 사용합니다.
+한 작업 폴더에서 실행 중인 서버의 브랜치를 바꾸지 않습니다.
+
+```bash
+# 최초 한 번: frontend 체크아웃과 나란히 backend 작업 폴더 만들기
+git switch frontend
+git worktree add ../Betchu-backend backend
+
+# API 계약과 구현 범위
+# packages/api-contract/README.md
+```
 
 요구 환경은 Node.js 24 LTS, pnpm 10, Java 21, Docker Desktop입니다. 전체 기준은 [개발 환경 정의](./development-environment.yaml)를 참고합니다.
 
