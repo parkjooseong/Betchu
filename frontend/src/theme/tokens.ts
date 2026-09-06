@@ -13,6 +13,19 @@ export const colors = {
   success: '#2C7040',
   warning: '#8A5B00',
   danger: '#A33A3A',
+  dangerSoft: '#FFF0ED',
+  hero: '#EDF2E7',
+  egg: '#FFFDF6',
+  eggShade: '#E8E3D4',
+  eggSpot: '#DAD6C8',
+  starlight: '#67548A',
+  starlightSoft: '#F1ECF8',
+  wave: '#336889',
+  waveSoft: '#EAF3F8',
+  sunset: '#9C503C',
+  sunsetSoft: '#F9EDE5',
+  forest: '#426544',
+  forestSoft: '#EDF2E6',
 } as const;
 
 export const spacing = {
@@ -21,6 +34,8 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+  xxl: 48,
+  xxxl: 64,
 } as const;
 
 export const radius = {
