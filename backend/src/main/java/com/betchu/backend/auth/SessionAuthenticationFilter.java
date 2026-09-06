@@ -58,6 +58,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     if ("GET".equals(method)
         && Set.of(
                 "/api/v1/users/me",
+                "/api/v1/couples/me/end-status",
                 "/api/v1/auth/providers",
                 "/api/v1/policy-versions/current",
                 "/api/v1/monsters/starters",

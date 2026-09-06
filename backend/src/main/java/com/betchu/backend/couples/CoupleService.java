@@ -235,9 +235,35 @@ public class CoupleService {
                   "IDEMPOTENCY_KEY_REUSED",
                   "다른 요청에 사용한 키예요. 새 요청으로 다시 시도해 주세요.");
             }
-            return new EndResult("COMPLETED");
+            List<String> states =
+                jdbc.queryForList(
+                    """
+                SELECT j.status FROM couple_action_receipts r
+                JOIN relationship_end_jobs j ON j.couple_id=r.couple_id
+                WHERE r.user_id=? AND r.idempotency_key=?
+                """,
+                    String.class,
+                    userId,
+                    key);
+            return new EndResult(
+                states.isEmpty() || "COMPLETED".equals(states.getFirst())
+                    ? "COMPLETED"
+                    : "PROCESSING");
           }
           if (block && coupleId == null) throw conflict();
+          UUID receiptCouple = coupleId;
+          if (receiptCouple == null) {
+            List<UUID> pending =
+                jdbc.queryForList(
+                    """
+                SELECT j.couple_id FROM relationship_end_jobs j
+                JOIN couple_members m ON m.couple_id=j.couple_id
+                WHERE m.user_id=? AND j.status<>'COMPLETED' ORDER BY j.created_at DESC,j.id DESC LIMIT 1
+                """,
+                    UUID.class,
+                    userId);
+            if (!pending.isEmpty()) receiptCouple = pending.getFirst();
+          }
           if (coupleId != null) {
             UUID partnerId =
                 jdbc.queryForObject(
@@ -264,20 +290,35 @@ public class CoupleService {
                 "UPDATE couple_members SET status = 'ENDED', left_at = ? WHERE couple_id = ? AND status = 'ACTIVE'",
                 timestamp(now),
                 coupleId);
-            // No quests or shared resources exist in this increment; the completed job has zero
-            // items.
+            // Commit loss of relationship access before any fallible resource cleanup begins.
+            // The shared advisory/couple locks exclude concurrent draft creation and modification.
+            UUID jobId = UUID.randomUUID();
+            int targets =
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM quests WHERE couple_id=? AND status='DRAFT'",
+                    Integer.class,
+                    coupleId);
             jdbc.update(
                 """
             INSERT INTO relationship_end_jobs
-            (id, couple_id, initiated_by, status, idempotency_key, created_at, completed_at)
-            VALUES (?, ?, ?, 'COMPLETED', ?, ?, ?) ON CONFLICT (couple_id) DO NOTHING
+            (id, couple_id, initiated_by, status, target_resource_count, idempotency_key, created_at, completed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-                UUID.randomUUID(),
+                jobId,
                 coupleId,
                 userId,
+                targets == 0 ? "COMPLETED" : "PROCESSING",
+                targets,
                 key,
                 timestamp(now),
-                timestamp(now));
+                targets == 0 ? timestamp(now) : null);
+            jdbc.update(
+                """
+                INSERT INTO relationship_end_job_items(relationship_end_job_id,resource_type,resource_id,status)
+                SELECT ?,'QUEST',id,'PENDING' FROM quests WHERE couple_id=? AND status='DRAFT'
+                """,
+                jobId,
+                coupleId);
           }
           jdbc.update(
               """
@@ -287,10 +328,46 @@ public class CoupleService {
               userId,
               key,
               action,
-              coupleId,
+              receiptCouple,
               timestamp(now));
-          return new EndResult("COMPLETED");
+          return endResult(receiptCouple);
         });
+  }
+
+  public EndStatus endStatus(UUID userId) {
+    return locked(
+        now -> {
+          requireActive(userId);
+          List<EndJob> jobs =
+              jdbc.query(
+                  """
+          SELECT j.id,j.status,j.created_at,j.completed_at,
+            (SELECT count(*) FROM relationship_end_job_items i JOIN quests q ON q.id=i.resource_id
+              WHERE i.relationship_end_job_id=j.id AND q.creator_id=m.user_id) AS target_resource_count,
+            (SELECT count(*) FROM relationship_end_job_items i JOIN quests q ON q.id=i.resource_id
+              WHERE i.relationship_end_job_id=j.id AND q.creator_id=m.user_id AND i.status='COMPLETED') AS processed_resource_count
+          FROM relationship_end_jobs j JOIN couple_members m ON m.couple_id=j.couple_id
+          WHERE m.user_id=? ORDER BY j.created_at DESC,j.id DESC LIMIT 1
+          """,
+                  (row, index) ->
+                      new EndJob(
+                          row.getObject("id", UUID.class),
+                          "COMPLETED".equals(row.getString("status")) ? "COMPLETED" : "PROCESSING",
+                          row.getInt("target_resource_count"),
+                          row.getInt("processed_resource_count"),
+                          instant(row, "created_at"),
+                          instant(row, "completed_at")),
+                  userId);
+          return new EndStatus(jobs.isEmpty() ? null : jobs.getFirst());
+        });
+  }
+
+  private EndResult endResult(UUID coupleId) {
+    if (coupleId == null) return new EndResult("COMPLETED");
+    String status =
+        jdbc.queryForObject(
+            "SELECT status FROM relationship_end_jobs WHERE couple_id=?", String.class, coupleId);
+    return new EndResult("COMPLETED".equals(status) ? "COMPLETED" : "PROCESSING");
   }
 
   public void expireInvites() {

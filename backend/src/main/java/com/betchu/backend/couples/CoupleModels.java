@@ -43,4 +43,14 @@ public final class CoupleModels {
   }
 
   public record EndResult(String status) {}
+
+  public record EndJob(
+      UUID id,
+      String status,
+      int targetResourceCount,
+      int processedResourceCount,
+      Instant createdAt,
+      Instant completedAt) {}
+
+  public record EndStatus(EndJob job) {}
 }

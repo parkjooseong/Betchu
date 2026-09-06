@@ -10,7 +10,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-@SpringBootTest
+@SpringBootTest(
+    properties = {
+      "betchu.couples.cleanup-delay-ms=3600000",
+      "betchu.couples.retention-delay-ms=3600000"
+    })
 @ExtendWith(PostgresIntegrationTestSupport.PostgresAvailable.class)
 public abstract class PostgresIntegrationTestSupport {
   private static PostgreSQLContainer container;

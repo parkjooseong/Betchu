@@ -105,6 +105,9 @@ class StarterControllerTest {
         "{\"species\":\"WAVE\",\"name\":\"배\\n츄\"}",
         "{\"species\":\"WAVE\",\"name\":\"배\\u200b츄\"}",
         "{\"species\":\"WAVE\",\"name\":\"배\\u2028츄\"}",
+        "{\"species\":\"WAVE\",\"name\":\"\\ud800\"}",
+        "{\"species\":\"WAVE\",\"name\":\"\\udfff\"}",
+        "{\"species\":\"WAVE\",\"name\":\"\\udc00\\ud800\"}",
         "{\"species\":\"WAVE\",\"name\":\"배츄\",\"userId\":\"PRIVATE_INPUT\"}"
       })
   void invalidSelectionReturnsGenericProblemDetails(String input) throws Exception {

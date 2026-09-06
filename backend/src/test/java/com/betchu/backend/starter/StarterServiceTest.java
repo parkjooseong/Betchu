@@ -89,7 +89,11 @@ class StarterServiceTest {
         "배\u200d츄",
         "배\ufeff츄",
         "배\u2028츄",
-        "배\u2029츄"
+        "배\u2029츄",
+        "\uD800",
+        "\uDFFF",
+        "배\uD800츄",
+        "\uDC00\uD800"
       })
   void rejectsInvalidNames(String name) {
     assertThatThrownBy(() -> service.preview(new PreviewRequest(Species.STARLIGHT, name)))

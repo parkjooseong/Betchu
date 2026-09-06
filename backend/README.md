@@ -37,7 +37,7 @@ Content-Type: application/json
 {"species":"STARLIGHT","name":"별이"}
 ```
 
-미리보기 응답의 `previewOnly`는 `true`이며, `starter`, 정규화된 `name`, `stage: EGG`, `recognizedSuccessCount: 0`, `stats`, `growthMilestones`를 반환한다. 이 미리보기는 회원·배츄·지갑을 생성하거나 코인·성공 수를 변경하지 않는다. 실제 배츄 생성 API는 후속 구현이다.
+미리보기 응답의 `previewOnly`는 `true`이며, `starter`, 정규화된 `name`, `stage: EGG`, `recognizedSuccessCount: 0`, `stats`, `growthMilestones`를 반환한다. 이 미리보기는 회원·배츄·지갑을 생성하거나 코인·성공 수를 변경하지 않는다.
 
 - 종은 `STARLIGHT`, `WAVE`, `SUNSET`, `FOREST` 중 하나다. 네 종 모두 레벨 1, HP 100, ATK 10, 전투력 700, XP 0, 다음 레벨 필요 XP 80으로 시작한다.
 - 이름은 NFC 정규화와 Unicode `White_Space` 앞뒤 제거 후 1~10 Unicode 코드 포인트다. 내부 줄바꿈·제어 문자(`Cc`)·포맷 문자(`Cf`)는 거절한다.
@@ -46,6 +46,69 @@ Content-Type: application/json
 - `CORS_ALLOWED_ORIGINS`에 지정한 웹 출처만 위 두 경로를 호출할 수 있다. 기본값은 `http://localhost:8081,http://localhost:19006`이다. 공개 경로를 제외한 API는 항상 세션 인증을 요구하며, 이전 `BETCHU_SECURITY_ENABLED=false` 설정으로 인증을 해제할 수 없다.
 
 공유 계약은 [`packages/api-contract/openapi.yaml`](../packages/api-contract/openapi.yaml)을 기준으로 한다.
+
+## 내 배츄 등록과 홈
+
+아래 API는 활성 계정과 현재 필수 정책 동의를 확인한다. 첫 등록에는 두 사람이 모두 연결을 확정한 현재 커플이 필요하다.
+
+```text
+POST /api/v1/monsters/starter
+Authorization: Bearer <accessToken>
+Idempotency-Key: <UUID>
+Content-Type: application/json
+
+{"species":"STARLIGHT","name":"별이"}
+```
+
+계정당 스타터 한 마리, 계정 성장 정보, 현재 배츄 참조와 최초 응답을 한 트랜잭션으로 저장하고 `201 MonsterView`를 반환한다. 같은 요청 키와 정규화된 종류·이름으로 재시도하면 최초 응답을 다시 받는다. 이후 이름을 바꾸거나 커플 관계를 종료해도 최초 응답은 유지된다. 같은 키로 다른 입력을 보내면 `409 IDEMPOTENCY_KEY_REUSED`, 새 키로 다시 선택하면 `409 STARTER_ALREADY_EXISTS`다. 등록으로 추가 코인이나 경험치를 지급하지 않는다.
+
+```text
+GET /api/v1/monsters/me
+GET /api/v1/monsters/partner
+PATCH /api/v1/monsters/me/name
+Content-Type: application/json
+
+{"name":"새이름"}
+
+GET /api/v1/home
+```
+
+- 내 배츄 조회는 `{monster: MonsterView | null}`이다. 이름 변경은 무료이며 미리보기와 같은 Unicode 이름 규칙을 적용한다. 아직 배츄가 없으면 이름 변경은 `404 MONSTER_NOT_FOUND`다.
+- `MonsterView`는 현재 알 상태, 인정 성공 0회, 다음 성장 `HATCH`, 초기 계정 능력치를 반환한다. 성장 보상과 장비 지급 API는 아직 없으며 `reachedMilestones`, `masteryRewards`는 빈 배열, 장비 보너스는 0이다.
+- 상대 배츄는 현재 유효한 커플 관계에서만 조회할 수 있다. 연결이 없거나 끝났거나 차단되면 `409 COUPLE_REQUIRED`다. 내 배츄·성장·지갑은 관계 종료와 재연결 후에도 유지된다.
+- 홈은 서버 시각, 현재 연결, 내 지갑과 배츄, 허용된 상대 프로필과 배츄를 반환한다. 상대 지갑이나 초안 내용은 포함하지 않는다. `ownDraftCount`는 현재 커플에서 내가 작성한 초안만 세며, 연결이 없으면 0이다. 공유 퀘스트 상태 수는 저장된 상태를 집계하며, 현재 초안 단계에서는 모두 0이다.
+- 관계 종료와 게임 쓰기는 동일한 PostgreSQL 트랜잭션 잠금을 사용한다. 종료된 관계에 새 스타터나 초안이 뒤늦게 저장되는 일을 방지한다.
+
+관련 마이그레이션은 `V5__monster_progression.sql`과 `V6__quest_drafts.sql`이다. 게임 통합 테스트는 실제 PostgreSQL에서 원자성, 동시에 들어온 요청, 관계 종료·재연결 보존과 홈 공개 범위를 검사한다.
+
+```bash
+./gradlew test --tests com.betchu.backend.game.GameControllerTest
+./gradlew integrationTest --tests com.betchu.backend.game.MonsterProgressionIntegrationTest
+```
+
+## 작성자 전용 퀘스트 초안
+
+- `POST /quests`는 `Idempotency-Key`로 개인 자유 입력 초안을 생성한다. `GET /quests?status=DRAFT`는 현재 관계의 본인 초안만 커서 방식으로 조회한다. 기본 20개, 최대 50개다.
+- `GET /quests/{questId}`, `PATCH /quests/{questId}/draft`, `DELETE /quests/{questId}/draft`는 작성자와 현재 관계를 검사한다. 타인·이전 관계·없는 초안은 모두 404다. 수정은 본문의 `expectedRowVersion`, 폐기는 같은 이름의 쿼리와 멱등 키가 필요하다.
+- 초안에는 제목·카테고리·성공 조건·난이도·제안 코인·수행 마감·결과 확인 시작·최소 수행 시간·인증 방식의 9개 항목을 저장한다. 난이도는 1~4, 제안 코인은 0/100C, 인증은 `NONE`만 지원한다. 튜토리얼 완료 전에도 작성할 수 있으며 코인·XP·슬롯을 변경하지 않는다.
+- 제목 1~80자, 성공 조건 1~1,000자, 최소 수행 시간 0~10,080분은 초기 구현의 입력 제한이다. NFC 정규화와 Unicode 공백 제거를 적용하며 정상 Unicode 코드 포인트를 센다. 성공 조건의 내부 LF 외 제어 문자와 고립 surrogate는 허용하지 않는다.
+- 날짜는 명시적 UTC 오프셋이 필요하고 UTC 기준 2000년 이상 2101년 미만이어야 한다. PostgreSQL 마이크로초 정밀도로 맞춘 후 결과 확인 시작이 수행 마감보다 뒤인지 검사한다. 초안은 과거 날짜도 허용한다.
+- 동일 생성 요청은 최초 응답을 재현하며 후속 수정을 덮어쓰지 않는다. 폐기 시 본문과 최초 응답 본문을 삭제한다. 이미 폐기한 초안의 생성 재시도는 404이며, 같은 폐기 요청은 버전을 다시 증가시키지 않는다.
+
+## 관계 종료 후 초안 정리
+
+연결 종료·차단은 먼저 관계 접근 차단과 정리 작업·대상 목록을 커밋한다. 이후 작업 처리기가 초안을 항목별 트랜잭션으로 취소한다. 처리 실패는 다음 실행에서 재시도하며 이미 확정한 접근 차단을 되돌리지 않는다. 모든 대상의 정리가 끝날 때까지 새 연결을 막는다.
+
+`POST /couples/me/end`와 `/block`은 `PROCESSING` 또는 `COMPLETED`를 반환한다. `GET /couples/me/end-status`는 최신 작업 상태를 반환하며, 정책 재동의 중에도 이용할 수 있다. 반환하는 대상·처리 건수는 본인 작성 초안만 집계하고 전체 작업 상태는 별도로 표시한다. 이전 멱등 키는 이전 관계에만 적용된다.
+
+처리기는 기본 5초 간격, 보관 기한 삭제는 1시간 간격으로 실행한다. 관계 종료 30일이 지난 본문과 최초 생성 응답은 취소 작업이 아직 실패 중이어도 삭제한다. 개인 본문 내보내기 API는 아직 구현하지 않았다. 일반 API에서는 종료 즉시 이전 관계 초안을 조회할 수 없다.
+
+```bash
+./gradlew test --tests com.betchu.backend.quests.QuestControllerTest --tests com.betchu.backend.quests.QuestValidationTest
+./gradlew integrationTest --tests com.betchu.backend.quests.QuestDraftIntegrationTest
+```
+
+튜토리얼·퀘스트 제출·승인·사진 인증·코인 정산은 후속 구현이다. 전체 요청·응답은 [공통 API 계약](../packages/api-contract/README.md)을 따른다.
 
 ## Google 로그인과 계정 활성화
 

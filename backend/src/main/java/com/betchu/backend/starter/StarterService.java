@@ -54,8 +54,11 @@ public class StarterService {
             .matcher(Normalizer.normalize(request.name(), Normalizer.Form.NFC))
             .replaceAll("");
     int length = name.codePointCount(0, name.length());
+    boolean unpairedSurrogate =
+        name.codePoints().anyMatch(point -> point >= 0xD800 && point <= 0xDFFF);
     if (length < NAME_RULES.minLength()
         || length > NAME_RULES.maxLength()
+        || unpairedSurrogate
         || FORBIDDEN_NAME_CHARACTERS.matcher(name).find()) {
       throw new InvalidStarterSelectionException();
     }

@@ -75,6 +75,11 @@ public class CoupleController {
     return service.end(userId(user), requestKey(key), false);
   }
 
+  @GetMapping("/me/end-status")
+  public EndStatus endStatus(@AuthenticationPrincipal AuthenticatedUser user) {
+    return service.endStatus(userId(user));
+  }
+
   @PostMapping("/me/block")
   public EndResult block(
       @AuthenticationPrincipal AuthenticatedUser user,
