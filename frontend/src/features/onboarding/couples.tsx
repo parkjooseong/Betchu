@@ -210,12 +210,12 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
             {processing ? '연결 종료 후 정리 중이에요' : '연결 정리가 완료됐어요'}
           </Text>
           <Text style={ui.caption}>
-            내 초안 정리 {endStatus.data.job.processedResourceCount} /{' '}
+            내 퀘스트 정리 {endStatus.data.job.processedResourceCount} /{' '}
             {endStatus.data.job.targetResourceCount}
           </Text>
           {processing && (
             <Text style={ui.caption}>
-              상대 정보는 이미 숨겼어요. 내 초안 수와 별개로 전체 정리가 끝나면 다시 연결할 수
+              상대 정보는 이미 숨겼어요. 내 퀘스트 수와 별개로 전체 정리가 끝나면 다시 연결할 수
               있어요.
             </Text>
           )}

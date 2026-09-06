@@ -513,6 +513,166 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/tutorials': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getTutorials'];
+    put?: never;
+    post: operations['createTutorial'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getTutorial'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['approveTutorial'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectTutorial'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/select-result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['selectTutorialResult'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/final-approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['finalApproveTutorial'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/reject-result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectTutorialResult'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['requestTutorialCancellation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/confirm-cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['confirmTutorialCancellation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tutorials/{questId}/reject-cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectTutorialCancellation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -877,6 +1037,170 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       completedAt: string | null;
+    };
+    TutorialTemplate: {
+      /** @constant */
+      title: '자기 전에 물 한 잔 더 마시기';
+      /** @constant */
+      category: 'EATING';
+      /** @constant */
+      successCriteria: '자기 전에 물 한 잔을 더 마셔요.';
+      /** @constant */
+      difficulty: 1;
+      /** @constant */
+      stake: 100;
+      /** @constant */
+      reward: 100;
+      /** @constant */
+      xp: 10;
+      /** @constant */
+      minimumDurationMinutes: 0;
+      /** @constant */
+      evidenceMethod: 'NONE';
+    };
+    TutorialTerms: {
+      /** @constant */
+      title: '자기 전에 물 한 잔 더 마시기';
+      /** @constant */
+      category: 'EATING';
+      /** @constant */
+      successCriteria: '자기 전에 물 한 잔을 더 마셔요.';
+      /** @constant */
+      difficulty: 1;
+      /** @constant */
+      stake: 100;
+      /** @constant */
+      reward: 100;
+      /** @constant */
+      xp: 10;
+      /** @constant */
+      minimumDurationMinutes: 0;
+      /** @constant */
+      evidenceMethod: 'NONE';
+      /** Format: date-time */
+      dueAt: string;
+      /** Format: date-time */
+      resultAt: string;
+      /** Format: date-time */
+      approvalDeadlineAt: string;
+      /** Format: date-time */
+      resultConfirmationDeadlineAt: string;
+    };
+    TutorialCreateRequest: {
+      /** Format: date-time */
+      dueAt: string;
+      /** Format: date-time */
+      resultAt: string;
+    };
+    TutorialApprovalRequest: {
+      /** Format: uuid */
+      questVersionId: string;
+      expectedRowVersion: number;
+      /** @enum {string} */
+      predictedResult: 'SUCCESS' | 'FAILURE';
+    };
+    TutorialRejectRequest: {
+      /** Format: uuid */
+      questVersionId: string;
+      expectedRowVersion: number;
+    };
+    TutorialVersionRequest: {
+      expectedRowVersion: number;
+    };
+    TutorialResultRequest: {
+      expectedRowVersion: number;
+      /** @enum {string} */
+      selectedResult: 'SUCCESS' | 'FAILURE';
+    };
+    TutorialPartnerSelection: {
+      /** @enum {string} */
+      selectedResult: 'SUCCESS' | 'FAILURE';
+      selectionRevision: number;
+      /** Format: date-time */
+      selectedAt: string;
+    };
+    TutorialCancelRequest: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      requestedBy: string;
+      /** @enum {string} */
+      status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'EXPIRED';
+      /** Format: date-time */
+      requestedAt: string;
+      respondedAt: string | null;
+    };
+    TutorialSettlement: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      resolvedResult:
+        'SUCCESS' | 'FAILURE' | 'INVALID' | 'CANCELED' | 'CANCELED_RELATIONSHIP_ENDED';
+      invalidReason: string | null;
+      stake: number;
+      reward: number;
+      xp: number;
+      creditedMonsterId: string | null;
+      recognizedSuccessBefore: number | null;
+      recognizedSuccessAfter: number | null;
+      growthStageBefore: string | null;
+      growthStageAfter: string | null;
+      /** Format: date-time */
+      settledAt: string;
+    };
+    TutorialView: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      coupleId: string;
+      /** Format: uuid */
+      creatorId: string;
+      /** @enum {string} */
+      viewerRole: 'CREATOR' | 'PARTNER';
+      /** @enum {string} */
+      status:
+        | 'PENDING_APPROVAL'
+        | 'ACTIVE'
+        | 'AWAITING_RESULT'
+        | 'PENDING_FINAL_APPROVAL'
+        | 'SUCCESS'
+        | 'FAILURE'
+        | 'INVALID'
+        | 'REJECTED'
+        | 'APPROVAL_EXPIRED'
+        | 'CANCELED'
+        | 'CANCELED_RELATIONSHIP_ENDED';
+      rowVersion: number;
+      /** Format: uuid */
+      questVersionId: string;
+      approvedQuestVersionId: string | null;
+      predictedResult: ('SUCCESS' | 'FAILURE') | null;
+      terms: components['schemas']['TutorialTerms'];
+      allowedActions: (
+        | 'APPROVE'
+        | 'REJECT'
+        | 'SELECT_RESULT'
+        | 'FINAL_APPROVE'
+        | 'REJECT_RESULT'
+        | 'CANCEL'
+        | 'CONFIRM_CANCEL'
+        | 'REJECT_CANCEL'
+      )[];
+      /** @description PARTNER 역할에만 포함된다. CREATOR 응답에서는 선택값이 최종 확정되기 전·후 모두 이 속성을 생략한다. */
+      partnerSelection?: components['schemas']['TutorialPartnerSelection'] | null;
+      cancelRequest: components['schemas']['TutorialCancelRequest'] | null;
+      settlement: components['schemas']['TutorialSettlement'] | null;
+      /** Format: date-time */
+      serverTime: string;
+    } & unknown;
+    TutorialOverview: {
+      /** Format: date-time */
+      serverTime: string;
+      completedAt: string | null;
+      template: components['schemas']['TutorialTemplate'];
+      canStart: boolean;
+      own: components['schemas']['TutorialView'] | null;
+      partner: components['schemas']['TutorialView'] | null;
     };
   };
   responses: {
@@ -2026,6 +2350,892 @@ export interface operations {
           'application/json': {
             job: components['schemas']['RelationshipEndJob'] | null;
           };
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getTutorials: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialOverview'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  createTutorial: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialCreateRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getTutorial: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  approveTutorial: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialApprovalRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectTutorial: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialRejectRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  selectTutorialResult: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialResultRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  finalApproveTutorial: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialResultRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectTutorialResult: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  requestTutorialCancellation: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  confirmTutorialCancellation: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectTutorialCancellation: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TutorialVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TutorialView'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description 요청·권한·현재 버전·기한을 확인해 주세요. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
         };
       };
       /** @description Request rejected with a stable BETCHU error code */

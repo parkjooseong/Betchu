@@ -1,8 +1,9 @@
 # BETCHU API contract
 
 `openapi.yaml` is the shared OpenAPI 3.1 source for the mobile app and API.
-Version 0.4.0 covers account onboarding, mutual couple pairing, permanent starter
-registration, home, private quest drafts, and the public starter preview. The server is authoritative for account status, coins,
+Version 0.5.0 covers account onboarding, mutual couple pairing, permanent starter
+registration, home, private quest drafts, the one-time tutorial lifecycle, and the
+public starter preview. The server is authoritative for account status, coins,
 policy versions, invite expiry, and relationship access.
 
 ## Account onboarding
@@ -135,8 +136,9 @@ and a personal starter. They can be written before tutorial completion and do
 not reserve or deduct coins. The nine inputs are title, category,
 successCriteria, difficulty, stake, dueAt, resultAt, minimumDurationMinutes and
 evidenceMethod. This increment accepts only evidenceMethod NONE, difficulties
-1–4 and CUSTOM stakes 0 or 100. It has no submit, approval, evidence upload,
-tutorial, settlement or reward endpoint.
+1–4 and CUSTOM stakes 0 or 100. General personal drafts do not yet offer
+submission, approval, evidence upload or settlement. The separate tutorial
+workflow below includes its own approval and settlement.
 
 Initial engineering input limits are 1–80 Unicode code points for titles,
 1–1000 for success criteria, and 0–10080 minimum-duration minutes. These limits
@@ -156,6 +158,56 @@ after discard returns 404. Repeated discard returns the original version once.
 Reads, updates and idempotency retries cannot expose another user's draft or a
 draft from a former relationship. Closing a relationship hides those drafts
 immediately, even while cleanup retries are still pending.
+
+## One-time tutorial
+
+| Method | Path (under /api/v1) | Behavior |
+| --- | --- | --- |
+| GET | /tutorials | Fixed template, personal completion, ability to start and current pair's tutorials |
+| POST | /tutorials | Send one fixed tutorial with dueAt/resultAt and a UUID Idempotency-Key |
+| GET | /tutorials/{questId} | Current relationship and role-scoped tutorial state |
+| POST | /tutorials/{questId}/approve | Partner approves the displayed version and prediction, locking 100C |
+| POST | /tutorials/{questId}/reject | Partner rejects start before the approval deadline |
+| POST | /tutorials/{questId}/select-result | Partner chooses or revises the actual result after result start |
+| POST | /tutorials/{questId}/final-approve | Separately approve the displayed result and settle exactly once |
+| POST | /tutorials/{questId}/reject-result | Reject judgment/final approval and refund the principal |
+| POST | /tutorials/{questId}/cancel | Request mutual cancellation before the performance deadline |
+| POST | /tutorials/{questId}/confirm-cancel | The other person confirms cancellation and refunds principal |
+| POST | /tutorials/{questId}/reject-cancel | The other person declines cancellation; time continues |
+
+All tutorial mutations require UUID Idempotency-Key. Version-sensitive actions
+include expectedRowVersion; start approval/rejection also require questVersionId.
+Final approval requires the currently selected result as well as its row version.
+The server exposes allowedActions from the current state and role, and checks
+the same conditions again under database locks. Timeouts take priority once a
+deadline is reached, including while a request was waiting for its lock.
+
+Sending does not charge coins. Start approval moves 100C from available to
+locked balance. Final SUCCESS returns that 100C, grants 100C and 10XP, and
+atomically hatches the starter with a unique HATCH milestone. Tutorial outcomes
+never change recognized-success count, streak, chemistry or recurring budgets.
+Other approved terminal outcomes return only the locked principal. Unapproved
+terminal outcomes do not create coin transactions.
+
+The actual pending result selection is present only in the partner projection;
+the challenger sees the final settlement once approved. Neither role receives
+the other person's full wallet balance or private drafts. Once the relationship
+ends, ordinary tutorial detail and idempotent retries are inaccessible; personal
+completion remains available without former relationship identifiers.
+
+Each account can create one tutorial. Rejection, approval expiry and mutual
+cancellation also record completion without rewards to prevent a permanent
+onboarding lockout. This is an implementation decision for cases unspecified
+in the plan. The fixed tutorial cannot be edited, recalled or resubmitted.
+Its date inputs require explicit UTC offsets, a future dueAt, later resultAt,
+and a maximum seven-day scheduling horizon. Result confirmation ends 24 hours
+after resultAt. See [tutorial implementation decisions](../../docs/implementation/tutorial-lifecycle.md).
+
+Relationship cleanup uses the stored end time: an approved tutorial ended
+before dueAt is CANCELED_RELATIONSHIP_ENDED; at or after dueAt it is INVALID
+with RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL. All locked principal is returned
+once. Access revocation commits before settlement, so a retryable settlement
+failure cannot restore partner access. Personal monster and wallet survive.
 
 ## Branch workflow
 

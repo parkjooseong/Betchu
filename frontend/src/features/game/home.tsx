@@ -8,8 +8,10 @@ import { createRequestId } from '@/features/onboarding/request-id';
 import { ApiError } from '@/features/onboarding/transport';
 import { Button, ui } from '@/features/onboarding/ui';
 import { getStarterCatalog } from '@/features/starter/api';
+import { BabyIllustration } from '@/features/starter/baby-illustration';
 import { EggIllustration } from '@/features/starter/egg-illustration';
 import { normalizeStarterName, validateStarterName } from '@/features/starter/name-validation';
+import { TutorialHomeCard } from '@/features/tutorial/home-card';
 import { colors } from '@/theme/tokens';
 
 import { homeSchema, Monster, monsterSchema } from './contracts';
@@ -94,6 +96,7 @@ export function HomePanel() {
           <Text style={ui.body}>서로 연결을 확인한 뒤 나의 스타팅 배츄를 만날 수 있어요.</Text>
         )}
       </View>
+      {connected && <TutorialHomeCard coupleId={data.coupleId!} />}
       {data.self.monster && (
         <View style={ui.card}>
           <Text accessibilityRole="header" style={ui.sectionTitle}>
@@ -165,6 +168,7 @@ function MonsterCard({ monster, own = false }: { monster: Monster; own?: boolean
         {monster.name}
       </Text>
       {monster.growthStage === 'EGG' && <EggIllustration />}
+      {monster.growthStage === 'BABY' && <BabyIllustration species={monster.species} />}
       <Text style={ui.body}>
         Lv.{monster.accountLevel} ·{' '}
         {monster.growthStage === 'EGG' ? '아직 알이에요' : '자라고 있어요'}

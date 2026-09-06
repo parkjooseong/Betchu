@@ -3,12 +3,17 @@ import { z } from 'zod';
 import { env } from '@/config/env';
 
 const messages: Record<string, string> = {
+  INVALID_TUTORIAL_REQUEST:
+    '첫 약속의 날짜와 선택 내용을 확인해 주세요. 일정은 현재부터 7일 안이어야 해요.',
+  TUTORIAL_ALREADY_EXISTS: '이미 첫 약속을 보냈어요. 현재 튜토리얼을 다시 확인해 주세요.',
+  TUTORIAL_NOT_FOUND:
+    '현재 연결에서 확인할 수 없는 첫 약속이에요. 홈에서 연결 상태를 확인해 주세요.',
+  TUTORIAL_STATE_CONFLICT: '첫 약속의 상태나 기한이 바뀌었어요. 새로 확인한 뒤 진행해 주세요.',
   STARTER_ALREADY_EXISTS: '이미 나의 배츄가 있어요. 저장된 배츄를 다시 불러올게요.',
   INVALID_MONSTER_REQUEST: '배츄 종류와 이름을 확인해 주세요.',
   INVALID_QUEST_REQUEST: '제목·조건·금액·날짜를 확인한 뒤 다시 저장해 주세요.',
   QUEST_NOT_FOUND: '이 초안은 확인할 수 없어요. 내 초안 목록과 연결 상태를 확인해 주세요.',
-  QUEST_VERSION_CONFLICT:
-    '다른 곳에서 초안이 변경됐어요. 작성한 내용을 보존했으니 최신 내용을 확인해 주세요.',
+  QUEST_VERSION_CONFLICT: '약속의 내용이나 상태가 바뀌었어요. 최신 내용을 확인해 주세요.',
   COUPLE_REQUIRED: '커플 연결을 완료한 뒤 다시 시도해 주세요.',
   STARTER_REQUIRED: '홈에서 스타팅 배츄를 먼저 골라 주세요.',
   IDEMPOTENCY_KEY_REUSED: '앞선 요청과 내용이 달라요. 현재 상태를 새로 확인해 주세요.',
