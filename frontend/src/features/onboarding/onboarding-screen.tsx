@@ -3,6 +3,7 @@ import { Link } from 'expo-router';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { HomePanel } from '@/features/game/home';
 import { EggIllustration } from '@/features/starter/egg-illustration';
 import { colors } from '@/theme/tokens';
 
@@ -56,7 +57,7 @@ export function OnboardingScreen() {
             </Text>
             <Text style={ui.body}>
               {user?.status === 'ACTIVE'
-                ? '가입이 활성화됐어요. 함께 약속할 사람을 연결해 보세요.'
+                ? '내 배츄와 작은 약속을 차근차근 쌓아가요.'
                 : '안전하게 가입하고, 서로를 확인한 뒤 함께 시작해요.'}
             </Text>
             {!user && <EggIllustration />}
@@ -161,33 +162,8 @@ export function OnboardingScreen() {
             </>
           ) : user.status === 'ACTIVE' ? (
             <>
-              <View style={ui.card}>
-                <Text style={ui.eyebrow}>내 계정</Text>
-                <Text style={ui.sectionTitle}>내 츄코인</Text>
-                <Text style={ui.body}>
-                  사용 가능 {user.availableCoins ?? '확인 필요'}C · 잠김{' '}
-                  {user.lockedCoins ?? '확인 필요'}C
-                </Text>
-                <Text style={ui.caption}>
-                  서버에서 확인한 내 잔액이에요. 연결이나 재연결로 가입 코인이 다시 지급되지는
-                  않아요.
-                </Text>
-                <Button
-                  secondary
-                  onPress={() =>
-                    void session.refreshUser().catch((reason: unknown) => session.setError(reason))
-                  }
-                >
-                  계정 상태 새로고침
-                </Button>
-              </View>
+              <HomePanel key={user.id} />
               <Couples />
-              <View style={ui.note}>
-                <Text style={ui.body}>스타팅 배츄 저장과 퀘스트는 준비 중이에요.</Text>
-                <Link href="/preview" style={ui.link}>
-                  배츄 미리보기 둘러보기
-                </Link>
-              </View>
             </>
           ) : (
             <View style={ui.card}>

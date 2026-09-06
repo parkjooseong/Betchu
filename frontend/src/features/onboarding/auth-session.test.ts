@@ -127,6 +127,40 @@ it('shares one rotating refresh for concurrent unauthorized requests', async () 
   expect(send.mock.calls.filter(([path]) => path === '/auth/refresh')).toHaveLength(1);
 });
 
+it('checks the relationship guard before retrying a mutation after token refresh', async () => {
+  const { session, send } = setup();
+  await session.completeLogin('login-one', 'SUCCESS', 'test-handoff');
+  let release!: () => void;
+  let entered!: () => void;
+  let relationshipCurrent = true;
+  const refreshing = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  send.mockImplementation(async (path) => {
+    if (path === '/auth/refresh') {
+      entered();
+      await refreshing;
+      return { ...tokensFixture, accessToken: 'refreshed-access' };
+    }
+    throw new ApiError(401);
+  });
+  const result = session.request('/quests', userSchema, {
+    method: 'POST',
+    assertCurrent: () => {
+      if (!relationshipCurrent) throw new Error('Relationship changed');
+    },
+  });
+  await started;
+  relationshipCurrent = false;
+  release();
+  await expect(result).rejects.toThrow('Relationship changed');
+  expect(send.mock.calls.filter(([path]) => path === '/quests')).toHaveLength(1);
+  expect(session.getSnapshot().user).not.toBeNull();
+});
+
 it('clears user data immediately on logout and prevents late refresh from restoring it', async () => {
   const { session, send, clear, storage } = setup();
   await session.completeLogin('login-one', 'SUCCESS', 'test-handoff');

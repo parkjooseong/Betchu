@@ -28,4 +28,10 @@ describe('starter name validation', () => {
     expect(normalizeStarterName('  우리 배츄  ')).toBe('우리 배츄');
     expect(validateStarterName('우리 배츄', rules)).toBeUndefined();
   });
+
+  it('rejects isolated UTF-16 surrogates while accepting valid emoji pairs', () => {
+    expect(validateStarterName('a\uD800b', rules)).toContain('제어 문자');
+    expect(validateStarterName('a\uDC00b', rules)).toContain('제어 문자');
+    expect(validateStarterName('🥚', rules)).toBeUndefined();
+  });
 });

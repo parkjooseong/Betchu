@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: BETCHU API
-  version: 0.3.0
-  description: BETCHU Google 로그인, 연령·정책 동의, 계정 활성화와 안전한 커플 연결 계약
+  version: 0.4.0
+  description: BETCHU 계정·커플 연결, 배츄 영구 등록과 홈, 작성자 전용 퀘스트 초안 계약
 servers:
   - url: http://localhost:8080/api/v1
     description: Local development
@@ -526,6 +526,328 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CoupleEndResult"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - couples
+  /monsters/starter:
+    post:
+      operationId: createStarterMonster
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StarterPreviewRequest"
+      responses:
+        "201":
+          description: Starter created atomically; an identical idempotent retry returns the original response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonsterView"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - game
+  /monsters/me:
+    get:
+      operationId: getMyMonster
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Personal monster, retained after ending a relationship
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonsterResult"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - game
+  /monsters/partner:
+    get:
+      operationId: getPartnerMonster
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current connected partner's monster, or null before their selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonsterResult"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - game
+  /monsters/me/name:
+    patch:
+      operationId: renameMyMonster
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Uses the same NFC and Unicode name rules as starter preview
+      responses:
+        "200":
+          description: Personal monster renamed without charging coins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonsterView"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          $ref: "#/components/responses/GameNotFound"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - game
+  /home:
+    get:
+      operationId: getHome
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Personal wallet and monster, current partner public monster, and privacy-safe quest counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameHome"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - game
+  /quests:
+    post:
+      operationId: createQuestDraft
+      parameters:
+        - $ref: "#/components/parameters/QuestIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestDraftInput"
+      responses:
+        "201":
+          description: Created draft; same-key replay returns the original response without changing the draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDraft"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - quests
+    get:
+      operationId: listQuestDrafts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - DRAFT
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        "200":
+          description: Only this user's drafts in the current relationship, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDraftPage"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - quests
+  /quests/{questId}:
+    parameters:
+      - $ref: "#/components/parameters/QuestId"
+    get:
+      operationId: getQuestDraft
+      responses:
+        "200":
+          description: The author's current draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDraft"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - quests
+  /quests/{questId}/draft:
+    parameters:
+      - $ref: "#/components/parameters/QuestId"
+    patch:
+      operationId: updateQuestDraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/QuestDraftInputFields"
+                - type: object
+                  required:
+                    - expectedRowVersion
+                  properties:
+                    expectedRowVersion:
+                      type: integer
+                      format: int64
+                      minimum: 0
+              unevaluatedProperties: false
+      responses:
+        "200":
+          description: Updated draft with a new rowVersion.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDraft"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - quests
+    delete:
+      operationId: discardQuestDraft
+      parameters:
+        - $ref: "#/components/parameters/QuestIdempotencyKey"
+        - name: expectedRowVersion
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: Draft text and retained create-response text are deleted; repeated key returns the original result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDiscardResult"
+        default:
+          description: Request rejected with a stable BETCHU error code
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      tags:
+        - quests
+  /couples/me/end-status:
+    get:
+      operationId: getRelationshipEndStatus
+      description: Available to an authenticated ACTIVE user even when policy reconsent is required. No partner data.
+      responses:
+        "200":
+          description: The latest relationship cleanup job for this user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - job
+                additionalProperties: false
+                properties:
+                  job:
+                    oneOf:
+                      - $ref: "#/components/schemas/RelationshipEndJob"
+                      - type: "null"
         default:
           description: Request rejected with a stable BETCHU error code
           content:
@@ -1059,7 +1381,403 @@ components:
       properties:
         status:
           type: string
-          const: COMPLETED
+          enum:
+            - PROCESSING
+            - COMPLETED
+    MonsterGrowthMilestone:
+      type: string
+      enum:
+        - HATCH
+        - SUCCESS_20
+        - SUCCESS_40
+        - SUCCESS_60
+        - SUCCESS_80
+    MonsterView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - species
+        - growthStage
+        - recognizedSuccessCount
+        - nextGrowthMilestone
+        - reachedMilestones
+        - masteryRewards
+        - accountLevel
+        - currentLevelExp
+        - nextLevelRequiredExp
+        - baseHp
+        - baseAttack
+        - equipmentBonusHp
+        - equipmentBonusAttack
+        - finalHp
+        - finalAttack
+        - combatPower
+        - streak
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 10
+        species:
+          $ref: "#/components/schemas/StarterSpecies"
+        growthStage:
+          type: string
+          enum:
+            - EGG
+            - BABY
+            - INTERMEDIATE
+            - FINAL
+        recognizedSuccessCount:
+          type: integer
+          minimum: 0
+        nextGrowthMilestone:
+          anyOf:
+            - $ref: "#/components/schemas/MonsterGrowthMilestone"
+            - type: "null"
+        reachedMilestones:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonsterGrowthMilestone"
+        masteryRewards:
+          type: array
+          maxItems: 0
+          items:
+            type: string
+          description: Empty until mastery rewards are implemented
+        accountLevel:
+          type: integer
+          minimum: 1
+          maximum: 50
+        currentLevelExp:
+          type: integer
+          minimum: 0
+        nextLevelRequiredExp:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+        baseHp:
+          type: integer
+          minimum: 1
+        baseAttack:
+          type: integer
+          minimum: 1
+        equipmentBonusHp:
+          type: integer
+          const: 0
+        equipmentBonusAttack:
+          type: integer
+          const: 0
+        finalHp:
+          type: integer
+          minimum: 1
+        finalAttack:
+          type: integer
+          minimum: 1
+        combatPower:
+          type: integer
+          minimum: 1
+        streak:
+          type: integer
+          minimum: 0
+    MonsterResult:
+      type: object
+      additionalProperties: false
+      required:
+        - monster
+      properties:
+        monster:
+          anyOf:
+            - $ref: "#/components/schemas/MonsterView"
+            - type: "null"
+    GameHome:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+        - coupleId
+        - self
+        - partner
+        - ownDraftCount
+        - questStatusSummary
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        coupleId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        self:
+          $ref: "#/components/schemas/GameHomeSelf"
+        partner:
+          anyOf:
+            - $ref: "#/components/schemas/GameHomePartner"
+            - type: "null"
+        ownDraftCount:
+          type: integer
+          minimum: 0
+        questStatusSummary:
+          $ref: "#/components/schemas/QuestStatusSummary"
+    GameHomeSelf:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nickname
+        - availableCoins
+        - lockedCoins
+        - monster
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+        availableCoins:
+          type: integer
+          minimum: 0
+        lockedCoins:
+          type: integer
+          minimum: 0
+        monster:
+          anyOf:
+            - $ref: "#/components/schemas/MonsterView"
+            - type: "null"
+    GameHomePartner:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nickname
+        - profileImage
+        - monster
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+        profileImage:
+          type:
+            - string
+            - "null"
+        monster:
+          anyOf:
+            - $ref: "#/components/schemas/MonsterView"
+            - type: "null"
+    QuestStatusSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - pendingApproval
+        - active
+        - awaitingResult
+      properties:
+        pendingApproval:
+          type: integer
+          minimum: 0
+        active:
+          type: integer
+          minimum: 0
+        awaitingResult:
+          type: integer
+          minimum: 0
+          description: AWAITING_RESULT plus PENDING_FINAL_APPROVAL
+    QuestDraftInputFields:
+      type: object
+      required:
+        - title
+        - category
+        - successCriteria
+        - difficulty
+        - stake
+        - dueAt
+        - resultAt
+        - minimumDurationMinutes
+        - evidenceMethod
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: NFC and Unicode White_Space edge trim; 1-80 code points; no Cc, Cf or line breaks.
+        category:
+          type: string
+          enum:
+            - SLEEP
+            - EXERCISE
+            - STUDY
+            - CONTACT
+            - GAMING
+            - SPENDING
+            - HOUSEWORK
+            - EATING
+            - DATE
+            - CUSTOM
+        successCriteria:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: NFC and Unicode White_Space edge trim; 1-1000 code points; internal LF allowed, other
+            control/format/line-separator characters rejected.
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 4
+        stake:
+          type: integer
+          enum:
+            - 0
+            - 100
+        dueAt:
+          type: string
+          format: date-time
+          description: Offset required, 2000-01-01T00:00:00Z inclusive to 2101-01-01T00:00:00Z exclusive. Server
+            truncates to UTC microseconds before comparisons, hashing and storage. Past dates may be saved.
+        resultAt:
+          type: string
+          format: date-time
+          description: Offset required, same date range as dueAt and strictly later than dueAt after truncation to UTC
+            microseconds.
+        minimumDurationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 10080
+        evidenceMethod:
+          type: string
+          enum:
+            - NONE
+    QuestDraftInput:
+      allOf:
+        - $ref: "#/components/schemas/QuestDraftInputFields"
+      unevaluatedProperties: false
+    QuestDraft:
+      allOf:
+        - $ref: "#/components/schemas/QuestDraftInputFields"
+        - type: object
+          required:
+            - id
+            - coupleId
+            - status
+            - questType
+            - sourceType
+            - rowVersion
+            - approvalDeadlineAt
+            - resultConfirmationDeadlineAt
+            - createdAt
+            - updatedAt
+          properties:
+            id:
+              type: string
+              format: uuid
+            coupleId:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum:
+                - DRAFT
+            questType:
+              type: string
+              enum:
+                - PERSONAL
+            sourceType:
+              type: string
+              enum:
+                - CUSTOM
+            rowVersion:
+              type: integer
+              format: int64
+              minimum: 0
+            approvalDeadlineAt:
+              type: string
+              format: date-time
+            resultConfirmationDeadlineAt:
+              type: string
+              format: date-time
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+      unevaluatedProperties: false
+    QuestDraftPage:
+      type: object
+      additionalProperties: false
+      required:
+        - quests
+        - nextCursor
+      properties:
+        quests:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestDraft"
+        nextCursor:
+          type:
+            - string
+            - "null"
+    QuestDiscardResult:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - rowVersion
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - DISCARDED
+        rowVersion:
+          type: integer
+          format: int64
+          minimum: 1
+    RelationshipEndJob:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - targetResourceCount
+        - processedResourceCount
+        - createdAt
+        - completedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - PROCESSING
+            - COMPLETED
+        targetResourceCount:
+          type: integer
+          minimum: 0
+          description: Only resources authored by the caller; excludes all private partner drafts.
+        processedResourceCount:
+          type: integer
+          minimum: 0
+          description: Completed resources authored by the caller. Status still describes completion of the whole job.
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
   securitySchemes:
     BearerAuth:
       type: http
@@ -1090,6 +1808,30 @@ components:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/ApiProblem"
+    GameBadRequest:
+      description: Invalid JSON, monster name, starter species, or idempotency key
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    GameForbidden:
+      description: Account activation or current required policy consent is incomplete
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    GameConflict:
+      description: COUPLE_REQUIRED, STARTER_ALREADY_EXISTS, or IDEMPOTENCY_KEY_REUSED
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
+    GameNotFound:
+      description: Personal active monster does not exist
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ApiProblem"
   parameters:
     CoupleIdempotencyKey:
       name: Idempotency-Key
@@ -1101,6 +1843,27 @@ components:
     CoupleInviteId:
       name: inviteId
       in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    GameIdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QuestId:
+      name: questId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QuestIdempotencyKey:
+      name: Idempotency-Key
+      in: header
       required: true
       schema:
         type: string

@@ -23,6 +23,7 @@ jest.mock('./transport', () => ({ ...jest.requireActual('./transport'), request:
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext);
 jest.mock('expo-router', () => ({
   Link: ({ children }: PropsWithChildren) => <MockText>{children}</MockText>,
+  useFocusEffect: () => {},
 }));
 
 const requestMock = jest.fn();
@@ -59,7 +60,9 @@ beforeEach(() => {
     busy: false,
     error: null,
   });
-  requestMock.mockResolvedValue(undefined);
+  requestMock.mockImplementation(async (path) =>
+    path === '/couples/me/end-status' ? { job: null } : undefined,
+  );
 });
 
 it('keeps required and optional policies unchecked and saves only explicit required consents in order', async () => {
@@ -188,7 +191,7 @@ it('preserves active-account safety actions when published policies are unavaila
   );
   await mount(<OnboardingScreen />);
   expect(await screen.findByRole('button', { name: '현재 연결 종료' })).toBeOnTheScreen();
-  expect(requestMock).not.toHaveBeenCalled();
+  expect(requestMock.mock.calls.every(([path]) => path === '/couples/me/end-status')).toBe(true);
   expect(screen.queryByRole('button', { name: '임시 가입 삭제하기' })).not.toBeOnTheScreen();
 });
 
@@ -200,14 +203,16 @@ it('allows unilateral safety actions during re-consent without requesting the re
     busy: false,
     error: null,
   });
-  requestMock.mockResolvedValue({ status: 'COMPLETED' });
+  requestMock.mockImplementation(async (path) =>
+    path === '/couples/me/end-status' ? { job: null } : { status: 'COMPLETED' },
+  );
   await mount(<Couples safetyOnly />);
-  expect(requestMock).not.toHaveBeenCalled();
+  expect(requestMock).not.toHaveBeenCalledWith('/couples/me', expect.anything());
   await fireEvent.press(screen.getByRole('button', { name: '현재 상대방 차단' }));
-  expect(requestMock).not.toHaveBeenCalled();
+  expect(requestMock.mock.calls.some(([path]) => path === '/couples/me/block')).toBe(false);
   await fireEvent.press(screen.getByRole('button', { name: '확인하고 진행' }));
   expect(await screen.findByText('요청이 완료됐어요.')).toBeOnTheScreen();
-  expect(requestMock).toHaveBeenCalledTimes(1);
+  expect(requestMock.mock.calls.filter(([path]) => path === '/couples/me/block')).toHaveLength(1);
   expect(requestMock).toHaveBeenCalledWith('/couples/me/block', expect.anything(), {
     method: 'POST',
     headers: { 'Idempotency-Key': expect.stringMatching(/^[0-9a-f-]{36}$/) },
@@ -227,6 +232,7 @@ it('previews a real partner before joining and waits for both server-confirmed p
     pendingInvite: null,
   };
   requestMock.mockImplementation(async (path) => {
+    if (path === '/couples/me/end-status') return { job: null };
     if (path === '/couples/me') return state;
     if (path === '/couples/invites/preview')
       return {
@@ -266,6 +272,7 @@ it('shows an invalid-code error and retains the entered code for correction', as
     error: null,
   });
   requestMock.mockImplementation(async (path) => {
+    if (path === '/couples/me/end-status') return { job: null };
     if (path === '/couples/me') return { couple: null, pendingInvite: null };
     throw new ApiError(400, 'INVALID_INVITE');
   });

@@ -1,8 +1,8 @@
 # BETCHU API contract
 
 `openapi.yaml` is the shared OpenAPI 3.1 source for the mobile app and API.
-Version 0.3.0 covers account onboarding, mutual couple pairing, and the public
-starter preview. The server is authoritative for account status, coins,
+Version 0.4.0 covers account onboarding, mutual couple pairing, permanent starter
+registration, home, private quest drafts, and the public starter preview. The server is authoritative for account status, coins,
 policy versions, invite expiry, and relationship access.
 
 ## Account onboarding
@@ -54,6 +54,7 @@ when policies need renewed consent.
 | POST | /couples/pending/{inviteId}/reject | Reject the pending connection |
 | POST | /couples/me/end | Unilaterally end the connection; requires Idempotency-Key |
 | POST | /couples/me/block | End and block the current partner; requires Idempotency-Key |
+| GET | /couples/me/end-status | Current cleanup progress for the caller, also available during policy reconsent |
 
 Invite codes contain 16 cryptographically random characters and are stored only
 as HMACs. A raw code is shown once; repeating its creation key returns the same
@@ -65,8 +66,16 @@ End/block receipts are bound to the original relationship and action, so retryin
 an old UUID cannot terminate a later relationship. Blocking without a current
 partner returns an explicit conflict. Relationship operations currently use a
 PostgreSQL transaction advisory lock plus unique membership constraints;
-partitioning that lock is a later performance improvement. Quest cleanup is not
-claimed: quests and their settlement have not been implemented yet.
+partitioning that lock is a later performance improvement. End/block first commits
+access revocation and a durable cleanup job. Draft cancellation then runs in
+separate transactions; a failed item cannot restore relationship access. A new
+connection is blocked until cleanup completes. End/block may return PROCESSING;
+end-status reports target and processed counts for the caller's own resources only,
+while status reflects completion of the whole job. Partner draft counts are never
+returned. Retrying the original key
+returns that original job's current status. Ended-relationship draft text, including any retained creation response, is purged
+after 30 days even when cancellation is still retrying. Personal text export is not
+implemented yet; former-relationship drafts remain unavailable in ordinary APIs.
 
 ## Public starter preview
 
@@ -77,7 +86,7 @@ claimed: quests and their settlement have not been implemented yet.
 | POST | /monsters/starter-preview | Validate species/name and return an egg preview without writing state |
 
 The preview never creates an account, connects a couple, grants coins or saves
-a monster. Actual starter creation is a later implementation and must follow
+a monster. Permanent registration uses the authenticated endpoint below after
 account activation and mutual couple confirmation. No authentication
 token or idempotency key is required for these public preview endpoints.
 
@@ -92,6 +101,61 @@ The hatch threshold is the first recognized ordinary quest success, **or** a
 successful tutorial with the recognized count still at zero. Later thresholds
 are 20 (intermediate), 40 (final), 60 (cosmetic mastery), and 80 (MVP eligibility
 record; egg choice is a P2 feature). Previewing never applies these milestones.
+
+## Permanent starter and home
+
+| Method | Path (under /api/v1) | Behavior |
+| --- | --- | --- |
+| POST | /monsters/starter | Atomically create one starter per user; UUID Idempotency-Key required |
+| GET | /monsters/me | Personal active monster, or null |
+| GET | /monsters/partner | Only the current connected partner's monster, or null |
+| PATCH | /monsters/me/name | Free name change with the same Unicode rules as preview |
+| GET | /home | Personal coins and monster, current partner, own draft count and shared quest status counts |
+
+Registration stores level 1, 0 XP, 100 HP, 10 attack, 700 combat power and an egg
+with zero recognized successes. It does not grant coins, XP or tutorial rewards.
+The same key and normalized request replay the original creation response; a
+different body returns IDEMPOTENCY_KEY_REUSED. A second creation key returns
+STARTER_ALREADY_EXISTS. Personal monster ownership, name changes and wallet
+access persist after relationship end. Partner data is always scoped to the
+current relationship; partner balances and private draft counts are omitted.
+
+## Author-only quest drafts
+
+| Method | Path (under /api/v1) | Behavior |
+| --- | --- | --- |
+| POST | /quests | Create a PERSONAL/CUSTOM draft; UUID Idempotency-Key required |
+| GET | /quests?status=DRAFT | Current author's drafts, cursor pagination; default 20, maximum 50 |
+| GET | /quests/{questId} | Own current-relationship draft; all inaccessible IDs return 404 |
+| PATCH | /quests/{questId}/draft | Replace the nine inputs using expectedRowVersion |
+| DELETE | /quests/{questId}/draft?expectedRowVersion=N | Discard and delete text; UUID Idempotency-Key required |
+
+Drafts require an active account, current required consents, a connected couple
+and a personal starter. They can be written before tutorial completion and do
+not reserve or deduct coins. The nine inputs are title, category,
+successCriteria, difficulty, stake, dueAt, resultAt, minimumDurationMinutes and
+evidenceMethod. This increment accepts only evidenceMethod NONE, difficulties
+1–4 and CUSTOM stakes 0 or 100. It has no submit, approval, evidence upload,
+tutorial, settlement or reward endpoint.
+
+Initial engineering input limits are 1–80 Unicode code points for titles,
+1–1000 for success criteria, and 0–10080 minimum-duration minutes. These limits
+are implementation bounds, not numerical requirements from the product plan.
+Text is normalized to NFC and edge-trimmed using Unicode White_Space; control
+and format characters are rejected except internal LF in success criteria.
+Dates require an explicit UTC offset and must be within 2000-01-01 inclusive
+and 2101-01-01 exclusive in UTC. resultAt must be strictly later than dueAt.
+Timestamps are truncated to PostgreSQL microsecond precision before comparison, hashing and storage. Past dates can be saved in drafts. Approval deadline is dueAt minus the minimum
+duration; result confirmation deadline is resultAt plus 24 hours. The mobile
+editor labels its date inputs as Korean time (UTC+09:00).
+
+Version conflicts return QUEST_VERSION_CONFLICT without replacing newer data.
+Repeated creation returns the original response without overwriting later edits.
+Discard removes draft text and the retained creation response; creation retry
+after discard returns 404. Repeated discard returns the original version once.
+Reads, updates and idempotency retries cannot expose another user's draft or a
+draft from a former relationship. Closing a relationship hides those drafts
+immediately, even while cleanup retries are still pending.
 
 ## Branch workflow
 

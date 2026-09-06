@@ -3,6 +3,15 @@ import { z } from 'zod';
 import { env } from '@/config/env';
 
 const messages: Record<string, string> = {
+  STARTER_ALREADY_EXISTS: '이미 나의 배츄가 있어요. 저장된 배츄를 다시 불러올게요.',
+  INVALID_MONSTER_REQUEST: '배츄 종류와 이름을 확인해 주세요.',
+  INVALID_QUEST_REQUEST: '제목·조건·금액·날짜를 확인한 뒤 다시 저장해 주세요.',
+  QUEST_NOT_FOUND: '이 초안은 확인할 수 없어요. 내 초안 목록과 연결 상태를 확인해 주세요.',
+  QUEST_VERSION_CONFLICT:
+    '다른 곳에서 초안이 변경됐어요. 작성한 내용을 보존했으니 최신 내용을 확인해 주세요.',
+  COUPLE_REQUIRED: '커플 연결을 완료한 뒤 다시 시도해 주세요.',
+  STARTER_REQUIRED: '홈에서 스타팅 배츄를 먼저 골라 주세요.',
+  IDEMPOTENCY_KEY_REUSED: '앞선 요청과 내용이 달라요. 현재 상태를 새로 확인해 주세요.',
   INVALID_INVITE: '초대 코드를 확인해 주세요. 사용할 수 없거나 만료된 코드예요.',
   PAIRING_CONFLICT: '연결 상태가 바뀌었어요. 현재 상태를 확인한 뒤 다시 시도해 주세요.',
   INVITE_EXPIRED: '초대 시간이 만료됐어요. 새 초대로 다시 시작해 주세요.',
@@ -34,7 +43,8 @@ export class ApiError extends Error {
 }
 
 export type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  assertCurrent?: () => void;
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   headers?: Record<string, string>;
 };

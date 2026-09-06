@@ -1,8 +1,16 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
+import { endStatusSchema } from '@/features/game/contracts';
+import {
+  clearRelationshipData,
+  finishRelationshipChange,
+  observeRelationship,
+  relationshipRequest,
+  useRelationshipBoundary,
+} from '@/features/game/relationship-cache';
 import { colors } from '@/theme/tokens';
 
 import { useAuth } from './auth-provider';
@@ -23,6 +31,8 @@ type IssuedInvite = z.infer<typeof inviteSchema>;
 
 export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
   const { session, user } = useAuth();
+  const client = useQueryClient();
+  const boundary = useRelationshipBoundary(user!.id);
   const [foreground, setForeground] = useState(AppState.currentState !== 'background');
   const [code, setCode] = useState('');
   const [preview, setPreview] = useState<InvitePreview>();
@@ -34,11 +44,36 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
   const endKey = useRef<string | null>(null);
   const query = useQuery({
     queryKey: ['couples', user?.id],
-    enabled: user?.status === 'ACTIVE' && !safetyOnly,
-    queryFn: () => session.request('/couples/me', coupleSchema),
+    enabled: user?.status === 'ACTIVE' && !safetyOnly && !boundary.ending,
+    queryFn: async () => {
+      const result = await relationshipRequest(
+        client,
+        session,
+        user!.id,
+        '/couples/me',
+        coupleSchema,
+      );
+      observeRelationship(client, user!.id, result.couple?.id ?? null, 'couples');
+      return result;
+    },
     retry: false,
     refetchInterval: (current) => (foreground && current.state.data?.pendingInvite ? 5000 : false),
   });
+  const endStatus = useQuery({
+    queryKey: ['relationship-end', user!.id],
+    enabled: !boundary.ending,
+    queryFn: () => session.request('/couples/me/end-status', endStatusSchema),
+    retry: false,
+    refetchInterval: (current) =>
+      foreground && current.state.data?.job?.status === 'PROCESSING' ? 5000 : false,
+  });
+  const processing = endStatus.data?.job?.status === 'PROCESSING';
+  useEffect(() => {
+    if (endStatus.data?.job?.status === 'COMPLETED') {
+      void client.invalidateQueries({ queryKey: ['couples', user!.id] });
+      void client.invalidateQueries({ queryKey: ['home', user!.id] });
+    }
+  }, [endStatus.data?.job?.status, client, user]);
   const { refetch } = query;
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
@@ -100,6 +135,7 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
       if (result.couple) {
         setIssued(undefined);
         setPreview(undefined);
+        void client.invalidateQueries({ queryKey: ['home', user!.id] });
       }
     });
   }
@@ -109,10 +145,17 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
     action.mutate(async () => {
       if (confirmation === 'end' || confirmation === 'block') {
         endKey.current ??= createRequestId();
-        await session.request(`/couples/me/${confirmation}`, completedSchema, {
-          method: 'POST',
-          headers: { 'Idempotency-Key': endKey.current },
-        });
+        setIssued(undefined);
+        setPreview(undefined);
+        await clearRelationshipData(client, user!.id);
+        try {
+          await session.request(`/couples/me/${confirmation}`, completedSchema, {
+            method: 'POST',
+            headers: { 'Idempotency-Key': endKey.current },
+          });
+        } finally {
+          finishRelationshipChange(client, user!.id);
+        }
         endKey.current = null;
       } else if (confirmation === 'revoke' && pending) {
         await session.request(`/couples/invites/${encodeURIComponent(pending.id)}`, emptySchema, {
@@ -134,6 +177,12 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
     });
   }
 
+  if (boundary.ending)
+    return (
+      <View style={ui.card}>
+        <Text style={ui.body}>상대 정보 접근을 닫고 연결을 정리하고 있어요…</Text>
+      </View>
+    );
   if (query.isPending && !safetyOnly)
     return (
       <View style={ui.card}>
@@ -150,11 +199,38 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
       </View>
     );
   const pending = query.data?.pendingInvite;
-  const couple = query.data?.couple;
+  const couple = query.data?.couple?.id === boundary.coupleId ? query.data?.couple : null;
   const visibleIssued = pending && issued?.inviteId === pending.id ? issued : undefined;
 
   return (
     <View style={ui.card}>
+      {endStatus.data?.job && (
+        <View style={ui.note}>
+          <Text style={ui.body}>
+            {processing ? '연결 종료 후 정리 중이에요' : '연결 정리가 완료됐어요'}
+          </Text>
+          <Text style={ui.caption}>
+            내 초안 정리 {endStatus.data.job.processedResourceCount} /{' '}
+            {endStatus.data.job.targetResourceCount}
+          </Text>
+          {processing && (
+            <Text style={ui.caption}>
+              상대 정보는 이미 숨겼어요. 내 초안 수와 별개로 전체 정리가 끝나면 다시 연결할 수
+              있어요.
+            </Text>
+          )}
+        </View>
+      )}
+      {endStatus.error && (
+        <View style={ui.note}>
+          <Text accessibilityRole="alert" style={ui.error}>
+            {endStatus.error.message}
+          </Text>
+          <Button secondary onPress={() => void endStatus.refetch()}>
+            연결 정리 상태 다시 확인
+          </Button>
+        </View>
+      )}
       <Text style={ui.eyebrow}>02 · 커플 연결</Text>
       <Text accessibilityRole="header" style={ui.sectionTitle}>
         {safetyOnly ? '연결 안전 설정' : couple ? '우리 둘, 연결됐어요' : '함께할 사람을 초대해요'}
@@ -279,7 +355,7 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
             초대 코드는 24시간 동안 한 번 사용할 수 있어요. 코드 입력 후에도 서로의 프로필을 보고
             각각 확인해야 연결돼요.
           </Text>
-          <Button busy={busy} onPress={createInvite}>
+          <Button busy={busy} disabled={processing} onPress={createInvite}>
             내 초대 코드 만들기
           </Button>
           <View style={ui.divider} />
@@ -301,7 +377,7 @@ export function Couples({ safetyOnly = false }: { safetyOnly?: boolean }) {
             autoCorrect={false}
             style={ui.input}
           />
-          <Button secondary busy={busy} onPress={previewInvite}>
+          <Button secondary busy={busy} disabled={processing} onPress={previewInvite}>
             초대한 사람 먼저 확인
           </Button>
           {preview && (

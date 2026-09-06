@@ -242,6 +242,7 @@ export class AuthSession {
     const generation = this.generation;
     const originalToken = this.accessToken;
     if (!originalToken) throw new ApiError(401);
+    options.assertCurrent?.();
     try {
       const result = await this.send(path, schema, options, originalToken);
       if (generation !== this.generation) throw new ApiError(401);
@@ -252,6 +253,7 @@ export class AuthSession {
       if (this.accessToken === originalToken) await this.refresh();
       if (generation !== this.generation) throw new ApiError(401);
       if (!this.accessToken) throw new ApiError(401);
+      options.assertCurrent?.();
       try {
         const result = await this.send(path, schema, options, this.accessToken);
         if (generation !== this.generation) throw new ApiError(401);

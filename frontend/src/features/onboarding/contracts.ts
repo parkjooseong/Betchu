@@ -74,7 +74,7 @@ export const invitePreviewSchema = z.object({
   inviter: profileSchema,
   expiresAt: z.string(),
 }) satisfies z.ZodType<components['schemas']['CoupleInvitePreview']>;
-export const completedSchema = z.object({ status: z.literal('COMPLETED') }) satisfies z.ZodType<
-  components['schemas']['CoupleEndResult']
->;
+export const completedSchema = z.object({
+  status: z.enum(['PROCESSING', 'COMPLETED']),
+}) satisfies z.ZodType<components['schemas']['CoupleEndResult']>;
 export const emptySchema = z.undefined();

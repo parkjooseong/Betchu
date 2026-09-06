@@ -364,6 +364,155 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/monsters/starter': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['createStarterMonster'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/monsters/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getMyMonster'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/monsters/partner': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPartnerMonster'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/monsters/me/name': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['renameMyMonster'];
+    trace?: never;
+  };
+  '/home': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getHome'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['listQuestDrafts'];
+    put?: never;
+    post: operations['createQuestDraft'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: components['parameters']['QuestId'];
+      };
+      cookie?: never;
+    };
+    get: operations['getQuestDraft'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/draft': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: components['parameters']['QuestId'];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['discardQuestDraft'];
+    options?: never;
+    head?: never;
+    patch: operations['updateQuestDraft'];
+    trace?: never;
+  };
+  '/couples/me/end-status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Available to an authenticated ACTIVE user even when policy reconsent is required. No partner data. */
+    get: operations['getRelationshipEndStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -581,8 +730,153 @@ export interface components {
       expiresAt: string;
     };
     CoupleEndResult: {
+      /** @enum {string} */
+      status: 'PROCESSING' | 'COMPLETED';
+    };
+    /** @enum {string} */
+    MonsterGrowthMilestone: 'HATCH' | 'SUCCESS_20' | 'SUCCESS_40' | 'SUCCESS_60' | 'SUCCESS_80';
+    MonsterView: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      species: components['schemas']['StarterSpecies'];
+      /** @enum {string} */
+      growthStage: 'EGG' | 'BABY' | 'INTERMEDIATE' | 'FINAL';
+      recognizedSuccessCount: number;
+      nextGrowthMilestone: components['schemas']['MonsterGrowthMilestone'] | null;
+      reachedMilestones: components['schemas']['MonsterGrowthMilestone'][];
+      /** @description Empty until mastery rewards are implemented */
+      masteryRewards: string[];
+      accountLevel: number;
+      currentLevelExp: number;
+      nextLevelRequiredExp: number | null;
+      baseHp: number;
+      baseAttack: number;
       /** @constant */
-      status: 'COMPLETED';
+      equipmentBonusHp: 0;
+      /** @constant */
+      equipmentBonusAttack: 0;
+      finalHp: number;
+      finalAttack: number;
+      combatPower: number;
+      streak: number;
+    };
+    MonsterResult: {
+      monster: components['schemas']['MonsterView'] | null;
+    };
+    GameHome: {
+      /** Format: date-time */
+      serverTime: string;
+      /** Format: uuid */
+      coupleId: string | null;
+      self: components['schemas']['GameHomeSelf'];
+      partner: components['schemas']['GameHomePartner'] | null;
+      ownDraftCount: number;
+      questStatusSummary: components['schemas']['QuestStatusSummary'];
+    };
+    GameHomeSelf: {
+      /** Format: uuid */
+      id: string;
+      nickname: string;
+      availableCoins: number;
+      lockedCoins: number;
+      monster: components['schemas']['MonsterView'] | null;
+    };
+    GameHomePartner: {
+      /** Format: uuid */
+      id: string;
+      nickname: string;
+      profileImage: string | null;
+      monster: components['schemas']['MonsterView'] | null;
+    };
+    QuestStatusSummary: {
+      pendingApproval: number;
+      active: number;
+      /** @description AWAITING_RESULT plus PENDING_FINAL_APPROVAL */
+      awaitingResult: number;
+    };
+    QuestDraftInputFields: {
+      /** @description NFC and Unicode White_Space edge trim; 1-80 code points; no Cc, Cf or line breaks. */
+      title: string;
+      /** @enum {string} */
+      category:
+        | 'SLEEP'
+        | 'EXERCISE'
+        | 'STUDY'
+        | 'CONTACT'
+        | 'GAMING'
+        | 'SPENDING'
+        | 'HOUSEWORK'
+        | 'EATING'
+        | 'DATE'
+        | 'CUSTOM';
+      /** @description NFC and Unicode White_Space edge trim; 1-1000 code points; internal LF allowed, other control/format/line-separator characters rejected. */
+      successCriteria: string;
+      difficulty: number;
+      /** @enum {integer} */
+      stake: 0 | 100;
+      /**
+       * Format: date-time
+       * @description Offset required, 2000-01-01T00:00:00Z inclusive to 2101-01-01T00:00:00Z exclusive. Server truncates to UTC microseconds before comparisons, hashing and storage. Past dates may be saved.
+       */
+      dueAt: string;
+      /**
+       * Format: date-time
+       * @description Offset required, same date range as dueAt and strictly later than dueAt after truncation to UTC microseconds.
+       */
+      resultAt: string;
+      minimumDurationMinutes: number;
+      /** @enum {string} */
+      evidenceMethod: 'NONE';
+    };
+    QuestDraftInput: components['schemas']['QuestDraftInputFields'];
+    QuestDraft: components['schemas']['QuestDraftInputFields'] & {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      coupleId: string;
+      /** @enum {string} */
+      status: 'DRAFT';
+      /** @enum {string} */
+      questType: 'PERSONAL';
+      /** @enum {string} */
+      sourceType: 'CUSTOM';
+      /** Format: int64 */
+      rowVersion: number;
+      /** Format: date-time */
+      approvalDeadlineAt: string;
+      /** Format: date-time */
+      resultConfirmationDeadlineAt: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    QuestDraftPage: {
+      quests: components['schemas']['QuestDraft'][];
+      nextCursor: string | null;
+    };
+    QuestDiscardResult: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status: 'DISCARDED';
+      /** Format: int64 */
+      rowVersion: number;
+    };
+    RelationshipEndJob: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status: 'PROCESSING' | 'COMPLETED';
+      /** @description Only resources authored by the caller; excludes all private partner drafts. */
+      targetResourceCount: number;
+      /** @description Completed resources authored by the caller. Status still describes completion of the whole job. */
+      processedResourceCount: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      completedAt: string | null;
     };
   };
   responses: {
@@ -622,10 +916,49 @@ export interface components {
         'application/problem+json': components['schemas']['ApiProblem'];
       };
     };
+    /** @description Invalid JSON, monster name, starter species, or idempotency key */
+    GameBadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description Account activation or current required policy consent is incomplete */
+    GameForbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description COUPLE_REQUIRED, STARTER_ALREADY_EXISTS, or IDEMPOTENCY_KEY_REUSED */
+    GameConflict: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
+    /** @description Personal active monster does not exist */
+    GameNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/problem+json': components['schemas']['ApiProblem'];
+      };
+    };
   };
   parameters: {
     CoupleIdempotencyKey: string;
     CoupleInviteId: string;
+    GameIdempotencyKey: string;
+    QuestId: string;
+    QuestIdempotencyKey: string;
   };
   requestBodies: {
     CoupleCode: {
@@ -1317,6 +1650,382 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['CoupleEndResult'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  createStarterMonster: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StarterPreviewRequest'];
+      };
+    };
+    responses: {
+      /** @description Starter created atomically; an identical idempotent retry returns the original response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MonsterView'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      409: components['responses']['GameConflict'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getMyMonster: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Personal monster, retained after ending a relationship */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MonsterResult'];
+        };
+      };
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPartnerMonster: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current connected partner's monster, or null before their selection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MonsterResult'];
+        };
+      };
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      409: components['responses']['GameConflict'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  renameMyMonster: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @description Uses the same NFC and Unicode name rules as starter preview */
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Personal monster renamed without charging coins */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MonsterView'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      404: components['responses']['GameNotFound'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getHome: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Personal wallet and monster, current partner public monster, and privacy-safe quest counts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GameHome'];
+        };
+      };
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  listQuestDrafts: {
+    parameters: {
+      query?: {
+        status?: 'DRAFT';
+        limit?: number;
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Only this user's drafts in the current relationship, newest first. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDraftPage'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  createQuestDraft: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['QuestIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QuestDraftInput'];
+      };
+    };
+    responses: {
+      /** @description Created draft; same-key replay returns the original response without changing the draft. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDraft'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getQuestDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: components['parameters']['QuestId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The author's current draft. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDraft'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  discardQuestDraft: {
+    parameters: {
+      query: {
+        expectedRowVersion: number;
+      };
+      header: {
+        'Idempotency-Key': components['parameters']['QuestIdempotencyKey'];
+      };
+      path: {
+        questId: components['parameters']['QuestId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Draft text and retained create-response text are deleted; repeated key returns the original result. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDiscardResult'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  updateQuestDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: components['parameters']['QuestId'];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['QuestDraftInputFields'] & {
+          /** Format: int64 */
+          expectedRowVersion: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated draft with a new rowVersion. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDraft'];
+        };
+      };
+      /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getRelationshipEndStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The latest relationship cleanup job for this user. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            job: components['schemas']['RelationshipEndJob'] | null;
+          };
         };
       };
       /** @description Request rejected with a stable BETCHU error code */
