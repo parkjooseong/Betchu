@@ -42,8 +42,15 @@ management:
 
 betchu:
   business-time-zone: Asia/Seoul
-  security:
-    enabled: ${BETCHU_SECURITY_ENABLED:false}
+  auth:
+    signing-secret: ${JWT_SIGNING_SECRET:}
+    redirect-uris: ${OAUTH_REDIRECT_URIS:betchu://auth/callback,http://localhost:8081/auth/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+      callback-uri: ${GOOGLE_CALLBACK_URI:http://localhost:8080/api/v1/auth/oauth/google/callback}
+  couples:
+    invite-hmac-secret: ${BETCHU_INVITE_HMAC_SECRET:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081,http://localhost:19006}
   object-storage:
