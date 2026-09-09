@@ -1,0 +1,2 @@
+# Keep fresh Windows checkouts consistent with Prettier's LF output.
+* text=auto eol=lf
