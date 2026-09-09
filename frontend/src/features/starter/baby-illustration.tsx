@@ -11,16 +11,38 @@ const appearances = {
   FOREST: { name: '숲', color: colors.forest, soft: colors.forestSoft },
 };
 
-export function BabyIllustration({ species }: { species: StarterSpecies }) {
+export function BabyIllustration({
+  species,
+  stage = 'BABY',
+}: {
+  species: StarterSpecies;
+  stage?: 'BABY' | 'INTERMEDIATE' | 'FINAL';
+}) {
   const appearance = appearances[species];
   return (
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel={`부화한 ${appearance.name} 아기 배츄`}
+      accessibilityLabel={
+        stage === 'BABY'
+          ? `부화한 ${appearance.name} 아기 배츄`
+          : `${appearance.name} ${stage === 'INTERMEDIATE' ? '중간 성장' : '최종 성장'} 배츄`
+      }
       style={styles.scene}
     >
       <View style={[styles.backdrop, { backgroundColor: appearance.soft }]} />
+      {stage !== 'BABY' && (
+        <View
+          style={[
+            styles.backdrop,
+            {
+              borderColor: appearance.color,
+              borderWidth: stage === 'FINAL' ? 5 : 2,
+              transform: [{ scale: 1.05 }],
+            },
+          ]}
+        />
+      )}
       <View style={styles.shadow} />
       <View style={[styles.arm, styles.armLeft, { backgroundColor: appearance.color }]} />
       <View style={[styles.arm, styles.armRight, { backgroundColor: appearance.color }]} />
@@ -37,7 +59,11 @@ export function BabyIllustration({ species }: { species: StarterSpecies }) {
         </>
       )}
       <View
-        style={[styles.body, { backgroundColor: appearance.soft, borderColor: appearance.color }]}
+        style={[
+          styles.body,
+          { backgroundColor: appearance.soft, borderColor: appearance.color },
+          stage !== 'BABY' && { transform: [{ scale: stage === 'FINAL' ? 1.12 : 1.06 }] },
+        ]}
       >
         <View style={[styles.cheek, styles.cheekLeft, { backgroundColor: appearance.color }]} />
         <View style={[styles.cheek, styles.cheekRight, { backgroundColor: appearance.color }]} />

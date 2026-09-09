@@ -119,11 +119,10 @@ export function TutorialHub({
       )}
       <View style={ui.note}>
         <Text style={ui.caption}>
-          일반 퀘스트는 지금 초안만 작성할 수 있어요. 첫 약속이 끝나도 일반 퀘스트를 보내는 기능은
-          아직 제공하지 않아요.
+          첫 약속을 마쳤다면 일반 퀘스트를 제출할 수 있어요. 파트너가 시작과 실제 결과를 확인해요.
         </Text>
-        <Link href="/quests" style={ui.link}>
-          내 초안 보기
+        <Link href="/quest" style={ui.link}>
+          일반 퀘스트 보기
         </Link>
       </View>
       <Button secondary disabled={overview.isFetching} onPress={() => void overview.refetch()}>

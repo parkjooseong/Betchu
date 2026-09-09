@@ -29,7 +29,7 @@ export const categorySchema = z.enum([
 export const draftSchema = z.object({
   id: z.string(),
   coupleId: z.string(),
-  status: z.literal('DRAFT'),
+  status: z.enum(['DRAFT', 'CHANGE_REQUESTED']),
   questType: z.literal('PERSONAL'),
   sourceType: z.literal('CUSTOM'),
   rowVersion: z.number().int().nonnegative(),

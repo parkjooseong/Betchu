@@ -451,7 +451,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get: operations['listQuestDrafts'];
+    get: operations['listQuests'];
     put?: never;
     post: operations['createQuestDraft'];
     delete?: never;
@@ -667,6 +667,294 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['rejectTutorialCancellation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/progress': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPersonalQuestProgress'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPersonalQuestVersions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/approval-quote': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPersonalQuestApprovalQuote'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/actions/pending': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPendingPersonalQuestActions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPersonalQuestActivitySummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/me/settlement-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getPersonalQuestBettingRules'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/couples/me/settlement-rules/acknowledge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['acknowledgePersonalQuestBettingRules'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['submitPersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/recall': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['recallPersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/request-change': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['requestPersonalQuestChange'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectPersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['approvePersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/partner-result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['selectPersonalQuestResult'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/partner-result/final-approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['finalApprovePersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/partner-result/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectPersonalQuestResult'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['cancelPersonalQuest'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/confirm-cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['confirmPersonalQuestCancellation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quests/{questId}/reject-cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['rejectPersonalQuestCancellation'];
     delete?: never;
     options?: never;
     head?: never;
@@ -905,7 +1193,7 @@ export interface components {
       recognizedSuccessCount: number;
       nextGrowthMilestone: components['schemas']['MonsterGrowthMilestone'] | null;
       reachedMilestones: components['schemas']['MonsterGrowthMilestone'][];
-      /** @description Empty until mastery rewards are implemented */
+      /** @description Species-bound cosmetic aura, title and accessory granted at 60 recognized successes; no combat bonus. */
       masteryRewards: string[];
       accountLevel: number;
       currentLevelExp: number;
@@ -996,7 +1284,7 @@ export interface components {
       /** Format: uuid */
       coupleId: string;
       /** @enum {string} */
-      status: 'DRAFT';
+      status: 'DRAFT' | 'CHANGE_REQUESTED';
       /** @enum {string} */
       questType: 'PERSONAL';
       /** @enum {string} */
@@ -1201,6 +1489,227 @@ export interface components {
       canStart: boolean;
       own: components['schemas']['TutorialView'] | null;
       partner: components['schemas']['TutorialView'] | null;
+    };
+    PersonalQuestTerms: {
+      title: string;
+      /** @enum {string} */
+      category:
+        | 'SLEEP'
+        | 'EXERCISE'
+        | 'STUDY'
+        | 'CONTACT'
+        | 'GAMING'
+        | 'SPENDING'
+        | 'HOUSEWORK'
+        | 'EATING'
+        | 'DATE'
+        | 'CUSTOM';
+      successCriteria: string;
+      difficulty: number;
+      /** @enum {integer} */
+      stake: 0 | 100;
+      /** @enum {integer} */
+      reward: 0 | 50;
+      /** @enum {integer} */
+      xp: 10 | 20 | 40 | 70;
+      minimumDurationMinutes: number;
+      /** @enum {string} */
+      evidenceMethod: 'NONE';
+      /** Format: date-time */
+      dueAt: string;
+      /** Format: date-time */
+      resultAt: string;
+      /** Format: date-time */
+      approvalDeadlineAt: string;
+      /** Format: date-time */
+      resultConfirmationDeadlineAt: string;
+    };
+    PersonalQuestVersion: {
+      /** Format: uuid */
+      id: string;
+      versionNo: number;
+      terms: components['schemas']['PersonalQuestTerms'];
+      changedFields: (
+        | 'title'
+        | 'category'
+        | 'successCriteria'
+        | 'difficulty'
+        | 'stake'
+        | 'minimumDurationMinutes'
+        | 'evidenceMethod'
+        | 'dueAt'
+        | 'resultAt'
+      )[];
+      /** Format: date-time */
+      submittedAt: string;
+    };
+    PersonalQuestDecision: {
+      /** @enum {string} */
+      decision: 'APPROVE' | 'REQUEST_CHANGE' | 'REJECT';
+      requestMessage: string | null;
+      /** Format: date-time */
+      decidedAt: string;
+    };
+    PersonalQuestSettlement: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      resolvedResult:
+        'SUCCESS' | 'FAILURE' | 'INVALID' | 'CANCELED' | 'CANCELED_RELATIONSHIP_ENDED';
+      invalidReason: string | null;
+      /** @enum {integer} */
+      stake: 0 | 100;
+      /** @enum {integer} */
+      reward: 0 | 25 | 50;
+      xp: number;
+      creditedMonsterId: string | null;
+      recognizedSuccessBefore: number | null;
+      recognizedSuccessAfter: number | null;
+      growthStageBefore: ('EGG' | 'BABY' | 'INTERMEDIATE' | 'FINAL') | null;
+      growthStageAfter: ('BABY' | 'INTERMEDIATE' | 'FINAL') | null;
+      /** Format: date-time */
+      settledAt: string;
+    };
+    PersonalQuestView: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      coupleId: string;
+      /** Format: uuid */
+      creatorId: string;
+      /** @enum {string} */
+      viewerRole: 'CREATOR' | 'PARTNER';
+      /** @enum {string} */
+      status:
+        | 'DRAFT'
+        | 'CHANGE_REQUESTED'
+        | 'DISCARDED'
+        | 'PENDING_APPROVAL'
+        | 'ACTIVE'
+        | 'AWAITING_RESULT'
+        | 'PENDING_FINAL_APPROVAL'
+        | 'SUCCESS'
+        | 'FAILURE'
+        | 'INVALID'
+        | 'REJECTED'
+        | 'APPROVAL_EXPIRED'
+        | 'CANCELED'
+        | 'CANCELED_RELATIONSHIP_ENDED';
+      auditProjectionStatus: 'RECALLED' | null;
+      rowVersion: number;
+      questVersionId: string | null;
+      approvedQuestVersionId: string | null;
+      version: components['schemas']['PersonalQuestVersion'] | null;
+      draft?: components['schemas']['QuestDraft'];
+      predictedResult: ('SUCCESS' | 'FAILURE') | null;
+      budgetDateKst: string | null;
+      lockedStake: (0 | 100) | null;
+      rewardReservedAmount: (0 | 25 | 50) | null;
+      decision: components['schemas']['PersonalQuestDecision'] | null;
+      partnerSelection?: components['schemas']['TutorialPartnerSelection'];
+      cancelRequest: components['schemas']['TutorialCancelRequest'] | null;
+      settlement: components['schemas']['PersonalQuestSettlement'] | null;
+      allowedActions: (
+        | 'EDIT'
+        | 'SUBMIT'
+        | 'DISCARD'
+        | 'RECALL'
+        | 'REQUEST_CHANGE'
+        | 'REJECT'
+        | 'APPROVE'
+        | 'SELECT_RESULT'
+        | 'FINAL_APPROVE'
+        | 'REJECT_RESULT'
+        | 'CANCEL'
+        | 'CONFIRM_CANCEL'
+        | 'REJECT_CANCEL'
+      )[];
+      /** Format: date-time */
+      serverTime: string;
+    } & unknown;
+    PersonalQuestPage: {
+      quests: components['schemas']['PersonalQuestView'][];
+      nextCursor: string | null;
+      /** Format: date-time */
+      serverTime: string;
+    };
+    PersonalQuestVersions: {
+      versions: components['schemas']['PersonalQuestVersion'][];
+      rowVersion: number;
+    };
+    PersonalQuestQuote: {
+      /** Format: uuid */
+      questId: string;
+      rowVersion: number;
+      /** Format: date */
+      budgetDateKst: string;
+      availableCoins: number;
+      activeSlotsRemaining: number;
+      xpSlotsRemaining: number;
+      coinSlotsRemaining: number;
+      totalBonusRemaining: number;
+      lowBonusRemaining: number;
+      /** @enum {integer} */
+      expectedReward: 0 | 25 | 50;
+      allowedStakes: (0 | 100)[];
+      canApprove: boolean;
+      blockingReason: string | null;
+    };
+    PersonalQuestActivitySummary: {
+      /** Format: date-time */
+      weekStartAt: string;
+      /** Format: date-time */
+      weekEndAt: string;
+      current: number;
+      /** @constant */
+      target: 10;
+      unlocked: boolean;
+    };
+    PersonalQuestBettingRules: {
+      /** Format: uuid */
+      coupleId: string;
+      suspended: boolean;
+      generation: number;
+      suspendedAt: string | null;
+      acknowledgedAt: string | null;
+      partnerAcknowledged: boolean;
+      /** Format: date-time */
+      serverTime: string;
+    };
+    PersonalQuestRowRequest: {
+      expectedRowVersion: number;
+    };
+    PersonalQuestVersionRequest: {
+      /** Format: uuid */
+      questVersionId: string;
+      expectedRowVersion: number;
+    };
+    PersonalQuestChangeRequest: {
+      /** Format: uuid */
+      questVersionId: string;
+      expectedRowVersion: number;
+      requestMessage: string;
+    };
+    PersonalQuestApproveRequest: {
+      /** Format: uuid */
+      questVersionId: string;
+      expectedRowVersion: number;
+      /** @enum {string} */
+      predictedResult: 'SUCCESS' | 'FAILURE';
+    };
+    PersonalQuestResultRequest: {
+      expectedRowVersion: number;
+      /** @enum {string} */
+      selectedResult: 'SUCCESS' | 'FAILURE';
+    };
+    PersonalQuestFinalRequest: {
+      expectedRowVersion: number;
+      /** @enum {string} */
+      selectedResult: 'SUCCESS' | 'FAILURE';
+      selectionRevision: number;
+    };
+    PersonalQuestAcknowledgeRequest: {
+      expectedGeneration: number;
     };
   };
   responses: {
@@ -1936,7 +2445,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Unilateral immediate relationship end. Current increment has no quest/resources to settle. Replays never end a later relationship. */
+      /** @description Immediately revoke relationship access and enqueue durable cleanup of live personal quests and tutorials using the saved end time. Retries never end a later relationship. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -2160,10 +2669,23 @@ export interface operations {
       };
     };
   };
-  listQuestDrafts: {
+  listQuests: {
     parameters: {
       query?: {
-        status?: 'DRAFT';
+        status?:
+          | 'DRAFT'
+          | 'ALL'
+          | 'PENDING_APPROVAL'
+          | 'CHANGE_REQUESTED'
+          | 'ACTIVE'
+          | 'AWAITING_RESULT'
+          | 'PENDING_FINAL_APPROVAL'
+          | 'SUCCESS'
+          | 'FAILURE'
+          | 'INVALID'
+          | 'CANCELED'
+          | 'REJECTED'
+          | 'APPROVAL_EXPIRED';
         limit?: number;
         cursor?: string;
       };
@@ -2173,13 +2695,14 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Only this user's drafts in the current relationship, newest first. */
+      /** @description DRAFT returns private editable drafts; other filters return role-scoped lifecycle projections with opaque cursors. */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['QuestDraftPage'];
+          'application/json':
+            components['schemas']['QuestDraftPage'] | components['schemas']['PersonalQuestPage'];
         };
       };
       /** @description Request rejected with a stable BETCHU error code */
@@ -2239,13 +2762,14 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The author's current draft. */
+      /** @description The creator receives the current draft while editable; otherwise returns the visible immutable lifecycle projection. Former partners cannot read any projection. */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['QuestDraft'];
+          'application/json':
+            components['schemas']['QuestDraft'] | components['schemas']['PersonalQuestView'];
         };
       };
       /** @description Request rejected with a stable BETCHU error code */
@@ -3239,6 +3763,628 @@ export interface operations {
         };
       };
       /** @description Request rejected with a stable BETCHU error code */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPersonalQuestProgress: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPersonalQuestVersions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestVersions'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPersonalQuestApprovalQuote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestQuote'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPendingPersonalQuestActions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestPage'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPersonalQuestActivitySummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestActivitySummary'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getPersonalQuestBettingRules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestBettingRules'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  acknowledgePersonalQuestBettingRules: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestAcknowledgeRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestBettingRules'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  submitPersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestRowRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  recallPersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  requestPersonalQuestChange: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestChangeRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectPersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestVersionRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  approvePersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestApproveRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  selectPersonalQuestResult: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestResultRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  finalApprovePersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestFinalRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectPersonalQuestResult: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestRowRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  cancelPersonalQuest: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestRowRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  confirmPersonalQuestCancellation: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestRowRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  rejectPersonalQuestCancellation: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': string;
+      };
+      path: {
+        questId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonalQuestRowRequest'];
+      };
+    };
+    responses: {
+      /** @description Current role-scoped result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PersonalQuestView'];
+        };
+      };
+      /** @description Safe request, role, version, time or budget error */
       default: {
         headers: {
           [name: string]: unknown;

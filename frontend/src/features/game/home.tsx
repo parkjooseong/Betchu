@@ -7,6 +7,7 @@ import { useAuth } from '@/features/onboarding/auth-provider';
 import { createRequestId } from '@/features/onboarding/request-id';
 import { ApiError } from '@/features/onboarding/transport';
 import { Button, ui } from '@/features/onboarding/ui';
+import { QuestHomeCard } from '@/features/quest-progress/home-card';
 import { getStarterCatalog } from '@/features/starter/api';
 import { BabyIllustration } from '@/features/starter/baby-illustration';
 import { EggIllustration } from '@/features/starter/egg-illustration';
@@ -97,6 +98,7 @@ export function HomePanel() {
         )}
       </View>
       {connected && <TutorialHomeCard coupleId={data.coupleId!} />}
+      {connected && data.self.monster && <QuestHomeCard coupleId={data.coupleId!} />}
       {data.self.monster && (
         <View style={ui.card}>
           <Text accessibilityRole="header" style={ui.sectionTitle}>
@@ -168,10 +170,19 @@ function MonsterCard({ monster, own = false }: { monster: Monster; own?: boolean
         {monster.name}
       </Text>
       {monster.growthStage === 'EGG' && <EggIllustration />}
-      {monster.growthStage === 'BABY' && <BabyIllustration species={monster.species} />}
+      {monster.growthStage !== 'EGG' && (
+        <BabyIllustration species={monster.species} stage={monster.growthStage} />
+      )}
       <Text style={ui.body}>
         Lv.{monster.accountLevel} ·{' '}
-        {monster.growthStage === 'EGG' ? '아직 알이에요' : '자라고 있어요'}
+        {
+          {
+            EGG: '아직 알이에요',
+            BABY: '아기 배츄',
+            INTERMEDIATE: '중간 성장',
+            FINAL: '최종 성장',
+          }[monster.growthStage]
+        }
       </Text>
       <Text style={ui.caption}>
         선택한 종 ·{' '}
@@ -199,6 +210,9 @@ function MonsterCard({ monster, own = false }: { monster: Monster; own?: boolean
       <Text style={ui.caption}>
         인정 성공 {monster.recognizedSuccessCount}회 · 연승 {monster.streak}회
       </Text>
+      {monster.masteryRewards.length > 0 && (
+        <Text style={ui.caption}>60회 성장 보상 · 오라·칭호·액세서리 획득 (능력치 추가 없음)</Text>
+      )}
       {monster.growthStage === 'EGG' && (
         <Text style={ui.caption}>
           튜토리얼 성공 또는 이후 첫 일반 퀘스트 성공으로 부화해요. 레벨과 외형 성장은 따로 쌓여요.

@@ -1,0 +1,2 @@
+# pnpm owns the formatting of its generated, multi-document lockfile.
+pnpm-lock.yaml

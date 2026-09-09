@@ -17,7 +17,7 @@ export const tutorialKey = (userId: string, coupleId: string) => [
   'tutorial',
 ];
 
-function useVisible() {
+export function useVisible() {
   const [foreground, setForeground] = useState(AppState.currentState !== 'background');
   const [focused, setFocused] = useState(false);
   useEffect(() => {

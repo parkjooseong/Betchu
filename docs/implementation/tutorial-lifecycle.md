@@ -2,8 +2,7 @@
 
 This increment completes the one-time tutorial from sending through partner
 approval, result confirmation, settlement and relationship cleanup. General
-personal quests remain private drafts; general submission and budget reservation
-are the following increment.
+personal quests were private drafts at this increment. The subsequent [personal quest lifecycle](personal-quest-lifecycle.md) implements general submission and budget reservation.
 
 ## Product rules
 

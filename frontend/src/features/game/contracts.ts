@@ -12,7 +12,7 @@ export const monsterSchema = z.object({
   recognizedSuccessCount: count,
   nextGrowthMilestone: milestone.nullable(),
   reachedMilestones: z.array(milestone),
-  masteryRewards: z.array(z.string()).length(0),
+  masteryRewards: z.array(z.string()).max(3),
   accountLevel: z.number().int().positive(),
   currentLevelExp: count,
   nextLevelRequiredExp: z.number().int().positive().nullable(),

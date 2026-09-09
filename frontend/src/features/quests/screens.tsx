@@ -15,7 +15,7 @@ import { colors } from '@/theme/tokens';
 import { categories, Draft, discardedSchema, draftSchema, draftsSchema } from './contracts';
 import { DraftForm, emptyDraft, formFromDraft, toSeoulInput, validateDraft } from './validation';
 
-function QuestPage({ children }: PropsWithChildren) {
+export function QuestPage({ children }: PropsWithChildren) {
   const { user, restoring } = useAuth();
   const boundary = useRelationshipBoundary(user?.id ?? 'signed-out');
   const home = useHome();
@@ -35,7 +35,7 @@ function QuestPage({ children }: PropsWithChildren) {
           ) : !eligible ? (
             <Text style={ui.body}>홈에서 로그인과 가입 조건을 확인해 주세요.</Text>
           ) : boundary.ending ? (
-            <Text style={ui.body}>연결 정리 중에는 초안을 볼 수 없어요.</Text>
+            <Text style={ui.body}>연결 정리 중에는 퀘스트를 볼 수 없어요.</Text>
           ) : home.isPending ? (
             <Text style={ui.body}>작성 가능한 상태를 확인하고 있어요…</Text>
           ) : home.error ? (
@@ -90,10 +90,13 @@ function DraftList() {
         나만 보는 초안
       </Text>
       <Text style={ui.body}>
-        작은 약속을 천천히 다듬어 보세요. 아직 파트너에게 보내지 않은 글이에요.
+        수정 중인 내용은 나만 볼 수 있어요. 파트너는 마지막 제출본을 확인해요.
       </Text>
       <Link href="/quests/new" style={ui.link}>
         새 초안 쓰기 →
+      </Link>
+      <Link href="/quest" style={ui.link}>
+        제출·진행·결과 보기
       </Link>
       {query.isPending ? (
         <Text style={ui.body}>초안을 불러오는 중…</Text>
@@ -424,6 +427,9 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
             최종 결과 확인 마감 {toSeoulInput(saved.resultConfirmationDeadlineAt)} (서울)
           </Text>
           <Text style={ui.caption}>작성 내용을 바꾸었다면 다시 저장해야 위 일정에 반영돼요.</Text>
+          <Link href={{ pathname: '/quest', params: { questId: saved.id } }} style={ui.link}>
+            저장한 내용 확인하고 제출 →
+          </Link>
         </View>
       )}
       {notice && (
