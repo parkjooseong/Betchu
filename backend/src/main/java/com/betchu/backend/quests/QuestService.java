@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,7 +33,7 @@ public class QuestService {
         d.title,d.category,d.success_criteria,d.difficulty,d.stake,d.due_at,d.result_at,
         d.minimum_duration_minutes,d.evidence_method,d.updated_at
       FROM quests q JOIN quest_drafts d ON d.quest_id=q.id
-      WHERE q.creator_id=? AND q.couple_id=? AND q.status='DRAFT'
+      WHERE q.creator_id=? AND q.couple_id=? AND q.status IN ('DRAFT','CHANGE_REQUESTED')
       """;
 
   public QuestService(JdbcTemplate jdbc, GameAccess access, JsonMapper mapper) {
@@ -120,7 +121,7 @@ public class QuestService {
   public DraftView update(UUID user, UUID id, long expected, DraftInput input) {
     UUID couple = scope(user, true);
     QuestRow row = ownQuest(user, couple, id);
-    if (!"DRAFT".equals(row.status())) throw notFound();
+    if (!Set.of("DRAFT", "CHANGE_REQUESTED").contains(row.status())) throw notFound();
     version(row.version(), expected);
     DraftInput normalized = QuestValidation.normalize(input);
     jdbc.update(
@@ -155,7 +156,7 @@ public class QuestService {
       checkReceipt(previous, "DISCARD", hash);
       return mapper.readValue(previous.response(), DiscardResult.class);
     }
-    if (!"DRAFT".equals(row.status())) throw notFound();
+    if (!Set.of("DRAFT", "CHANGE_REQUESTED").contains(row.status())) throw notFound();
     version(row.version(), expected);
     Instant now = now();
     jdbc.update("DELETE FROM quest_drafts WHERE quest_id=?", id);
@@ -167,6 +168,13 @@ public class QuestService {
         timestamp(now),
         id);
     DiscardResult response = new DiscardResult(id, "DISCARDED", expected + 1);
+    jdbc.update(
+        "INSERT INTO quest_outbox(id,quest_id,event_type,row_version,recipient_id,created_at) VALUES (?,?,'DISCARD',?,?,?)",
+        UUID.randomUUID(),
+        id,
+        expected + 1,
+        user,
+        timestamp(now));
     saveReceipt(user, key, "DISCARD", id, hash, response, now);
     return response;
   }

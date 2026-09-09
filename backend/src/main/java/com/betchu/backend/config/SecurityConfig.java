@@ -106,7 +106,8 @@ public class SecurityConfig {
     source.registerCorsConfiguration(
         "/api/v1/couples/**", cors(origins, List.of("GET", "POST", "DELETE")));
     source.registerCorsConfiguration(
-        "/api/v1/quests/**", cors(origins, List.of("GET", "POST", "PATCH", "DELETE")));
+        "/api/v1/quests/**", cors(origins, List.of("GET", "POST", "PUT", "PATCH", "DELETE")));
+    source.registerCorsConfiguration("/api/v1/actions/pending", cors(origins, List.of("GET")));
     source.registerCorsConfiguration("/api/v1/quests", cors(origins, List.of("GET", "POST")));
     source.registerCorsConfiguration("/api/v1/tutorials", cors(origins, List.of("GET", "POST")));
     source.registerCorsConfiguration("/api/v1/tutorials/**", cors(origins, List.of("GET", "POST")));

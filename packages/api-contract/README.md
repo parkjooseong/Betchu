@@ -127,7 +127,7 @@ current relationship; partner balances and private draft counts are omitted.
 | --- | --- | --- |
 | POST | /quests | Create a PERSONAL/CUSTOM draft; UUID Idempotency-Key required |
 | GET | /quests?status=DRAFT | Current author's drafts, cursor pagination; default 20, maximum 50 |
-| GET | /quests/{questId} | Own current-relationship draft; all inaccessible IDs return 404 |
+| GET | /quests/{questId} | Editable own draft or role-scoped lifecycle view; inaccessible IDs return 404 |
 | PATCH | /quests/{questId}/draft | Replace the nine inputs using expectedRowVersion |
 | DELETE | /quests/{questId}/draft?expectedRowVersion=N | Discard and delete text; UUID Idempotency-Key required |
 
@@ -136,9 +136,7 @@ and a personal starter. They can be written before tutorial completion and do
 not reserve or deduct coins. The nine inputs are title, category,
 successCriteria, difficulty, stake, dueAt, resultAt, minimumDurationMinutes and
 evidenceMethod. This increment accepts only evidenceMethod NONE, difficulties
-1–4 and CUSTOM stakes 0 or 100. General personal drafts do not yet offer
-submission, approval, evidence upload or settlement. The separate tutorial
-workflow below includes its own approval and settlement.
+1–4 and CUSTOM stakes 0 or 100. The general PERSONAL/CUSTOM lifecycle below adds submission, approval and settlement. Photo evidence remains outside this increment.
 
 Initial engineering input limits are 1–80 Unicode code points for titles,
 1–1000 for success criteria, and 0–10080 minimum-duration minutes. These limits
@@ -209,11 +207,41 @@ with RELATIONSHIP_ENDED_BEFORE_FINAL_APPROVAL. All locked principal is returned
 once. Access revocation commits before settlement, so a retryable settlement
 failure cannot restore partner access. Personal monster and wallet survive.
 
+## General personal quests
+
+OpenAPI 0.6.0 adds role-scoped progress and immutable version history, author-only approval quotes, pending actions, weekly summary and betting-rule acknowledgments.
+
+| Method | Path (under /api/v1) | Behavior |
+| --- | --- | --- |
+| GET | /quests?status=ALL | Current couple lifecycle list with private drafts visible only to their creator |
+| GET | /quests/{questId}/progress | Consistent role-scoped view with allowedActions and rowVersion |
+| GET | /quests/{questId}/versions | Immutable submitted versions and changed field names |
+| GET | /quests/{questId}/approval-quote | Creator-only wallet, remaining daily limits and permitted stakes |
+| POST | /quests/{questId}/submit | Snapshot saved draft after tutorial completion |
+| POST | /quests/{questId}/recall | Creator recalls the exact pending version |
+| POST | /quests/{questId}/request-change | Partner requests revision with a message |
+| POST | /quests/{questId}/approve | Approve exact version and prediction; reserve resources |
+| POST | /quests/{questId}/reject | Reject the displayed pending version |
+| PUT | /quests/{questId}/partner-result | Store the private actual result without settlement |
+| POST | /quests/{questId}/partner-result/final-approve | Confirm stored result plus selectionRevision and settle once |
+| POST | /quests/{questId}/partner-result/reject | Invalidate a result that cannot be confirmed |
+| POST | /quests/{questId}/cancel | Request mutual cancellation before dueAt |
+| POST | /quests/{questId}/confirm-cancel | Other partner confirms cancellation |
+| POST | /quests/{questId}/reject-cancel | Other partner declines cancellation |
+| GET | /actions/pending | Currently actionable personal quests |
+| GET | /quests/summary | Current couple's Seoul weekly finalized personal activity |
+| GET | /couples/me/settlement-rules | Current suspension generation and acknowledgment state |
+| POST | /couples/me/settlement-rules/acknowledge | Acknowledge the displayed suspension generation |
+
+Every lifecycle mutation uses UUID Idempotency-Key and expectedRowVersion; rule acknowledgment instead uses expectedGeneration. Partner projections never include working drafts or personal quote limits. Creator projections never include partnerSelection. After the relationship ends, ordinary access and mutation replays return 404.
+
+CUSTOM stakes are 0/100C with at most 50% success bonus. Approval reserves up to five active and five daily XP slots, two daily coin slots, 300C total bonus and 100C custom/low bonus. Budget date is resultAt in Asia/Seoul. Actual FAILURE burns the principal; INVALID returns it and releases daily slots. Mutual cancellation returns principal but retains daily slot usage. See [full lifecycle decisions](../../docs/implementation/personal-quest-lifecycle.md) for deadlines, growth, risk suspension and retention.
+
 ## Branch workflow
 
 Maintain the same contract on `frontend` and `backend`. Only the frontend branch
 contains the mobile implementation/generated types; only the backend branch
-contains the new controller/service/tests until the branches are integrated.
+contains the new controller/service/tests. The `work` branch integrates both implementations.
 Do not merge an unrelated branch simply to synchronize the contract.
 
 ## Generate TypeScript types

@@ -51,7 +51,7 @@ public class HomeService {
               partnerId);
       draftCount =
           jdbc.queryForObject(
-              "SELECT COUNT(*) FROM quests q JOIN quest_drafts d ON d.quest_id=q.id WHERE q.couple_id=? AND q.creator_id=? AND q.status='DRAFT'",
+              "SELECT COUNT(*) FROM quests q JOIN quest_drafts d ON d.quest_id=q.id WHERE q.couple_id=? AND q.creator_id=? AND q.status IN ('DRAFT','CHANGE_REQUESTED')",
               Long.class,
               coupleId,
               userId);

@@ -74,7 +74,7 @@ GET /api/v1/home
 ```
 
 - 내 배츄 조회는 `{monster: MonsterView | null}`이다. 이름 변경은 무료이며 미리보기와 같은 Unicode 이름 규칙을 적용한다. 아직 배츄가 없으면 이름 변경은 `404 MONSTER_NOT_FOUND`다.
-- `MonsterView`는 저장된 성장 단계와 계정 능력치를 반환한다. 튜토리얼 성공 후에는 인정 성공 0회를 유지하며 `BABY` 단계와 도달한 `HATCH`를 표시한다. 일반 퀘스트 성장 보상과 장비 지급 API는 아직 없으며 `masteryRewards`는 빈 배열, 장비 보너스는 0이다.
+- `MonsterView`는 저장된 성장 단계와 계정 능력치를 반환한다. 튜토리얼 성공 후에는 인정 성공 0회를 유지하며 `BABY` 단계와 도달한 `HATCH`를 표시한다. 일반 퀘스트는 20·40회 성장과 60회 종별 귀속 외형 보상을 기록한다. `masteryRewards`는 지급된 코드이며 장비 보너스는 0이다.
 - 상대 배츄는 현재 유효한 커플 관계에서만 조회할 수 있다. 연결이 없거나 끝났거나 차단되면 `409 COUPLE_REQUIRED`다. 내 배츄·성장·지갑은 관계 종료와 재연결 후에도 유지된다.
 - 홈은 서버 시각, 현재 연결, 내 지갑과 배츄, 허용된 상대 프로필과 배츄를 반환한다. 상대 지갑이나 초안 내용은 포함하지 않는다. `ownDraftCount`는 현재 커플에서 내가 작성한 초안만 세며, 연결이 없으면 0이다. 공유 퀘스트 상태 수는 저장된 튜토리얼의 승인 대기·진행·결과 확인 상태를 포함한다.
 - 관계 종료와 게임 쓰기는 동일한 PostgreSQL 트랜잭션 잠금을 사용한다. 종료된 관계에 새 스타터나 초안이 뒤늦게 저장되는 일을 방지한다.
@@ -108,7 +108,7 @@ GET /api/v1/home
 ./gradlew integrationTest --tests com.betchu.backend.quests.QuestDraftIntegrationTest
 ```
 
-일반 퀘스트 제출·승인·정산과 사진 인증은 후속 구현이다. 전체 요청·응답은 [공통 API 계약](../packages/api-contract/README.md)을 따른다.
+일반 퀘스트 제출·승인·정산은 아래 일반 퀘스트 절에서 제공하며 사진 인증은 후속 구현이다. 전체 요청·응답은 [공통 API 계약](../packages/api-contract/README.md)을 따른다.
 
 ## 튜토리얼 정산과 관계 종료
 
@@ -174,3 +174,11 @@ Google 인증 흐름은 [Google OpenID Connect](https://developers.google.com/id
 - DB 변경은 `src/main/resources/db/migration`의 Flyway 파일로만 적용한다.
 - 실제 비밀값은 `.env`나 운영 secret manager에 저장하고 Git에 커밋하지 않는다.
 - 서버 시각은 UTC로 저장하고 주간·일일 정책은 `Asia/Seoul` 기준으로 계산한다.
+
+## 일반 개인 퀘스트
+
+`V8__personal_quest_lifecycle.sql`은 제출본·수정 요청·슬롯/보상 예산·일반 정산·성장 보상·정산 규칙 확인·outbox를 추가한다. 제출은 튜토리얼 완료 후 가능하며 코인과 슬롯은 파트너 시작 승인 때만 예약한다. 결과 선택은 PUT으로 저장하고 최종 승인은 선택값·선택 버전·행 버전을 모두 검증해 한 번만 정산한다.
+
+`QuestLifecycleService`, `QuestSettlementService`, `QuestBettingService`가 현재 관계 접근·DB 시각·자원 예약·정산을 처리한다. `QuestMaintenance`는 기본 5초마다 승인/결과 기한을 처리한다. 연결 종료는 기존 정리 작업에서 저장된 종료 시각을 기준으로 환급한다. 지갑·원장·정산·일일 예산·성장·outbox는 함께 커밋하거나 롤백한다. outbox 외부 푸시 전송기는 아직 없다.
+
+검증 명령: `./gradlew integrationTest --tests '*PersonalQuestIntegrationTest'`. 전체 규칙과 제한은 [일반 퀘스트 구현](../docs/implementation/personal-quest-lifecycle.md)을 참고한다. 통합 브랜치 `work`에서 `frontend/`와 `backend/`를 함께 실행할 수 있다.

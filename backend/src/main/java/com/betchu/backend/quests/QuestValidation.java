@@ -49,6 +49,10 @@ final class QuestValidation {
     return value != null && !value.isBefore(MIN) && value.isBefore(MAX);
   }
 
+  static String message(String value) {
+    return text(value, 1000, CRITERIA_CONTROL);
+  }
+
   private static String text(String value, int maximum, Pattern forbidden) {
     if (value == null) throw invalid();
     String result = EDGE.matcher(Normalizer.normalize(value, Normalizer.Form.NFC)).replaceAll("");

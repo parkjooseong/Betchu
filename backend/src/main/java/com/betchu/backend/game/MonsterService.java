@@ -179,7 +179,10 @@ public class MonsterService {
         successes,
         next,
         List.copyOf(reached),
-        List.of(),
+        jdbc.queryForList(
+            "SELECT reward_code FROM monster_mastery_rewards WHERE monster_id=? ORDER BY kind",
+            String.class,
+            rs.getObject("id", UUID.class)),
         level,
         rs.getInt("current_level_exp"),
         level == 50 ? null : 80 + 20 * (level - 1),

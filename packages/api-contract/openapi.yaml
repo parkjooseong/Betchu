@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: BETCHU API
-  version: 0.5.0
-  description: BETCHU 계정·커플 연결, 배츄와 홈, 개인 초안, 일회 튜토리얼 승인·정산 계약
+  version: 0.6.0
+  description: BETCHU 계정·커플 연결, 배츄와 홈, 개인 퀘스트 제출·파트너 확인·정산, 일회 튜토리얼 계약
 servers:
   - url: http://localhost:8080/api/v1
     description: Local development
@@ -499,8 +499,8 @@ paths:
         - $ref: "#/components/parameters/CoupleIdempotencyKey"
       responses:
         "200":
-          description: Unilateral immediate relationship end. Current increment has no quest/resources to settle.
-            Replays never end a later relationship.
+          description: Immediately revoke relationship access and enqueue durable cleanup of live personal
+            quests and tutorials using the saved end time. Retries never end a later relationship.
           content:
             application/json:
               schema:
@@ -712,7 +712,7 @@ paths:
       tags:
         - quests
     get:
-      operationId: listQuestDrafts
+      operationId: listQuests
       parameters:
         - name: status
           in: query
@@ -720,6 +720,18 @@ paths:
             type: string
             enum:
               - DRAFT
+              - ALL
+              - PENDING_APPROVAL
+              - CHANGE_REQUESTED
+              - ACTIVE
+              - AWAITING_RESULT
+              - PENDING_FINAL_APPROVAL
+              - SUCCESS
+              - FAILURE
+              - INVALID
+              - CANCELED
+              - REJECTED
+              - APPROVAL_EXPIRED
         - name: limit
           in: query
           schema:
@@ -734,11 +746,14 @@ paths:
             maxLength: 256
       responses:
         "200":
-          description: Only this user's drafts in the current relationship, newest first.
+          description: DRAFT returns private editable drafts; other filters return role-scoped lifecycle
+            projections with opaque cursors.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/QuestDraftPage"
+                anyOf:
+                  - $ref: "#/components/schemas/QuestDraftPage"
+                  - $ref: "#/components/schemas/PersonalQuestPage"
         default:
           description: Request rejected with a stable BETCHU error code
           content:
@@ -754,11 +769,14 @@ paths:
       operationId: getQuestDraft
       responses:
         "200":
-          description: The author's current draft.
+          description: The creator receives the current draft while editable; otherwise returns the visible
+            immutable lifecycle projection. Former partners cannot read any projection.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/QuestDraft"
+                anyOf:
+                  - $ref: "#/components/schemas/QuestDraft"
+                  - $ref: "#/components/schemas/PersonalQuestView"
         default:
           description: Request rejected with a stable BETCHU error code
           content:
@@ -1577,6 +1595,590 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ApiProblem"
+  /quests/{questId}/progress:
+    get:
+      operationId: getPersonalQuestProgress
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /quests/{questId}/versions:
+    get:
+      operationId: getPersonalQuestVersions
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestVersions"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /quests/{questId}/approval-quote:
+    get:
+      operationId: getPersonalQuestApprovalQuote
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestQuote"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /actions/pending:
+    get:
+      operationId: getPendingPersonalQuestActions
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters: []
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestPage"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /quests/summary:
+    get:
+      operationId: getPersonalQuestActivitySummary
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters: []
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestActivitySummary"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /couples/me/settlement-rules:
+    get:
+      operationId: getPersonalQuestBettingRules
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters: []
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestBettingRules"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /couples/me/settlement-rules/acknowledge:
+    post:
+      operationId: acknowledgePersonalQuestBettingRules
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestBettingRules"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestAcknowledgeRequest"
+  /quests/{questId}/submit:
+    post:
+      operationId: submitPersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a1
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a1
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestRowRequest"
+  /quests/{questId}/recall:
+    post:
+      operationId: recallPersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a2
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a2
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestVersionRequest"
+  /quests/{questId}/request-change:
+    post:
+      operationId: requestPersonalQuestChange
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a3
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a3
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestChangeRequest"
+  /quests/{questId}/reject:
+    post:
+      operationId: rejectPersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a4
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a4
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestVersionRequest"
+  /quests/{questId}/approve:
+    post:
+      operationId: approvePersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a5
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a5
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestApproveRequest"
+  /quests/{questId}/partner-result:
+    put:
+      operationId: selectPersonalQuestResult
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a6
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a6
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestResultRequest"
+  /quests/{questId}/partner-result/final-approve:
+    post:
+      operationId: finalApprovePersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a7
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a7
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestFinalRequest"
+  /quests/{questId}/partner-result/reject:
+    post:
+      operationId: rejectPersonalQuestResult
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a8
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a8
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestRowRequest"
+  /quests/{questId}/cancel:
+    post:
+      operationId: cancelPersonalQuest
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a9
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a9
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestRowRequest"
+  /quests/{questId}/confirm-cancel:
+    post:
+      operationId: confirmPersonalQuestCancellation
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a10
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a10
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestRowRequest"
+  /quests/{questId}/reject-cancel:
+    post:
+      operationId: rejectPersonalQuestCancellation
+      tags:
+        - personal-quests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questId
+          in: path
+          required: true
+          schema: &a11
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: *a11
+      responses:
+        "200":
+          description: Current role-scoped result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalQuestView"
+        default:
+          description: Safe request, role, version, time or budget error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalQuestRowRequest"
 components:
   schemas:
     SystemHealth:
@@ -2166,10 +2768,11 @@ components:
             $ref: "#/components/schemas/MonsterGrowthMilestone"
         masteryRewards:
           type: array
-          maxItems: 0
+          maxItems: 3
           items:
             type: string
-          description: Empty until mastery rewards are implemented
+          description: Species-bound cosmetic aura, title and accessory granted at 60 recognized successes; no
+            combat bonus.
         accountLevel:
           type: integer
           minimum: 1
@@ -2405,6 +3008,7 @@ components:
               type: string
               enum:
                 - DRAFT
+                - CHANGE_REQUESTED
             questType:
               type: string
               enum:
@@ -2904,6 +3508,620 @@ components:
           anyOf:
             - $ref: "#/components/schemas/TutorialView"
             - type: "null"
+    PersonalQuestTerms:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - category
+        - successCriteria
+        - difficulty
+        - stake
+        - reward
+        - xp
+        - minimumDurationMinutes
+        - evidenceMethod
+        - dueAt
+        - resultAt
+        - approvalDeadlineAt
+        - resultConfirmationDeadlineAt
+      properties:
+        title: &a1
+          type: string
+        category:
+          type: string
+          enum:
+            - SLEEP
+            - EXERCISE
+            - STUDY
+            - CONTACT
+            - GAMING
+            - SPENDING
+            - HOUSEWORK
+            - EATING
+            - DATE
+            - CUSTOM
+        successCriteria: *a1
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 4
+        stake:
+          type: integer
+          enum:
+            - 0
+            - 100
+        reward:
+          type: integer
+          enum:
+            - 0
+            - 50
+        xp:
+          type: integer
+          enum:
+            - 10
+            - 20
+            - 40
+            - 70
+        minimumDurationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 10080
+        evidenceMethod:
+          type: string
+          enum:
+            - NONE
+        dueAt: &a2
+          type: string
+          format: date-time
+        resultAt: *a2
+        approvalDeadlineAt: *a2
+        resultConfirmationDeadlineAt: *a2
+    PersonalQuestVersion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - versionNo
+        - terms
+        - changedFields
+        - submittedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        versionNo:
+          type: integer
+          minimum: 1
+        terms:
+          $ref: "#/components/schemas/PersonalQuestTerms"
+        changedFields:
+          type: array
+          items:
+            type: string
+            enum:
+              - title
+              - category
+              - successCriteria
+              - difficulty
+              - stake
+              - minimumDurationMinutes
+              - evidenceMethod
+              - dueAt
+              - resultAt
+        submittedAt:
+          type: string
+          format: date-time
+    PersonalQuestDecision:
+      type: object
+      additionalProperties: false
+      required:
+        - decision
+        - requestMessage
+        - decidedAt
+      properties:
+        decision:
+          type: string
+          enum:
+            - APPROVE
+            - REQUEST_CHANGE
+            - REJECT
+        requestMessage:
+          anyOf:
+            - type: string
+            - type: "null"
+        decidedAt:
+          type: string
+          format: date-time
+    PersonalQuestSettlement:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - resolvedResult
+        - invalidReason
+        - stake
+        - reward
+        - xp
+        - creditedMonsterId
+        - recognizedSuccessBefore
+        - recognizedSuccessAfter
+        - growthStageBefore
+        - growthStageAfter
+        - settledAt
+      properties:
+        id: &a3
+          type: string
+          format: uuid
+        resolvedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+            - INVALID
+            - CANCELED
+            - CANCELED_RELATIONSHIP_ENDED
+        invalidReason:
+          anyOf:
+            - type: string
+            - type: "null"
+        stake:
+          type: integer
+          enum:
+            - 0
+            - 100
+        reward:
+          type: integer
+          enum:
+            - 0
+            - 25
+            - 50
+        xp:
+          type: integer
+          minimum: 0
+          maximum: 91
+        creditedMonsterId:
+          anyOf:
+            - *a3
+            - type: "null"
+        recognizedSuccessBefore:
+          anyOf:
+            - &a4
+              type: integer
+              minimum: 0
+            - type: "null"
+        recognizedSuccessAfter:
+          anyOf:
+            - *a4
+            - type: "null"
+        growthStageBefore:
+          anyOf:
+            - type: string
+              enum:
+                - EGG
+                - BABY
+                - INTERMEDIATE
+                - FINAL
+            - type: "null"
+        growthStageAfter:
+          anyOf:
+            - type: string
+              enum:
+                - BABY
+                - INTERMEDIATE
+                - FINAL
+            - type: "null"
+        settledAt:
+          type: string
+          format: date-time
+    PersonalQuestView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - coupleId
+        - creatorId
+        - viewerRole
+        - status
+        - auditProjectionStatus
+        - rowVersion
+        - questVersionId
+        - approvedQuestVersionId
+        - version
+        - predictedResult
+        - budgetDateKst
+        - lockedStake
+        - rewardReservedAmount
+        - decision
+        - cancelRequest
+        - settlement
+        - allowedActions
+        - serverTime
+      properties:
+        id: &a5
+          type: string
+          format: uuid
+        coupleId: *a5
+        creatorId: *a5
+        viewerRole:
+          type: string
+          enum:
+            - CREATOR
+            - PARTNER
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - CHANGE_REQUESTED
+            - DISCARDED
+            - PENDING_APPROVAL
+            - ACTIVE
+            - AWAITING_RESULT
+            - PENDING_FINAL_APPROVAL
+            - SUCCESS
+            - FAILURE
+            - INVALID
+            - REJECTED
+            - APPROVAL_EXPIRED
+            - CANCELED
+            - CANCELED_RELATIONSHIP_ENDED
+        auditProjectionStatus:
+          anyOf:
+            - type: string
+              enum:
+                - RECALLED
+            - type: "null"
+        rowVersion:
+          type: integer
+          minimum: 0
+        questVersionId:
+          anyOf:
+            - *a5
+            - type: "null"
+        approvedQuestVersionId:
+          anyOf:
+            - *a5
+            - type: "null"
+        version:
+          anyOf:
+            - $ref: "#/components/schemas/PersonalQuestVersion"
+            - type: "null"
+        draft:
+          $ref: "#/components/schemas/QuestDraft"
+        predictedResult:
+          anyOf:
+            - type: string
+              enum:
+                - SUCCESS
+                - FAILURE
+            - type: "null"
+        budgetDateKst:
+          anyOf:
+            - type: string
+              format: date
+            - type: "null"
+        lockedStake:
+          anyOf:
+            - type: integer
+              enum:
+                - 0
+                - 100
+            - type: "null"
+        rewardReservedAmount:
+          anyOf:
+            - type: integer
+              enum:
+                - 0
+                - 25
+                - 50
+            - type: "null"
+        decision:
+          anyOf:
+            - $ref: "#/components/schemas/PersonalQuestDecision"
+            - type: "null"
+        partnerSelection:
+          $ref: "#/components/schemas/TutorialPartnerSelection"
+        cancelRequest:
+          anyOf:
+            - $ref: "#/components/schemas/TutorialCancelRequest"
+            - type: "null"
+        settlement:
+          anyOf:
+            - $ref: "#/components/schemas/PersonalQuestSettlement"
+            - type: "null"
+        allowedActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - EDIT
+              - SUBMIT
+              - DISCARD
+              - RECALL
+              - REQUEST_CHANGE
+              - REJECT
+              - APPROVE
+              - SELECT_RESULT
+              - FINAL_APPROVE
+              - REJECT_RESULT
+              - CANCEL
+              - CONFIRM_CANCEL
+              - REJECT_CANCEL
+        serverTime:
+          type: string
+          format: date-time
+      allOf:
+        - if:
+            properties:
+              viewerRole:
+                const: CREATOR
+            required:
+              - viewerRole
+          then:
+            not:
+              required:
+                - partnerSelection
+          else:
+            not:
+              required:
+                - draft
+    PersonalQuestPage:
+      type: object
+      additionalProperties: false
+      required:
+        - quests
+        - nextCursor
+        - serverTime
+      properties:
+        quests:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonalQuestView"
+        nextCursor:
+          anyOf:
+            - type: string
+            - type: "null"
+        serverTime:
+          type: string
+          format: date-time
+    PersonalQuestVersions:
+      type: object
+      additionalProperties: false
+      required:
+        - versions
+        - rowVersion
+      properties:
+        versions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonalQuestVersion"
+        rowVersion:
+          type: integer
+          minimum: 0
+    PersonalQuestQuote:
+      type: object
+      additionalProperties: false
+      required:
+        - questId
+        - rowVersion
+        - budgetDateKst
+        - availableCoins
+        - activeSlotsRemaining
+        - xpSlotsRemaining
+        - coinSlotsRemaining
+        - totalBonusRemaining
+        - lowBonusRemaining
+        - expectedReward
+        - allowedStakes
+        - canApprove
+        - blockingReason
+      properties:
+        questId:
+          type: string
+          format: uuid
+        rowVersion: &a6
+          type: integer
+          minimum: 0
+        budgetDateKst:
+          type: string
+          format: date
+        availableCoins: *a6
+        activeSlotsRemaining:
+          type: integer
+          minimum: 0
+          maximum: 5
+        xpSlotsRemaining:
+          type: integer
+          minimum: 0
+          maximum: 5
+        coinSlotsRemaining:
+          type: integer
+          minimum: 0
+          maximum: 2
+        totalBonusRemaining:
+          type: integer
+          minimum: 0
+          maximum: 300
+        lowBonusRemaining:
+          type: integer
+          minimum: 0
+          maximum: 100
+        expectedReward:
+          type: integer
+          enum:
+            - 0
+            - 25
+            - 50
+        allowedStakes:
+          type: array
+          items:
+            type: integer
+            enum:
+              - 0
+              - 100
+        canApprove:
+          type: boolean
+        blockingReason:
+          anyOf:
+            - type: string
+            - type: "null"
+    PersonalQuestActivitySummary:
+      type: object
+      additionalProperties: false
+      required:
+        - weekStartAt
+        - weekEndAt
+        - current
+        - target
+        - unlocked
+      properties:
+        weekStartAt: &a7
+          type: string
+          format: date-time
+        weekEndAt: *a7
+        current:
+          type: integer
+          minimum: 0
+        target:
+          type: integer
+          const: 10
+        unlocked:
+          type: boolean
+    PersonalQuestBettingRules:
+      type: object
+      additionalProperties: false
+      required:
+        - coupleId
+        - suspended
+        - generation
+        - suspendedAt
+        - acknowledgedAt
+        - partnerAcknowledged
+        - serverTime
+      properties:
+        coupleId:
+          type: string
+          format: uuid
+        suspended:
+          type: boolean
+        generation:
+          type: integer
+          minimum: 0
+        suspendedAt:
+          anyOf:
+            - &a8
+              type: string
+              format: date-time
+            - type: "null"
+        acknowledgedAt:
+          anyOf:
+            - *a8
+            - type: "null"
+        partnerAcknowledged:
+          type: boolean
+        serverTime: *a8
+    PersonalQuestRowRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedRowVersion
+      properties:
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+    PersonalQuestVersionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questVersionId
+        - expectedRowVersion
+      properties:
+        questVersionId:
+          type: string
+          format: uuid
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+    PersonalQuestChangeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questVersionId
+        - expectedRowVersion
+        - requestMessage
+      properties:
+        questVersionId:
+          type: string
+          format: uuid
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        requestMessage:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    PersonalQuestApproveRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questVersionId
+        - expectedRowVersion
+        - predictedResult
+      properties:
+        questVersionId:
+          type: string
+          format: uuid
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        predictedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+    PersonalQuestResultRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedRowVersion
+        - selectedResult
+      properties:
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        selectedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+    PersonalQuestFinalRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedRowVersion
+        - selectedResult
+        - selectionRevision
+      properties:
+        expectedRowVersion:
+          type: integer
+          minimum: 0
+        selectedResult:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+        selectionRevision:
+          type: integer
+          minimum: 1
+    PersonalQuestAcknowledgeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedGeneration
+      properties:
+        expectedGeneration:
+          type: integer
+          minimum: 0
   securitySchemes:
     BearerAuth:
       type: http

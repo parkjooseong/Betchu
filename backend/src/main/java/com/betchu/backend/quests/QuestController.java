@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/quests")
 public class QuestController {
   private final QuestService service;
+  private final QuestLifecycleService lifecycle;
 
-  public QuestController(QuestService service) {
+  public QuestController(QuestService service, QuestLifecycleService lifecycle) {
     this.service = service;
+    this.lifecycle = lifecycle;
   }
 
   @PostMapping
@@ -28,18 +30,19 @@ public class QuestController {
   }
 
   @GetMapping
-  public DraftPage list(
+  public Object list(
       @AuthenticationPrincipal AuthenticatedUser user,
       @RequestParam(defaultValue = "DRAFT") String status,
       @RequestParam(defaultValue = "20") int limit,
       @RequestParam(required = false) String cursor) {
-    return service.list(userId(user), status, limit, cursor);
+    return "DRAFT".equals(status)
+        ? service.list(userId(user), status, limit, cursor)
+        : lifecycle.list(userId(user), status, limit, cursor);
   }
 
   @GetMapping("/{questId}")
-  public DraftView get(
-      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID questId) {
-    return service.get(userId(user), questId);
+  public Object get(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID questId) {
+    return lifecycle.read(userId(user), questId);
   }
 
   @PatchMapping("/{questId}/draft")
@@ -65,7 +68,7 @@ public class QuestController {
     return user.userId();
   }
 
-  private static UUID key(String key) {
+  static UUID key(String key) {
     try {
       UUID id = UUID.fromString(key);
       if (!id.toString().equalsIgnoreCase(key)) throw new IllegalArgumentException();

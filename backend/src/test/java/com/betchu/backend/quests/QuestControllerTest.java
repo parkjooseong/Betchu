@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 class QuestControllerTest {
   @Autowired MockMvc mvc;
   @MockitoBean QuestService service;
+  @MockitoBean QuestLifecycleService lifecycle;
   private final UUID user = UUID.randomUUID();
 
   @Test

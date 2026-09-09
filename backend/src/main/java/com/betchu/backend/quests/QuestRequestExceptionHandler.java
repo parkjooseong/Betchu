@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(assignableTypes = QuestController.class)
+@RestControllerAdvice(assignableTypes = {QuestController.class, QuestLifecycleController.class})
 public class QuestRequestExceptionHandler {
   @ExceptionHandler({
     HttpMessageNotReadableException.class,
