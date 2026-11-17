@@ -11,7 +11,7 @@ RUN ./gradlew bootJar --no-daemon
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN useradd --system --uid 10001 betchu
-COPY --from=build /workspace/build/libs/*.jar app.jar
+COPY --from=build /workspace/build/libs/betchu-api.jar app.jar
 USER betchu
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

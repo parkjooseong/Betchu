@@ -48,6 +48,10 @@ tasks.withType<Test> {
   useJUnitPlatform()
 }
 
+tasks.bootJar {
+  archiveFileName.set("betchu-api.jar")
+}
+
 spotless {
   java {
     googleJavaFormat()

@@ -19,11 +19,21 @@ final class QuestValidation {
   private QuestValidation() {}
 
   static DraftInput normalize(DraftInput input) {
+    return normalize(input, false);
+  }
+
+  static DraftInput normalize(DraftInput input, boolean template) {
     if (input == null
         || input.category() == null
         || input.difficulty() < 1
         || input.difficulty() > 4
-        || (input.stake() != 0 && input.stake() != 100)
+        || (input.stake() != 0
+            && input.stake() != 100
+            && (!template || (input.stake() != 200 && input.stake() != 300)))
+        || input.stake()
+            > (template
+                ? (input.difficulty() == 4 ? 300 : input.difficulty() == 3 ? 200 : 100)
+                : 100)
         || input.minimumDurationMinutes() < 0
         || input.minimumDurationMinutes() > 10080
         || !"NONE".equals(input.evidenceMethod())

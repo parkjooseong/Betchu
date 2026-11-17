@@ -3,6 +3,7 @@ package com.betchu.backend.couples;
 import static com.betchu.backend.couples.CoupleModels.*;
 
 import com.betchu.backend.common.ApiException;
+import com.betchu.backend.gameplay.WeeklyBossService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -22,12 +23,17 @@ public class CoupleService {
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transactions;
   private final InviteCodeCodec codes;
+  private final WeeklyBossService weeks;
 
   public CoupleService(
-      JdbcTemplate jdbc, PlatformTransactionManager manager, InviteCodeCodec codes) {
+      JdbcTemplate jdbc,
+      PlatformTransactionManager manager,
+      InviteCodeCodec codes,
+      WeeklyBossService weeks) {
     this.jdbc = jdbc;
     this.transactions = new TransactionTemplate(manager);
     this.codes = codes;
+    this.weeks = weeks;
   }
 
   public State me(UUID userId) {
@@ -196,6 +202,7 @@ public class CoupleService {
                 timestamp(now),
                 inviteId);
             jdbc.update("DELETE FROM couple_pairing_slots WHERE invite_id = ?", inviteId);
+            weeks.beforePowerChange(userId);
           }
           return state(userId);
         });
@@ -289,6 +296,9 @@ public class CoupleService {
             jdbc.update(
                 "UPDATE couple_members SET status = 'ENDED', left_at = ? WHERE couple_id = ? AND status = 'ACTIVE'",
                 timestamp(now),
+                coupleId);
+            jdbc.update(
+                "UPDATE weekly_coop_bosses SET status='CANCELED_RELATIONSHIP_ENDED',row_version=row_version+1 WHERE couple_id=? AND status IN ('LOCKED','AVAILABLE','WAITING_PARTNER')",
                 coupleId);
             // Commit loss of relationship access before any fallible resource cleanup begins.
             // The shared advisory/couple locks exclude concurrent draft creation and modification.

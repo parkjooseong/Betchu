@@ -166,6 +166,75 @@ class PersonalQuestIntegrationTest extends PostgresIntegrationTestSupport {
   }
 
   @Test
+  void templateDifficultyAndHighStakeRewardsAreServerOwned() {
+    Instant due = Instant.now().plusSeconds(10000);
+    var d =
+        drafts.createTemplate(
+            alice, UUID.randomUUID(), "PROJECT_120-v1", 300, due, due.plusSeconds(60));
+    assertThat(d.sourceType()).isEqualTo("TEMPLATE");
+    assertThatThrownBy(
+            () ->
+                drafts.update(
+                    alice, d.id(), 0, input("Fake template", 300, due, due.plusSeconds(60))))
+        .isInstanceOf(ApiException.class);
+    var v = quests.submit(alice, d.id(), UUID.randomUUID(), new RowInput(0));
+    assertThat(quests.quote(alice, d.id()).expectedReward()).isEqualTo(300);
+    var active = approve(v);
+    assertThat(active.rewardReservedAmount()).isEqualTo(300);
+    assertThat(n("SELECT low_reward_reserved FROM daily_reward_budgets WHERE user_id=?", alice))
+        .isZero();
+    // Preserve the template's fixed two-hour minimum when moving this fixture's clock.
+    Instant result = Instant.now().minusSeconds(2);
+    jdbc.update(
+        "UPDATE quest_versions SET due_at=?,result_at=?,approval_deadline_at=?,result_confirmation_deadline_at=? WHERE quest_id=?",
+        Timestamp.from(result.minusSeconds(60)),
+        Timestamp.from(result),
+        Timestamp.from(result.minusSeconds(7260)),
+        Timestamp.from(result.plusSeconds(86400)),
+        d.id());
+    var open = quests.get(bob, d.id());
+    var selected =
+        quests.select(
+            bob, d.id(), UUID.randomUUID(), new ResultInput(open.rowVersion(), Result.SUCCESS));
+    quests.finalApprove(
+        bob,
+        d.id(),
+        UUID.randomUUID(),
+        new FinalInput(
+            selected.rowVersion(),
+            Result.SUCCESS,
+            selected.partnerSelection().selectionRevision()));
+    balance(1300, 0);
+    assertThat(n("SELECT reward_issued FROM daily_reward_budgets WHERE user_id=?", alice))
+        .isEqualTo(300);
+    assertThat(n("SELECT low_reward_issued FROM daily_reward_budgets WHERE user_id=?", alice))
+        .isZero();
+  }
+
+  @Test
+  void templateLowDifficultySharesLowBonusBudgetWithCustomQuests() {
+    Instant due = Instant.now().plusSeconds(10000);
+    var d =
+        drafts.createTemplate(
+            alice, UUID.randomUUID(), "TIDY_30-v1", 100, due, due.plusSeconds(60));
+    var v = quests.submit(alice, d.id(), UUID.randomUUID(), new RowInput(0));
+    assertThat(quests.quote(alice, d.id()).expectedReward()).isEqualTo(75);
+    approve(v);
+    var custom = submitted(100);
+    assertThat(quests.quote(alice, custom.id()).expectedReward()).isEqualTo(25);
+    assertThatThrownBy(
+            () ->
+                drafts.createTemplate(
+                    alice, UUID.randomUUID(), "READ_15-v1", 300, due, due.plusSeconds(60)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                drafts.create(
+                    alice, UUID.randomUUID(), input("Custom", 200, due, due.plusSeconds(60))))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
   void exactFinalApprovalPaysOnceAndNeverExposesUnconfirmedSelection() {
     var v = approved(100);
     balance(900, 100);

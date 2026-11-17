@@ -47,6 +47,18 @@ public class AuthController {
     return auth.login(request);
   }
 
+  @PostMapping(path = "/auth/oauth/apple/callback", consumes = "application/x-www-form-urlencoded")
+  public ResponseEntity<Void> appleCallback(
+      @RequestParam(required = false) String state,
+      @RequestParam(required = false) String code,
+      @RequestParam(required = false) String error) {
+    return ResponseEntity.status(303)
+        .location(URI.create(auth.callback("APPLE", state, code, error)))
+        .cacheControl(CacheControl.noStore())
+        .header("Referrer-Policy", "no-referrer")
+        .build();
+  }
+
   @PostMapping("/auth/refresh")
   public Tokens refresh(@RequestBody RefreshRequest request) {
     return auth.refresh(request.refreshToken());
@@ -81,5 +93,10 @@ public class AuthController {
       @PathVariable String policyType,
       @RequestBody ConsentRequest request) {
     return accounts.consent(principal.userId(), policyType, request);
+  }
+
+  @DeleteMapping("/consents/EVIDENCE_OPTIONAL")
+  public UserMe withdrawEvidence(@AuthenticationPrincipal AuthenticatedUser principal) {
+    return accounts.withdrawEvidenceConsent(principal.userId());
   }
 }

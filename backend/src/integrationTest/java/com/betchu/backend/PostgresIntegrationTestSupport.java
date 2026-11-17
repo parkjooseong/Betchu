@@ -15,7 +15,12 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
       "betchu.couples.cleanup-delay-ms=3600000",
       "betchu.couples.retention-delay-ms=3600000",
       "betchu.tutorial.maintenance-delay-ms=3600000",
-      "betchu.quests.maintenance-delay-ms=3600000"
+      "betchu.quests.maintenance-delay-ms=3600000",
+      "betchu.gameplay.maintenance-delay-ms=3600000",
+      "betchu.safety.maintenance-delay-ms=3600000",
+      "betchu.notifications.collect-delay-ms=3600000",
+      "betchu.notifications.dispatch-delay-ms=3600000",
+      "betchu.auth.revocation-delay-ms=3600000"
     })
 @ExtendWith(PostgresIntegrationTestSupport.PostgresAvailable.class)
 public abstract class PostgresIntegrationTestSupport {
@@ -45,7 +50,14 @@ public abstract class PostgresIntegrationTestSupport {
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
       String url = System.getenv("BETCHU_TEST_DB_URL");
-      return (url != null && !url.isBlank()) || DockerClientFactory.instance().isDockerAvailable()
+      boolean available =
+          (url != null && !url.isBlank()) || DockerClientFactory.instance().isDockerAvailable();
+      if (!available
+          && ("true".equalsIgnoreCase(System.getenv("CI"))
+              || "true".equalsIgnoreCase(System.getenv("BETCHU_REQUIRE_INTEGRATION_TESTS"))))
+        throw new IllegalStateException(
+            "Required PostgreSQL integration tests cannot run: set BETCHU_TEST_DB_URL or provide Docker");
+      return available
           ? ConditionEvaluationResult.enabled("PostgreSQL is available")
           : ConditionEvaluationResult.disabled(
               "Neither BETCHU_TEST_DB_URL nor Docker is available");

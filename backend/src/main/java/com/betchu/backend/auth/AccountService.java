@@ -23,11 +23,14 @@ public class AccountService {
   private final JdbcTemplate jdbc;
   private final PolicyService policies;
   private final Clock clock;
+  private final AppleRevocationService revocations;
 
-  public AccountService(JdbcTemplate jdbc, PolicyService policies, Clock clock) {
+  public AccountService(
+      JdbcTemplate jdbc, PolicyService policies, Clock clock, AppleRevocationService revocations) {
     this.jdbc = jdbc;
     this.policies = policies;
     this.clock = clock;
+    this.revocations = revocations;
   }
 
   User user(UUID id, boolean lock) {
@@ -106,6 +109,11 @@ public class AccountService {
             HttpStatus.CONFLICT, "ACCOUNT_ALREADY_ACTIVE", "이미 가입한 계정은 가입 연령 응답으로 삭제할 수 없어요.");
       jdbc.update(
           "UPDATE auth_sessions SET status='REVOKED',revoked_at=? WHERE user_id=?", now(), userId);
+      for (String token :
+          jdbc.queryForList(
+              "SELECT encrypted_provider_token FROM oauth_identities WHERE user_id=? AND provider='APPLE' AND encrypted_provider_token IS NOT NULL",
+              String.class,
+              userId)) revocations.enqueue(token);
       jdbc.update("DELETE FROM users WHERE id=? AND status='PENDING_ELIGIBILITY'", userId);
       return null;
     }
@@ -171,20 +179,46 @@ public class AccountService {
   }
 
   @Transactional
+  public UserMe withdrawEvidenceConsent(UUID userId) {
+    ensureUsable(user(userId, true));
+    jdbc.update(
+        "UPDATE policy_consents c SET withdrawn_at=? FROM policy_versions p WHERE c.policy_version_id=p.id AND c.user_id=? AND p.policy_type='EVIDENCE_OPTIONAL' AND c.withdrawn_at IS NULL",
+        now(),
+        userId);
+    return me(userId);
+  }
+
+  @Transactional
   UUID resolveIdentity(VerifiedIdentity identity) {
     jdbc.query(
         "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
         rs -> {},
-        "GOOGLE:" + identity.subject());
+        identity.provider() + ":" + identity.subject());
     List<UUID> ids =
         jdbc.query(
-            "SELECT user_id FROM oauth_identities WHERE provider='GOOGLE' AND provider_subject=?",
+            "SELECT user_id FROM oauth_identities WHERE provider=? AND provider_subject=?",
             (rs, row) -> rs.getObject(1, UUID.class),
+            identity.provider(),
             identity.subject());
     if (!ids.isEmpty()) {
       ensureUsable(user(ids.getFirst(), true));
+      if (identity.encryptedProviderToken() != null)
+        jdbc.update(
+            "UPDATE oauth_identities SET encrypted_provider_token=?,provider_token_revoked_at=NULL WHERE user_id=? AND provider=?",
+            identity.encryptedProviderToken(),
+            ids.getFirst(),
+            identity.provider());
       return ids.getFirst();
     }
+    if (Boolean.TRUE.equals(
+        jdbc.queryForObject(
+            "SELECT EXISTS(SELECT 1 FROM deleted_identity_cooldowns WHERE identity_hash=? AND expires_at>clock_timestamp())",
+            Boolean.class,
+            AuthSecrets.hash(identity.provider() + ":" + identity.subject()))))
+      throw new ApiException(
+          HttpStatus.CONFLICT,
+          "ACCOUNT_DELETION_COOLDOWN",
+          "탈퇴 처리 후 30일 동안 같은 로그인으로 다시 가입할 수 없어요.");
     UUID id = UUID.randomUUID();
     jdbc.update(
         "INSERT INTO users(id,nickname,status,created_at) VALUES (?,?,'PENDING_ELIGIBILITY',?)",
@@ -192,9 +226,11 @@ public class AccountService {
         identity.nickname(),
         now());
     jdbc.update(
-        "INSERT INTO oauth_identities(user_id,provider,provider_subject) VALUES (?,'GOOGLE',?)",
+        "INSERT INTO oauth_identities(user_id,provider,provider_subject,encrypted_provider_token) VALUES (?,?,?,?)",
         id,
-        identity.subject());
+        identity.provider(),
+        identity.subject(),
+        identity.encryptedProviderToken());
     return id;
   }
 

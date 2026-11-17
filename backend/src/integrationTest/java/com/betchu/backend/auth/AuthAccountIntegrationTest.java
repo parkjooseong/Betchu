@@ -93,6 +93,22 @@ class AuthAccountIntegrationTest extends PostgresIntegrationTestSupport {
   }
 
   @Test
+  void evidenceConsentCanBeWithdrawnRepeatedlyWithoutWithdrawingRequiredPolicies() {
+    UUID user = activate();
+    UUID evidence = policy("EVIDENCE_OPTIONAL");
+    accept(user, "EVIDENCE_OPTIONAL", evidence);
+    assertThat(accounts.me(user).evidenceConsent()).isTrue();
+    assertThat(accounts.withdrawEvidenceConsent(user).evidenceConsent()).isFalse();
+    assertThat(accounts.withdrawEvidenceConsent(user).missingPolicyVersionIds()).isEmpty();
+    assertThat(accounts.me(user).status()).isEqualTo("ACTIVE");
+    assertThat(
+            count(
+                "SELECT count(*) FROM wallet_ledger WHERE user_id=? AND entry_type='SIGNUP_GRANT'",
+                user))
+        .isEqualTo(1);
+  }
+
+  @Test
   void missingApprovedPoliciesNeverActivatesOrGrantsCoins() {
     UUID user = pending();
     assertThat(policies.current("ko-KR").ready()).isFalse();
