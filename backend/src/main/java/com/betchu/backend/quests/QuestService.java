@@ -44,10 +44,25 @@ public class QuestService {
 
   @Transactional
   public DraftView create(UUID user, UUID key, DraftInput input) {
+    return createInternal(user, key, input, null);
+  }
+
+  @Transactional
+  public DraftView createTemplate(
+      UUID user, UUID key, String code, int stake, Instant due, Instant result) {
+    var template = QuestTemplates.get(code);
+    return createInternal(user, key, QuestTemplates.input(template, stake, due, result), template);
+  }
+
+  private DraftView createInternal(
+      UUID user, UUID key, DraftInput input, QuestTemplates.Template template) {
     UUID couple = scope(user, false);
     requireKey(key);
-    DraftInput normalized = QuestValidation.normalize(input);
-    String hash = hash(mapper.writeValueAsString(normalized));
+    DraftInput normalized = QuestValidation.normalize(input, template != null);
+    String hash =
+        hash(
+            (template == null ? "" : template.code() + ":")
+                + mapper.writeValueAsString(normalized));
     Receipt previous = receipt(user, key);
     if (previous != null) {
       checkReceipt(previous, "CREATE", hash);
@@ -58,11 +73,13 @@ public class QuestService {
     UUID id = UUID.randomUUID();
     Instant now = now();
     jdbc.update(
-        "INSERT INTO quests(id,couple_id,creator_id,quest_type,source_type,status,created_at) VALUES (?,?,?,'PERSONAL','CUSTOM','DRAFT',?)",
+        "INSERT INTO quests(id,couple_id,creator_id,quest_type,source_type,status,created_at,template_code) VALUES (?,?,?,'PERSONAL',?,'DRAFT',?,?)",
         id,
         couple,
         user,
-        timestamp(now));
+        template == null ? "CUSTOM" : "TEMPLATE",
+        timestamp(now),
+        template == null ? null : template.code());
     jdbc.update(
         """
         INSERT INTO quest_drafts(quest_id,title,category,success_criteria,difficulty,stake,due_at,
@@ -123,7 +140,10 @@ public class QuestService {
     QuestRow row = ownQuest(user, couple, id);
     if (!Set.of("DRAFT", "CHANGE_REQUESTED").contains(row.status())) throw notFound();
     version(row.version(), expected);
-    DraftInput normalized = QuestValidation.normalize(input);
+    String templateCode =
+        jdbc.queryForObject("SELECT template_code FROM quests WHERE id=?", String.class, id);
+    DraftInput normalized = QuestValidation.normalize(input, templateCode != null);
+    if (templateCode != null) QuestTemplates.validate(QuestTemplates.get(templateCode), normalized);
     jdbc.update(
         """
         UPDATE quest_drafts SET title=?,category=?,success_criteria=?,difficulty=?,stake=?,due_at=?,

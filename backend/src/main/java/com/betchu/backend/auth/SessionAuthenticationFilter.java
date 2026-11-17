@@ -58,6 +58,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     if ("GET".equals(method)
         && Set.of(
                 "/api/v1/users/me",
+                "/api/v1/account/export",
+                "/api/v1/reports/targets",
                 "/api/v1/couples/me/end-status",
                 "/api/v1/auth/providers",
                 "/api/v1/policy-versions/current",
@@ -68,6 +70,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         && Set.of(
                 "/api/v1/onboarding/age-eligibility",
                 "/api/v1/auth/logout",
+                "/api/v1/account/delete",
+                "/api/v1/reports",
                 "/api/v1/monsters/starter-preview",
                 "/api/v1/auth/login/start",
                 "/api/v1/auth/login",
@@ -75,6 +79,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 "/api/v1/couples/me/end",
                 "/api/v1/couples/me/block")
             .contains(path)) return true;
+    if ("DELETE".equals(method) && "/api/v1/consents/EVIDENCE_OPTIONAL".equals(path)) return true;
     return "PUT".equals(method)
         && Set.of(
                 "/api/v1/consents/TERMS",

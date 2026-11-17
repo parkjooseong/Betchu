@@ -42,6 +42,9 @@ management:
 
 betchu:
   business-time-zone: Asia/Seoul
+  notifications:
+    enabled: ${PUSH_ENABLED:false}
+    expo-access-token: ${EXPO_PUSH_ACCESS_TOKEN:}
   auth:
     signing-secret: ${JWT_SIGNING_SECRET:}
     redirect-uris: ${OAUTH_REDIRECT_URIS:betchu://auth/callback,http://localhost:8081/auth/callback}
@@ -49,6 +52,13 @@ betchu:
       client-id: ${GOOGLE_CLIENT_ID:}
       client-secret: ${GOOGLE_CLIENT_SECRET:}
       callback-uri: ${GOOGLE_CALLBACK_URI:http://localhost:8080/api/v1/auth/oauth/google/callback}
+    apple:
+      client-id: ${APPLE_CLIENT_ID:}
+      team-id: ${APPLE_TEAM_ID:}
+      key-id: ${APPLE_KEY_ID:}
+      private-key-base64: ${APPLE_PRIVATE_KEY_BASE64:}
+      callback-uri: ${APPLE_CALLBACK_URI:}
+      token-encryption-secret: ${APPLE_TOKEN_ENCRYPTION_SECRET:}
   couples:
     invite-hmac-secret: ${BETCHU_INVITE_HMAC_SECRET:}
   cors:

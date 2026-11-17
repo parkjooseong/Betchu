@@ -838,7 +838,7 @@ public class QuestLifecycleService {
         d.successCriteria(),
         d.difficulty(),
         d.stake(),
-        d.stake() / 2,
+        QuestTemplates.reward(d.sourceType(), d.difficulty(), d.stake()),
         new int[] {0, 10, 20, 40, 70}[d.difficulty()],
         d.minimumDurationMinutes(),
         d.evidenceMethod(),

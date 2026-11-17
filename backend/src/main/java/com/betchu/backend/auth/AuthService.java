@@ -29,7 +29,9 @@ public class AuthService {
       String nickname,
       Instant expiresAt,
       String handoffHash,
-      Instant handoffExpiresAt) {}
+      Instant handoffExpiresAt,
+      String provider,
+      String encryptedProviderToken) {}
 
   record Session(UUID id, UUID userId, String refreshHash, String status, Instant expiresAt) {}
 
@@ -39,6 +41,9 @@ public class AuthService {
   private final AuthSettings settings;
   private final SessionTokenService tokens;
   private final GoogleIdentityClient google;
+  private final AppleIdentityClient apple;
+  private final AppleSettings appleSettings;
+  private final AppleRevocationService revocations;
   private final Clock clock;
   private final TransactionTemplate transaction;
 
@@ -50,29 +55,39 @@ public class AuthService {
       SessionTokenService tokens,
       GoogleIdentityClient google,
       Clock clock,
-      PlatformTransactionManager manager) {
+      PlatformTransactionManager manager,
+      AppleIdentityClient apple,
+      AppleSettings appleSettings,
+      AppleRevocationService revocations) {
     this.jdbc = jdbc;
     this.accounts = accounts;
     this.policies = policies;
     this.settings = settings;
     this.tokens = tokens;
     this.google = google;
+    this.apple = apple;
+    this.appleSettings = appleSettings;
+    this.revocations = revocations;
     this.clock = clock;
     this.transaction = new TransactionTemplate(manager);
   }
 
   public Providers providers() {
     boolean enabled = settings.googleConfigured() && tokens.configured();
+    boolean appleEnabled = appleSettings.configured() && tokens.configured();
     return new Providers(
-        List.of(new Provider("GOOGLE", "Google", enabled)),
-        enabled && policies.current("ko-KR").ready());
+        List.of(
+            new Provider("GOOGLE", "Google", enabled),
+            new Provider("APPLE", "Apple", appleEnabled)),
+        (enabled || appleEnabled) && policies.current("ko-KR").ready());
   }
 
   @Transactional
   public LoginStart start(StartRequest request) {
-    if (!settings.googleConfigured() || !tokens.configured())
-      throw SessionTokenService.unavailable();
-    if (!"GOOGLE".equals(request.provider())
+    boolean isApple = "APPLE".equals(request.provider());
+    if (!(isApple ? appleSettings.configured() : settings.googleConfigured())
+        || !tokens.configured()) throw SessionTokenService.unavailable();
+    if (!("GOOGLE".equals(request.provider()) || isApple)
         || !settings.redirectUris().contains(request.redirectUri()))
       throw new ApiException(
           HttpStatus.BAD_REQUEST, "INVALID_LOGIN_REQUEST", "로그인 종류와 돌아갈 주소를 확인해 주세요.");
@@ -83,7 +98,7 @@ public class AuthService {
     String verifier = AuthSecrets.randomToken();
     Instant expires = clock.instant().plusSeconds(600);
     jdbc.update(
-        "INSERT INTO oauth_login_attempts(id,login_secret_hash,state_hash,nonce_hash,pkce_verifier,redirect_uri,status,expires_at,created_at) VALUES (?,?,?,?,?,?,'PENDING',?,?)",
+        "INSERT INTO oauth_login_attempts(id,login_secret_hash,state_hash,nonce_hash,pkce_verifier,redirect_uri,status,expires_at,created_at,provider) VALUES (?,?,?,?,?,?,'PENDING',?,?,?)",
         id,
         AuthSecrets.hash(secret),
         AuthSecrets.hash(state),
@@ -91,11 +106,22 @@ public class AuthService {
         verifier,
         request.redirectUri(),
         Timestamp.from(expires),
-        now());
-    return new LoginStart(id, secret, google.authorizationUrl(state, nonce, verifier), expires);
+        now(),
+        request.provider());
+    return new LoginStart(
+        id,
+        secret,
+        isApple
+            ? apple.authorizationUrl(state, nonce)
+            : google.authorizationUrl(state, nonce, verifier),
+        expires);
   }
 
   public String callback(String state, String code, String error) {
+    return callback("GOOGLE", state, code, error);
+  }
+
+  public String callback(String provider, String state, String code, String error) {
     if (state == null || state.isBlank() || state.length() > 128) throw invalidCallback();
     Attempt attempt =
         transaction.execute(
@@ -106,6 +132,7 @@ public class AuthService {
                       this::attempt,
                       AuthSecrets.hash(state));
               if (found.isEmpty()
+                  || !provider.equals(found.getFirst().provider())
                   || !"PENDING".equals(found.getFirst().status())
                   || !found.getFirst().expiresAt().isAfter(clock.instant()))
                 throw invalidCallback();
@@ -119,19 +146,24 @@ public class AuthService {
     String handoffCode = AuthSecrets.randomToken();
     if (error == null && code != null && !code.isBlank() && code.length() <= 4096) {
       try {
-        VerifiedIdentity identity = google.exchange(code, attempt.verifier(), attempt.nonceHash());
+        VerifiedIdentity identity =
+            "APPLE".equals(provider)
+                ? apple.exchange(code, attempt.nonceHash())
+                : google.exchange(code, attempt.verifier(), attempt.nonceHash());
         success =
             transaction.execute(
                 status ->
                     jdbc.update(
-                            "UPDATE oauth_login_attempts SET status='COMPLETE',provider_subject=?,nickname=?,handoff_hash=?,handoff_expires_at=LEAST(expires_at,?) WHERE id=? AND status='PROCESSING' AND expires_at>?",
+                            "UPDATE oauth_login_attempts SET status='COMPLETE',provider_subject=?,nickname=?,handoff_hash=?,handoff_expires_at=LEAST(expires_at,?),encrypted_provider_token=? WHERE id=? AND status='PROCESSING' AND expires_at>?",
                             identity.subject(),
                             identity.nickname(),
                             AuthSecrets.hash(handoffCode),
                             Timestamp.from(clock.instant().plusSeconds(120)),
+                            identity.encryptedProviderToken(),
                             attempt.id(),
                             now())
                         == 1);
+        if (!success) revocations.enqueue(identity.encryptedProviderToken());
       } catch (ApiException ignored) {
         success = false;
       }
@@ -162,13 +194,18 @@ public class AuthService {
         || !attempt.expiresAt().isAfter(clock.instant())
         || "FAILED".equals(attempt.status())) throw SessionTokenService.unauthorized();
     if (!"COMPLETE".equals(attempt.status()))
-      throw new ApiException(HttpStatus.CONFLICT, "LOGIN_PENDING", "Google 로그인을 먼저 완료해 주세요.");
+      throw new ApiException(HttpStatus.CONFLICT, "LOGIN_PENDING", "선택한 계정의 로그인을 먼저 완료해 주세요.");
     if (!AuthSecrets.matches(request.handoffCode(), attempt.handoffHash())
         || attempt.handoffExpiresAt() == null
         || !attempt.handoffExpiresAt().isAfter(clock.instant()))
       throw SessionTokenService.unauthorized();
     UUID userId =
-        accounts.resolveIdentity(new VerifiedIdentity(attempt.subject(), attempt.nickname()));
+        accounts.resolveIdentity(
+            new VerifiedIdentity(
+                attempt.provider(),
+                attempt.subject(),
+                attempt.nickname(),
+                attempt.encryptedProviderToken()));
     UUID sessionId = UUID.randomUUID();
     String refresh = AuthSecrets.randomToken();
     UserMe me = accounts.me(userId);
@@ -234,7 +271,14 @@ public class AuthService {
     return principal;
   }
 
+  @Transactional
   public void logout(AuthenticatedUser principal) {
+    jdbc.execute("SELECT pg_advisory_xact_lock(477529190429401)");
+    accounts.user(principal.userId(), true);
+    jdbc.update(
+        "DELETE FROM push_devices WHERE session_id=? AND user_id=?",
+        principal.sessionId(),
+        principal.userId());
     jdbc.update(
         "UPDATE auth_sessions SET status='REVOKED',revoked_at=? WHERE id=? AND user_id=? AND status='ACTIVE'",
         now(),
@@ -245,6 +289,17 @@ public class AuthService {
   @Scheduled(fixedDelayString = "${betchu.auth.cleanup-delay-ms:60000}", initialDelay = 0)
   @Transactional
   public void cleanup() {
+    for (String token :
+        jdbc.queryForList(
+            "SELECT encrypted_provider_token FROM oauth_login_attempts WHERE encrypted_provider_token IS NOT NULL AND (expires_at<=? OR handoff_expires_at<=?)",
+            String.class,
+            now(),
+            now())) revocations.enqueue(token);
+    for (String token :
+        jdbc.queryForList(
+            "SELECT o.encrypted_provider_token FROM oauth_identities o JOIN users u ON u.id=o.user_id WHERE o.provider='APPLE' AND o.encrypted_provider_token IS NOT NULL AND u.status='PENDING_ELIGIBILITY' AND u.created_at<=?",
+            String.class,
+            Timestamp.from(clock.instant().minusSeconds(23L * 3600)))) revocations.enqueue(token);
     jdbc.update(
         "DELETE FROM oauth_login_attempts WHERE expires_at<=? OR handoff_expires_at<=?",
         now(),
@@ -270,7 +325,9 @@ public class AuthService {
         rs.getString("handoff_hash"),
         rs.getTimestamp("handoff_expires_at") == null
             ? null
-            : rs.getTimestamp("handoff_expires_at").toInstant());
+            : rs.getTimestamp("handoff_expires_at").toInstant(),
+        rs.getString("provider"),
+        rs.getString("encrypted_provider_token"));
   }
 
   private Session session(java.sql.ResultSet rs, int row) throws java.sql.SQLException {

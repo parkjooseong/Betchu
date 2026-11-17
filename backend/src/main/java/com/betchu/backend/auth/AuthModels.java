@@ -42,7 +42,12 @@ public final class AuthModels {
 
   public record Tokens(String accessToken, String refreshToken, long expiresIn, UserMe user) {}
 
-  public record VerifiedIdentity(String subject, String nickname) {}
+  public record VerifiedIdentity(
+      String provider, String subject, String nickname, String encryptedProviderToken) {
+    public VerifiedIdentity(String subject, String nickname) {
+      this("GOOGLE", subject, nickname, null);
+    }
+  }
 
   public record StartRequest(String provider, String redirectUri) {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

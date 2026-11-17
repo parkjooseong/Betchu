@@ -2,6 +2,7 @@ package com.betchu.backend.tutorial;
 
 import com.betchu.backend.common.ApiException;
 import com.betchu.backend.common.GameAccess;
+import com.betchu.backend.gameplay.WeeklyBossService;
 import com.betchu.backend.tutorial.TutorialModels.Settlement;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
@@ -29,10 +30,12 @@ public class TutorialSettlementService {
           "APPROVAL_EXPIRED");
   private final JdbcTemplate jdbc;
   private final GameAccess access;
+  private final WeeklyBossService weeks;
 
-  public TutorialSettlementService(JdbcTemplate jdbc, GameAccess access) {
+  public TutorialSettlementService(JdbcTemplate jdbc, GameAccess access, WeeklyBossService weeks) {
     this.jdbc = jdbc;
     this.access = access;
+    this.weeks = weeks;
   }
 
   @Transactional(propagation = Propagation.MANDATORY)
@@ -76,6 +79,7 @@ public class TutorialSettlementService {
       throw new IllegalStateException(
           "Final judgment requires an approved tutorial in a connected relationship");
     jdbc.queryForList("SELECT id FROM users WHERE id=? FOR UPDATE", quest.creator());
+    if ("SUCCESS".equals(terminalStatus)) weeks.beforePowerChange(quest.creator());
     Timestamp now = now();
     if (!quest.locked()) {
       finish(quest, terminalStatus, invalidReason, now);

@@ -37,6 +37,7 @@ import tools.jackson.databind.json.JsonMapper;
     properties = "betchu.couples.invite-hmac-secret=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 class MonsterProgressionIntegrationTest extends PostgresIntegrationTestSupport {
   @Autowired MonsterService monsters;
+  @Autowired com.betchu.backend.gameplay.WeeklyBossService weeks;
   @Autowired HomeService home;
   @Autowired CoupleService couples;
   @Autowired GameAccess access;
@@ -236,7 +237,7 @@ class MonsterProgressionIntegrationTest extends PostgresIntegrationTestSupport {
     JsonMapper brokenMapper = mock(JsonMapper.class);
     when(brokenMapper.writeValueAsString(any()))
         .thenThrow(new IllegalStateException("Serialization failed"));
-    MonsterService failing = new MonsterService(jdbc, access, starters, brokenMapper);
+    MonsterService failing = new MonsterService(jdbc, access, starters, brokenMapper, weeks);
     assertThatThrownBy(
             () ->
                 new TransactionTemplate(transactionManager)

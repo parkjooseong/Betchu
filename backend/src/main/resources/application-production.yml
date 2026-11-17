@@ -1,0 +1,46 @@
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    hikari:
+      connection-timeout: 5000
+      validation-timeout: 3000
+  flyway:
+    clean-disabled: true
+
+server:
+  forward-headers-strategy: none
+  max-http-request-header-size: 16KB
+  tomcat:
+    max-http-form-post-size: 16KB
+    connection-timeout: 10s
+    threads:
+      max: 100
+    max-connections: 2000
+    accept-count: 100
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,db,releasePolicies
+        liveness:
+          include: livenessState
+
+logging:
+  level:
+    org.springframework.jdbc: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: OFF
+    org.springframework.web.client: WARN
+    org.springframework.security: WARN

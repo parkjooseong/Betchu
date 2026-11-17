@@ -26,6 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
     properties = "betchu.couples.invite-hmac-secret=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 class CouplePairingIntegrationTest extends PostgresIntegrationTestSupport {
   @Autowired CoupleService service;
+  @Autowired com.betchu.backend.gameplay.WeeklyBossService weeks;
   @Autowired JdbcTemplate jdbc;
   @Autowired PlatformTransactionManager transactionManager;
   @Autowired InviteCodeCodec codec;
@@ -245,7 +246,7 @@ class CouplePairingIntegrationTest extends PostgresIntegrationTestSupport {
       if (index % 2 == 0) assertError(() -> service.preview(bob, "invalid"), "INVALID_INVITE");
       else assertError(() -> service.join(bob, "invalid"), "INVALID_INVITE");
     }
-    CoupleService otherInstance = new CoupleService(jdbc, transactionManager, codec);
+    CoupleService otherInstance = new CoupleService(jdbc, transactionManager, codec, weeks);
     assertError(() -> otherInstance.join(bob, invitation.code()), "INVITE_RATE_LIMITED");
     assertThat(
             jdbc.queryForObject(

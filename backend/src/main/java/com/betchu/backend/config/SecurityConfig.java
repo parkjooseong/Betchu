@@ -28,10 +28,20 @@ import tools.jackson.databind.json.JsonMapper;
 public class SecurityConfig {
   @Bean
   SecurityFilterChain securityFilterChain(
-      HttpSecurity http, ObjectProvider<SessionAuthenticationFilter> filters, JsonMapper mapper)
+      HttpSecurity http,
+      ObjectProvider<SessionAuthenticationFilter> filters,
+      JsonMapper mapper,
+      org.springframework.core.env.Environment environment)
       throws Exception {
     var filter = filters.getIfAvailable();
     if (filter != null) http.addFilterBefore(filter, AnonymousAuthenticationFilter.class);
+    var limits =
+        new ApiRequestLimitsFilter(
+            java.time.Clock.systemUTC(),
+            environment.getProperty("betchu.http.requests-per-minute", Integer.class, 600),
+            environment.getProperty("betchu.http.auth-requests-per-minute", Integer.class, 60));
+    if (filter != null) http.addFilterBefore(limits, SessionAuthenticationFilter.class);
+    else http.addFilterBefore(limits, AnonymousAuthenticationFilter.class);
     return http.cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.disable())
         .sessionManagement(
@@ -54,8 +64,11 @@ public class SecurityConfig {
                         "/api/v1/monsters/starter-preview",
                         "/api/v1/auth/login/start",
                         "/api/v1/auth/login",
+                        "/api/v1/auth/oauth/apple/callback",
                         "/api/v1/auth/refresh")
                     .permitAll()
+                    .requestMatchers("/actuator/**")
+                    .denyAll()
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(
@@ -102,7 +115,7 @@ public class SecurityConfig {
         "/api/v1/policy-versions/current", cors(origins, List.of("GET")));
     source.registerCorsConfiguration(
         "/api/v1/onboarding/age-eligibility", cors(origins, List.of("POST")));
-    source.registerCorsConfiguration("/api/v1/consents/*", cors(origins, List.of("PUT")));
+    source.registerCorsConfiguration("/api/v1/consents/*", cors(origins, List.of("PUT", "DELETE")));
     source.registerCorsConfiguration(
         "/api/v1/couples/**", cors(origins, List.of("GET", "POST", "DELETE")));
     source.registerCorsConfiguration(
@@ -116,6 +129,21 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/api/v1/monsters/partner", cors(origins, List.of("GET")));
     source.registerCorsConfiguration("/api/v1/monsters/me/name", cors(origins, List.of("PATCH")));
     source.registerCorsConfiguration("/api/v1/home", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/notifications", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration(
+        "/api/v1/notifications/**", cors(origins, List.of("GET", "POST", "PUT", "DELETE")));
+    source.registerCorsConfiguration("/api/v1/quest-templates", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/quest-templates/**", cors(origins, List.of("POST")));
+    source.registerCorsConfiguration("/api/v1/account/**", cors(origins, List.of("GET", "POST")));
+    source.registerCorsConfiguration("/api/v1/reports", cors(origins, List.of("POST")));
+    source.registerCorsConfiguration("/api/v1/reports/targets", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/economy", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/wallet/**", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/draws", cors(origins, List.of("POST")));
+    source.registerCorsConfiguration("/api/v1/equipment", cors(origins, List.of("PUT")));
+    source.registerCorsConfiguration("/api/v1/rescue", cors(origins, List.of("GET")));
+    source.registerCorsConfiguration("/api/v1/rescue/**", cors(origins, List.of("POST")));
+    source.registerCorsConfiguration("/api/v1/coop/**", cors(origins, List.of("GET", "POST")));
     return source;
   }
 

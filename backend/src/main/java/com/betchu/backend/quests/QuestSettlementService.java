@@ -3,6 +3,7 @@ package com.betchu.backend.quests;
 import static com.betchu.backend.quests.QuestLifecycleModels.*;
 
 import com.betchu.backend.common.GameAccess;
+import com.betchu.backend.gameplay.WeeklyBossService;
 import com.betchu.backend.tutorial.TutorialModels.Settlement;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -31,10 +32,12 @@ public class QuestSettlementService {
           "DISCARDED");
   private final JdbcTemplate jdbc;
   private final GameAccess access;
+  private final WeeklyBossService weeks;
 
-  public QuestSettlementService(JdbcTemplate jdbc, GameAccess access) {
+  public QuestSettlementService(JdbcTemplate jdbc, GameAccess access, WeeklyBossService weeks) {
     this.jdbc = jdbc;
     this.access = access;
+    this.weeks = weeks;
   }
 
   @Transactional(propagation = Propagation.MANDATORY)
@@ -64,7 +67,7 @@ public class QuestSettlementService {
       jdbc.update(
           "UPDATE daily_reward_budgets SET coin_slots_used=coin_slots_used+1,reward_reserved=reward_reserved+?,low_reward_reserved=low_reward_reserved+? WHERE user_id=? AND budget_date_kst=?",
           quote.expectedReward(),
-          quote.expectedReward(),
+          q.low() ? quote.expectedReward() : 0,
           q.creator(),
           q.date());
     jdbc.update(
@@ -101,6 +104,7 @@ public class QuestSettlementService {
     budget(q);
     int reward = "SUCCESS".equals(status) ? q.reserved() : 0;
     UUID settlementId = UUID.randomUUID();
+    if ("SUCCESS".equals(status)) weeks.beforePowerChange(q.creator());
     Growth growth = "SUCCESS".equals(status) ? grow(q, now) : null;
     if ("FAILURE".equals(status))
       jdbc.update(
@@ -127,9 +131,9 @@ public class QuestSettlementService {
         WHERE user_id=? AND budget_date_kst=?
         """,
           q.reserved(),
-          q.reserved(),
+          q.low() ? q.reserved() : 0,
           reward,
-          reward,
+          q.low() ? reward : 0,
           "INVALID".equals(status) ? 1 : 0,
           q.creator(),
           q.date());
@@ -200,7 +204,7 @@ public class QuestSettlementService {
     Quest q =
         jdbc.queryForObject(
             """
-        SELECT q.id,q.creator_id,q.couple_id,q.status,q.row_version,q.activity_slot_reserved_at,q.reward_reserved_amount,
+        SELECT q.id,q.creator_id,q.couple_id,q.status,q.source_type,q.row_version,q.activity_slot_reserved_at,q.reward_reserved_amount,
           q.budget_date_kst,c.status AS relationship_status,c.betting_suspended_at,
           COALESCE(v.stake,d.stake,0) AS stake,COALESCE(v.difficulty,d.difficulty,1) AS difficulty,
           COALESCE(v.result_at,d.result_at,q.created_at) AS result_at
@@ -226,7 +230,8 @@ public class QuestSettlementService {
                             .atZone(ZoneId.of("Asia/Seoul"))
                             .toLocalDate()
                         : rs.getObject("budget_date_kst", LocalDate.class),
-                    rs.getTimestamp("betting_suspended_at") != null),
+                    rs.getTimestamp("betting_suspended_at") != null,
+                    rs.getString("source_type")),
             id);
     jdbc.queryForList("SELECT id FROM users WHERE id=? FOR UPDATE", q.creator());
     return q;
@@ -276,10 +281,16 @@ public class QuestSettlementService {
     List<Integer> stakes = new ArrayList<>();
     if (ready && b.active() < 5 && b.xp() < 5) {
       stakes.add(0);
-      if (!q.suspended() && b.coin() < 2 && available >= 100) stakes.add(100);
+      if (!q.suspended() && b.coin() < 2)
+        for (int stake = 100; stake <= q.maxStake() && stake <= available; stake += 100)
+          stakes.add(stake);
     }
     int reward =
-        q.stake() == 0 ? 0 : Math.min(50, Math.min(300 - b.total(), 100 - b.low())) / 25 * 25;
+        Math.min(
+                QuestTemplates.reward(q.source(), q.difficulty(), q.stake()),
+                Math.min(300 - b.total(), q.low() ? 100 - b.low() : 300))
+            / 25
+            * 25;
     String reason =
         !ready
             ? "TUTORIAL_REQUIRED"
@@ -552,7 +563,18 @@ public class QuestSettlementService {
       int difficulty,
       int reserved,
       LocalDate date,
-      boolean suspended) {}
+      boolean suspended,
+      String source) {
+    boolean low() {
+      return QuestTemplates.low(source, difficulty);
+    }
+
+    int maxStake() {
+      return "TEMPLATE".equals(source)
+          ? (difficulty == 4 ? 300 : difficulty == 3 ? 200 : 100)
+          : 100;
+    }
+  }
 
   private record Budget(int active, int xp, int coin, int total, int low) {}
 

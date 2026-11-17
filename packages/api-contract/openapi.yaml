@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: BETCHU API
-  version: 0.6.0
-  description: BETCHU 계정·커플 연결, 배츄와 홈, 개인 퀘스트 제출·파트너 확인·정산, 일회 튜토리얼 계약
+  version: 0.7.0
+  description: BETCHU 계정과 안전, 커플 연결, 배츄와 장비, 퀘스트와 정산, 뽑기와 구제, 주간 협동 및 비공개 알림 계약
 servers:
   - url: http://localhost:8080/api/v1
     description: Local development
@@ -2179,6 +2179,1103 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/PersonalQuestRowRequest"
+  /economy:
+    get:
+      operationId: getEconomy
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Economy"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /draws:
+    post:
+      operationId: drawEquipment
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DrawResult"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DrawRequest"
+  /equipment:
+    put:
+      operationId: equipItem
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Economy"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EquipRequest"
+  /wallet/history:
+    get:
+      operationId: getWalletHistory
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletHistory"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+            format: uuid
+  /rescue:
+    get:
+      operationId: getRescue
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescueStatus"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /rescue/start:
+    post:
+      operationId: startRescue
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescueStatus"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+  /rescue/complete:
+    post:
+      operationId: completeRescue
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescueStatus"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteRescueRequest"
+  /coop/week:
+    get:
+      operationId: getCoopWeek
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoopWeek"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /coop/join:
+    post:
+      operationId: joinCoop
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoopWeek"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoopJoinRequest"
+  /reports:
+    post:
+      operationId: reportPartner
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportReceipt"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportRequest"
+  /reports/targets:
+    get:
+      operationId: getReportTargets
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportTargets"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /account/delete:
+    post:
+      operationId: deleteAccount
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletion"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteAccountRequest"
+  /account/export:
+    get:
+      operationId: exportAccount
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountExportPage"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - in: query
+          name: section
+          required: true
+          schema:
+            type: string
+            enum:
+              - ACCOUNT
+              - CONSENTS
+              - LEDGER
+              - INVENTORY
+              - DRAWS
+              - MONSTERS
+              - PROGRESSION
+              - EQUIPMENT
+              - RESCUE
+              - REPORTS
+              - QUESTS
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+            maxLength: 80
+  /consents/EVIDENCE_OPTIONAL:
+    delete:
+      operationId: withdrawEvidenceConsent
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationInbox"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /notifications/read:
+    post:
+      operationId: readNotifications
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationInbox"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadNotificationsRequest"
+  /notifications/device:
+    get:
+      operationId: getNotificationPreferences
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+    put:
+      operationId: registerPushDevice
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushDeviceRequest"
+    delete:
+      operationId: unregisterPushDevice
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /quest-templates:
+    get:
+      operationId: getQuestTemplates
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestTemplates"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+  /quest-templates/{code}/draft:
+    post:
+      operationId: createTemplateDraft
+      tags:
+        - release
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current authorized projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestDraft"
+        "400":
+          $ref: "#/components/responses/GameBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "403":
+          $ref: "#/components/responses/GameForbidden"
+        "404":
+          description: Resource is unavailable to the caller
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          $ref: "#/components/responses/GameConflict"
+        "413":
+          description: Request exceeds the size limit
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "429":
+          description: Too many requests; Retry-After indicates seconds until retry
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Internal failure; never contains SQL, credentials or provider response bodies
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+      parameters:
+        - $ref: "#/components/parameters/GameIdempotencyKey"
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+            maxLength: 60
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TemplateDraftRequest"
+  /auth/oauth/apple/callback:
+    post:
+      operationId: appleOAuthCallback
+      tags:
+        - auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - state
+              properties:
+                state:
+                  type: string
+                code:
+                  type: string
+                error:
+                  type: string
+      responses:
+        "303":
+          description: Redirect to the initiating app with one-time handoff, never tokens
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
 components:
   schemas:
     SystemHealth:
@@ -2370,7 +3467,9 @@ components:
             properties:
               provider:
                 type: string
-                const: GOOGLE
+                enum:
+                  - GOOGLE
+                  - APPLE
               displayName:
                 type: string
               enabled:
@@ -2386,7 +3485,9 @@ components:
       properties:
         provider:
           type: string
-          const: GOOGLE
+          enum:
+            - GOOGLE
+            - APPLE
         redirectUri:
           type: string
           maxLength: 1000
@@ -2793,10 +3894,10 @@ components:
           minimum: 1
         equipmentBonusHp:
           type: integer
-          const: 0
+          minimum: 0
         equipmentBonusAttack:
           type: integer
-          const: 0
+          minimum: 0
         finalHp:
           type: integer
           minimum: 1
@@ -2960,6 +4061,9 @@ components:
           enum:
             - 0
             - 100
+            - 200
+            - 300
+          description: CUSTOM accepts 0/100 only. TEMPLATE accepts fixed difficulty-specific stakes.
         dueAt:
           type: string
           format: date-time
@@ -3017,6 +4121,7 @@ components:
               type: string
               enum:
                 - CUSTOM
+                - TEMPLATE
             rowVersion:
               type: integer
               format: int64
@@ -3551,11 +4656,13 @@ components:
           enum:
             - 0
             - 100
+            - 200
+            - 300
         reward:
           type: integer
-          enum:
-            - 0
-            - 50
+          minimum: 0
+          maximum: 300
+          multipleOf: 25
         xp:
           type: integer
           enum:
@@ -3670,12 +4777,13 @@ components:
           enum:
             - 0
             - 100
+            - 200
+            - 300
         reward:
           type: integer
-          enum:
-            - 0
-            - 25
-            - 50
+          minimum: 0
+          maximum: 300
+          multipleOf: 25
         xp:
           type: integer
           minimum: 0
@@ -3806,14 +4914,15 @@ components:
               enum:
                 - 0
                 - 100
+                - 200
+                - 300
             - type: "null"
         rewardReservedAmount:
           anyOf:
             - type: integer
-              enum:
-                - 0
-                - 25
-                - 50
+              minimum: 0
+              maximum: 300
+              multipleOf: 25
             - type: "null"
         decision:
           anyOf:
@@ -3948,10 +5057,9 @@ components:
           maximum: 100
         expectedReward:
           type: integer
-          enum:
-            - 0
-            - 25
-            - 50
+          minimum: 0
+          maximum: 300
+          multipleOf: 25
         allowedStakes:
           type: array
           items:
@@ -3959,6 +5067,8 @@ components:
             enum:
               - 0
               - 100
+              - 200
+              - 300
         canApprove:
           type: boolean
         blockingReason:
@@ -4122,6 +5232,1051 @@ components:
         expectedGeneration:
           type: integer
           minimum: 0
+    GameplayItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        rarity:
+          type: string
+          enum:
+            - COMMON
+            - RARE
+            - EPIC
+            - LEGENDARY
+            - MYTHIC
+        slot:
+          type: string
+          enum:
+            - WEAPON
+            - ARMOR
+            - ACCESSORY
+        hpBonus:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        attackBonus:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        combatPower:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        duplicateFragments:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+        - id
+        - name
+        - rarity
+        - slot
+        - hpBonus
+        - attackBonus
+        - combatPower
+        - duplicateFragments
+      additionalProperties: false
+    DrawResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        probabilityVersionId:
+          type: string
+        payment:
+          type: string
+          enum:
+            - COINS
+            - TICKET
+        cost:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        item:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            rarity:
+              type: string
+              enum:
+                - COMMON
+                - RARE
+                - EPIC
+                - LEGENDARY
+                - MYTHIC
+            slot:
+              type: string
+              enum:
+                - WEAPON
+                - ARMOR
+                - ACCESSORY
+            hpBonus:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            attackBonus:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            combatPower:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            duplicateFragments:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+          required:
+            - id
+            - name
+            - rarity
+            - slot
+            - hpBonus
+            - attackBonus
+            - combatPower
+            - duplicateFragments
+          additionalProperties: false
+        pityApplied:
+          type: boolean
+        pityBefore:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        pityAfter:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        duplicate:
+          type: boolean
+        fragmentsGranted:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        createdAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - id
+        - probabilityVersionId
+        - payment
+        - cost
+        - item
+        - pityApplied
+        - pityBefore
+        - pityAfter
+        - duplicate
+        - fragmentsGranted
+        - createdAt
+      additionalProperties: false
+    Economy:
+      type: object
+      properties:
+        availableCoins:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        lockedCoins:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        normalTickets:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        catalog:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              rarity:
+                type: string
+                enum:
+                  - COMMON
+                  - RARE
+                  - EPIC
+                  - LEGENDARY
+                  - MYTHIC
+              slot:
+                type: string
+                enum:
+                  - WEAPON
+                  - ARMOR
+                  - ACCESSORY
+              hpBonus:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              attackBonus:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              combatPower:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              duplicateFragments:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+            required:
+              - id
+              - name
+              - rarity
+              - slot
+              - hpBonus
+              - attackBonus
+              - combatPower
+              - duplicateFragments
+            additionalProperties: false
+        draws:
+          type: array
+          items:
+            type: object
+            properties:
+              versionId:
+                type: string
+              type:
+                type: string
+                enum:
+                  - NORMAL
+                  - ADVANCED
+                  - LEGENDARY
+              cost:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              weights:
+                minItems: 5
+                maxItems: 5
+                type: array
+                items:
+                  type: integer
+                  minimum: 0
+                  maximum: 9007199254740991
+              pityThreshold:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              pityRarity:
+                anyOf:
+                  - type: string
+                    enum:
+                      - COMMON
+                      - RARE
+                      - EPIC
+                      - LEGENDARY
+                      - MYTHIC
+                  - type: "null"
+              misses:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              itemIds:
+                type: array
+                items:
+                  type: string
+            required:
+              - versionId
+              - type
+              - cost
+              - weights
+              - pityThreshold
+              - pityRarity
+              - misses
+              - itemIds
+            additionalProperties: false
+        inventory:
+          type: array
+          items:
+            type: object
+            properties:
+              item:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  rarity:
+                    type: string
+                    enum:
+                      - COMMON
+                      - RARE
+                      - EPIC
+                      - LEGENDARY
+                      - MYTHIC
+                  slot:
+                    type: string
+                    enum:
+                      - WEAPON
+                      - ARMOR
+                      - ACCESSORY
+                  hpBonus:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  attackBonus:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  combatPower:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  duplicateFragments:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                required:
+                  - id
+                  - name
+                  - rarity
+                  - slot
+                  - hpBonus
+                  - attackBonus
+                  - combatPower
+                  - duplicateFragments
+                additionalProperties: false
+              fragments:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+            required:
+              - item
+              - fragments
+            additionalProperties: false
+        equipment:
+          type: array
+          items:
+            type: object
+            properties:
+              slot:
+                type: string
+                enum:
+                  - WEAPON
+                  - ARMOR
+                  - ACCESSORY
+              itemId:
+                type:
+                  - string
+                  - "null"
+              rowVersion:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+            required:
+              - slot
+              - itemId
+              - rowVersion
+            additionalProperties: false
+        recentDraws:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              probabilityVersionId:
+                type: string
+              payment:
+                type: string
+                enum:
+                  - COINS
+                  - TICKET
+              cost:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              item:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  rarity:
+                    type: string
+                    enum:
+                      - COMMON
+                      - RARE
+                      - EPIC
+                      - LEGENDARY
+                      - MYTHIC
+                  slot:
+                    type: string
+                    enum:
+                      - WEAPON
+                      - ARMOR
+                      - ACCESSORY
+                  hpBonus:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  attackBonus:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  combatPower:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  duplicateFragments:
+                    type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                required:
+                  - id
+                  - name
+                  - rarity
+                  - slot
+                  - hpBonus
+                  - attackBonus
+                  - combatPower
+                  - duplicateFragments
+                additionalProperties: false
+              pityApplied:
+                type: boolean
+              pityBefore:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              pityAfter:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              duplicate:
+                type: boolean
+              fragmentsGranted:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              createdAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            required:
+              - id
+              - probabilityVersionId
+              - payment
+              - cost
+              - item
+              - pityApplied
+              - pityBefore
+              - pityAfter
+              - duplicate
+              - fragmentsGranted
+              - createdAt
+            additionalProperties: false
+      required:
+        - availableCoins
+        - lockedCoins
+        - normalTickets
+        - catalog
+        - draws
+        - inventory
+        - equipment
+        - recentDraws
+      additionalProperties: false
+    RescueStatus:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        eligible:
+          type: boolean
+        reason:
+          type:
+            - string
+            - "null"
+        nextEligibleAt:
+          anyOf:
+            - type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            - type: "null"
+        quest:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                status:
+                  type: string
+                  enum:
+                    - ACTIVE
+                    - COMPLETED
+                    - EXPIRED
+                title:
+                  type: string
+                startedAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                availableAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                expiresAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                completedAt:
+                  anyOf:
+                    - type: string
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                    - type: "null"
+              required:
+                - id
+                - status
+                - title
+                - startedAt
+                - availableAt
+                - expiresAt
+                - completedAt
+              additionalProperties: false
+            - type: "null"
+      required:
+        - serverTime
+        - eligible
+        - reason
+        - nextEligibleAt
+        - quest
+      additionalProperties: false
+    CoopWeek:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        boss:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                weekStartKst:
+                  type: string
+                  format: date
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+                status:
+                  type: string
+                  enum:
+                    - LOCKED
+                    - AVAILABLE
+                    - WAITING_PARTNER
+                    - CLEARED
+                    - FAILED
+                    - EXPIRED
+                    - CANCELED_RELATIONSHIP_ENDED
+                rowVersion:
+                  type: integer
+                  minimum: 0
+                  maximum: 9007199254740991
+                requiredPower:
+                  type: integer
+                  minimum: 0
+                  maximum: 9007199254740991
+                chemistry:
+                  type: integer
+                  minimum: 0
+                  maximum: 9007199254740991
+                opensAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                closesAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                self:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    baselinePower:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    currentPower:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    weeklyGrowth:
+                      type: integer
+                      minimum: -9007199254740991
+                      maximum: 9007199254740991
+                    joined:
+                      type: boolean
+                    finalPower:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 9007199254740991
+                        - type: "null"
+                  required:
+                    - userId
+                    - baselinePower
+                    - currentPower
+                    - weeklyGrowth
+                    - joined
+                    - finalPower
+                  additionalProperties: false
+                partner:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    baselinePower:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    currentPower:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    weeklyGrowth:
+                      type: integer
+                      minimum: -9007199254740991
+                      maximum: 9007199254740991
+                    joined:
+                      type: boolean
+                    finalPower:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 9007199254740991
+                        - type: "null"
+                  required:
+                    - userId
+                    - baselinePower
+                    - currentPower
+                    - weeklyGrowth
+                    - joined
+                    - finalPower
+                  additionalProperties: false
+              required:
+                - id
+                - weekStartKst
+                - status
+                - rowVersion
+                - requiredPower
+                - chemistry
+                - opensAt
+                - closesAt
+                - self
+                - partner
+              additionalProperties: false
+            - type: "null"
+      required:
+        - serverTime
+        - boss
+      additionalProperties: false
+    WalletHistory:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              type:
+                type: string
+              availableDelta:
+                type: integer
+                minimum: -9007199254740991
+                maximum: 9007199254740991
+              lockedDelta:
+                type: integer
+                minimum: -9007199254740991
+                maximum: 9007199254740991
+              createdAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            required:
+              - id
+              - type
+              - availableDelta
+              - lockedDelta
+              - createdAt
+            additionalProperties: false
+        nextCursor:
+          anyOf:
+            - type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            - type: "null"
+      required:
+        - entries
+        - nextCursor
+      additionalProperties: false
+    NotificationInbox:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              kind:
+                type: string
+              title:
+                type: string
+              route:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+              expiresAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+              read:
+                type: boolean
+            required:
+              - id
+              - kind
+              - title
+              - route
+              - createdAt
+              - expiresAt
+              - read
+            additionalProperties: false
+        unreadCount:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+        - notifications
+        - unreadCount
+      additionalProperties: false
+    NotificationPreferences:
+      type: object
+      properties:
+        pushEnabled:
+          type: boolean
+        registeredDevices:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+        - pushEnabled
+        - registeredDevices
+      additionalProperties: false
+    ReportReceipt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - id
+        - status
+        - createdAt
+      additionalProperties: false
+    AccountDeletion:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PROCESSING
+            - COMPLETED
+        requestedAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - status
+        - requestedAt
+      additionalProperties: false
+    AccountExportPage:
+      type: object
+      properties:
+        formatVersion:
+          type: number
+          const: 1
+        section:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        records:
+          type: array
+          items:
+            type: object
+            propertyNames:
+              type: string
+            additionalProperties: {}
+        nextCursor:
+          type:
+            - string
+            - "null"
+      required:
+        - formatVersion
+        - section
+        - generatedAt
+        - records
+        - nextCursor
+      additionalProperties: false
+    DrawRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - probabilityVersionId
+        - payment
+      properties:
+        type:
+          type: string
+          enum:
+            - NORMAL
+            - ADVANCED
+            - LEGENDARY
+        probabilityVersionId:
+          type: string
+          maxLength: 30
+        payment:
+          type: string
+          enum:
+            - COINS
+            - TICKET
+    EquipRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - slot
+        - itemId
+        - rowVersion
+      properties:
+        slot:
+          type: string
+          enum:
+            - WEAPON
+            - ARMOR
+            - ACCESSORY
+        itemId:
+          type:
+            - string
+            - "null"
+          maxLength: 60
+        rowVersion:
+          type: integer
+          minimum: 0
+    CompleteRescueRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - questId
+        - completed
+      properties:
+        questId:
+          type: string
+          format: uuid
+        completed:
+          type: boolean
+          const: true
+    CoopJoinRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - bossId
+        - rowVersion
+      properties:
+        bossId:
+          type: string
+          format: uuid
+        rowVersion:
+          type: integer
+          minimum: 0
+    ReportRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - reportedUserId
+        - reason
+        - description
+      properties:
+        reportedUserId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+            - HARASSMENT
+            - UNSAFE_REQUEST
+            - PRIVACY
+            - OTHER
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ReportTargets:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+          - id
+          - nickname
+        properties:
+          id:
+            type: string
+            format: uuid
+          nickname:
+            type: string
+    DeleteAccountRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - confirmation
+      properties:
+        confirmation:
+          type: string
+          const: DELETE_MY_ACCOUNT
+    PushDeviceRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - platform
+      properties:
+        token:
+          type: string
+          maxLength: 200
+        platform:
+          type: string
+          enum:
+            - ANDROID
+            - IOS
+    ReadNotificationsRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            format: uuid
+    QuestTemplate:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - title
+        - category
+        - successCriteria
+        - difficulty
+        - minimumDurationMinutes
+        - stakes
+      properties:
+        code:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+          enum:
+            - SLEEP
+            - EXERCISE
+            - STUDY
+            - CONTACT
+            - GAMING
+            - SPENDING
+            - HOUSEWORK
+            - EATING
+            - DATE
+            - CUSTOM
+        successCriteria:
+          type: string
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 4
+        minimumDurationMinutes:
+          type: integer
+          minimum: 0
+        stakes:
+          type: array
+          items:
+            type: integer
+            enum:
+              - 0
+              - 100
+              - 200
+              - 300
+    QuestTemplates:
+      type: array
+      items:
+        $ref: "#/components/schemas/QuestTemplate"
+    TemplateDraftRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - stake
+        - dueAt
+        - resultAt
+      properties:
+        stake:
+          type: integer
+          enum:
+            - 0
+            - 100
+            - 200
+            - 300
+        dueAt:
+          type: string
+          format: date-time
+        resultAt:
+          type: string
+          format: date-time
   securitySchemes:
     BearerAuth:
       type: http

@@ -4,6 +4,7 @@ import com.betchu.backend.auth.AuthSecrets;
 import com.betchu.backend.common.ApiException;
 import com.betchu.backend.common.GameAccess;
 import com.betchu.backend.game.GameModels.*;
+import com.betchu.backend.gameplay.WeeklyBossService;
 import com.betchu.backend.starter.InvalidStarterSelectionException;
 import com.betchu.backend.starter.StarterModels.PreviewRequest;
 import com.betchu.backend.starter.StarterModels.Species;
@@ -25,13 +26,19 @@ public class MonsterService {
   private final GameAccess access;
   private final StarterService starters;
   private final JsonMapper mapper;
+  private final WeeklyBossService weeks;
 
   public MonsterService(
-      JdbcTemplate jdbc, GameAccess access, StarterService starters, JsonMapper mapper) {
+      JdbcTemplate jdbc,
+      GameAccess access,
+      StarterService starters,
+      JsonMapper mapper,
+      WeeklyBossService weeks) {
     this.jdbc = jdbc;
     this.access = access;
     this.starters = starters;
     this.mapper = mapper;
+    this.weeks = weeks;
   }
 
   @Transactional
@@ -77,6 +84,7 @@ public class MonsterService {
         name,
         request.species().name());
     jdbc.update("INSERT INTO user_active_monsters(user_id,monster_id) VALUES (?,?)", userId, id);
+    weeks.beforePowerChange(userId);
     MonsterView result = activeMonster(userId);
     if (result == null) throw new IllegalStateException("Created starter has no active projection");
     jdbc.update(
@@ -171,6 +179,11 @@ public class MonsterService {
                     : successes < 60
                         ? Milestone.SUCCESS_60
                         : successes < 80 ? Milestone.SUCCESS_80 : null;
+    var bonus =
+        jdbc.queryForObject(
+            "SELECT COALESCE(SUM(i.hp_bonus),0),COALESCE(SUM(i.attack_bonus),0) FROM equipment_loadouts l JOIN item_definitions i ON i.id=l.item_id WHERE l.user_id=?",
+            (rowData, n) -> new int[] {rowData.getInt(1), rowData.getInt(2)},
+            rs.getObject("user_id", UUID.class));
     return new MonsterView(
         rs.getObject("id", UUID.class),
         rs.getString("name"),
@@ -188,11 +201,12 @@ public class MonsterService {
         level == 50 ? null : 80 + 20 * (level - 1),
         hp,
         attack,
-        0,
-        0,
-        hp,
-        attack,
-        Math.addExact(Math.multiplyExact(hp, 5), Math.multiplyExact(attack, 20)),
+        bonus[0],
+        bonus[1],
+        hp + bonus[0],
+        attack + bonus[1],
+        Math.addExact(
+            Math.multiplyExact(hp + bonus[0], 5), Math.multiplyExact(attack + bonus[1], 20)),
         rs.getInt("streak"));
   }
 }
