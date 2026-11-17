@@ -30,6 +30,9 @@ export function OnboardingScreen() {
   const google = providers.data?.providers.find(
     (provider) => provider.provider === 'GOOGLE' && provider.enabled,
   );
+  const apple = providers.data?.providers.find(
+    (provider) => provider.provider === 'APPLE' && provider.enabled,
+  );
   const loading = restoring || (!user && (providers.isPending || policies.isPending));
   const publicError = providers.error ?? policies.error;
 
@@ -102,20 +105,25 @@ export function OnboardingScreen() {
               <Text accessibilityRole="header" style={ui.sectionTitle}>
                 둘만의 이야기를 시작해요
               </Text>
-              {google ? (
+              {google || apple ? (
                 <>
-                  <Text style={ui.caption}>
-                    Google로 로그인한 뒤 연령과 정책 동의를 직접 확인해 주세요.
-                  </Text>
+                  <Text style={ui.caption}>로그인한 뒤 연령과 정책 동의를 직접 확인해 주세요.</Text>
                   {!ready && (
                     <Text style={ui.caption}>
                       로그인은 가능해요. 신규 가입 완료와 초대는 필수 정책이 준비된 뒤 진행할 수
                       있어요.
                     </Text>
                   )}
-                  <Button busy={busy} onPress={() => void launchLogin(session)}>
-                    Google로 계속하기
-                  </Button>
+                  {google && (
+                    <Button busy={busy} onPress={() => void launchLogin(session)}>
+                      Google로 계속하기
+                    </Button>
+                  )}
+                  {apple && (
+                    <Button busy={busy} onPress={() => void launchLogin(session, 'APPLE')}>
+                      Apple로 계속하기
+                    </Button>
+                  )}
                   {busy && (
                     <Button
                       secondary
@@ -171,6 +179,11 @@ export function OnboardingScreen() {
                 현재 사용할 수 없는 계정이에요. 로그아웃한 뒤 계정 상태를 확인해 주세요.
               </Text>
             </View>
+          )}
+          {user && (
+            <Link href="/settings" style={ui.link}>
+              설정 · 신고 · 계정 관리
+            </Link>
           )}
           {user && (
             <Button

@@ -98,6 +98,33 @@ export function HomePanel() {
         )}
       </View>
       {connected && <TutorialHomeCard coupleId={data.coupleId!} />}
+      <View style={ui.card}>
+        <Text style={ui.sectionTitle}>배츄와 함께</Text>
+        <View style={ui.row}>
+          <Link href="/inventory" style={ui.link}>
+            장비 보관함
+          </Link>
+          <Link href="/draws" style={ui.link}>
+            장비 뽑기
+          </Link>
+          <Link href="/wallet" style={ui.link}>
+            코인 기록
+          </Link>
+          <Link href="/inbox" style={ui.link}>
+            내 알림
+          </Link>
+          {connected && (
+            <Link href="/coop" style={ui.link}>
+              주간 협동 보스
+            </Link>
+          )}
+          {data.self.availableCoins < 100 && (
+            <Link href="/rescue" style={ui.link}>
+              다시 시작하는 작은 약속
+            </Link>
+          )}
+        </View>
+      </View>
       {connected && data.self.monster && <QuestHomeCard coupleId={data.coupleId!} />}
       {data.self.monster && (
         <View style={ui.card}>
@@ -113,6 +140,9 @@ export function HomePanel() {
             <>
               <Link href="/quests/new" style={ui.link}>
                 새 퀘스트 초안 쓰기 →
+              </Link>
+              <Link href="/templates" style={ui.link}>
+                추천 약속에서 고르기 →
               </Link>
               <Link href="/quests" style={ui.link}>
                 내 초안 모아보기

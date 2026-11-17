@@ -1,0 +1,55 @@
+name: Frontend verification
+on:
+  push:
+    branches: [frontend, work]
+    paths: ['frontend/**', 'packages/api-contract/**', '.github/workflows/frontend.yml']
+  pull_request:
+    paths: ['frontend/**', 'packages/api-contract/**', '.github/workflows/frontend.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+      EXPO_PUBLIC_APP_ENV: test
+      EXPO_PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install the exact package manager and frozen dependency graph
+        run: |
+          corepack enable
+          corepack pnpm install --frozen-lockfile
+      - name: Verify generated API declarations
+        run: |
+          corepack pnpm dlx openapi-typescript@7.13.0 ../packages/api-contract/openapi.yaml --output src/api/generated/schema.d.ts
+          corepack pnpm exec prettier --write src/api/generated/schema.d.ts
+          git diff --exit-code -- src/api/generated/schema.d.ts
+      - name: Verify source and release configuration
+        run: |
+          corepack pnpm typecheck
+          corepack pnpm lint
+          corepack pnpm format:check
+          corepack pnpm test:release-config
+          corepack pnpm test
+      - name: Bundle Android, iOS and web without publishing
+        run: corepack pnpm exec expo export --platform all --output-dir dist-verification
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: frontend-verification-bundles
+          path: frontend/dist-verification/
+          retention-days: 7

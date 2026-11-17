@@ -59,6 +59,25 @@ export function formFromDraft(draft: Draft): DraftForm {
   };
 }
 export function validateDraft(form: DraftForm, saved?: Draft): DraftInput {
+  const maxStake =
+    saved?.sourceType === 'TEMPLATE'
+      ? saved.difficulty <= 2
+        ? 100
+        : saved.difficulty === 3
+          ? 200
+          : 300
+      : 100;
+  if (![0, 100, 200, 300].includes(form.stake) || form.stake > maxStake)
+    throw new Error('이 퀘스트에서 허용되는 코인을 선택해 주세요.');
+  if (
+    saved?.sourceType === 'TEMPLATE' &&
+    (form.title !== saved.title ||
+      form.category !== saved.category ||
+      form.successCriteria !== saved.successCriteria ||
+      form.difficulty !== saved.difficulty ||
+      Number(form.minimumDurationMinutes) !== saved.minimumDurationMinutes)
+  )
+    throw new Error('추천 약속의 내용·난이도·최소 수행 시간은 바꿀 수 없어요.');
   const title = trim(form.title),
     successCriteria = trim(form.successCriteria);
   if (
