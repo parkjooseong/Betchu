@@ -26,6 +26,21 @@ export class AuthSession {
   ) {}
 
   getSnapshot = () => this.state;
+  captureSessionGuard() {
+    const generation = this.generation;
+    const loginGeneration = this.loginGeneration;
+    const userId = this.state.user?.id;
+    return () => {
+      if (
+        !userId ||
+        !this.accessToken ||
+        generation !== this.generation ||
+        loginGeneration !== this.loginGeneration ||
+        userId !== this.state.user?.id
+      )
+        throw new ApiError(401);
+    };
+  }
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
     return () => {
@@ -104,18 +119,25 @@ export class AuthSession {
     }
   }
 
-  async startLogin(redirectUri: string): Promise<string> {
+  async startLogin(redirectUri: string, provider: 'GOOGLE' | 'APPLE' = 'GOOGLE'): Promise<string> {
     const generation = ++this.loginGeneration;
     this.update({ busy: true, error: null });
     try {
       await this.attemptOperation(() => this.storage.clearAttempt());
       const result = await this.send('/auth/login/start', loginStartSchema, {
         method: 'POST',
-        body: { provider: 'GOOGLE', redirectUri },
+        body: { provider, redirectUri },
       });
       const authorization = new URL(result.authorizationUrl);
       if (generation !== this.loginGeneration) throw new Error('로그인을 취소했어요.');
-      if (authorization.protocol !== 'https:' || authorization.hostname !== 'accounts.google.com')
+      if (
+        authorization.protocol !== 'https:' ||
+        authorization.hostname !==
+          (provider === 'APPLE' ? 'appleid.apple.com' : 'accounts.google.com') ||
+        authorization.username ||
+        authorization.password ||
+        authorization.port
+      )
         throw new Error('로그인 연결 주소를 확인할 수 없어요. 다시 시도해 주세요.');
       await this.attemptOperation(async () => {
         if (generation !== this.loginGeneration) return;

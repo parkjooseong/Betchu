@@ -3,6 +3,15 @@ import { z } from 'zod';
 import { env } from '@/config/env';
 
 const messages: Record<string, string> = {
+  REAUTHENTICATION_REQUIRED: '계정 보호를 위해 다시 로그인한 뒤 10분 안에 탈퇴를 확인해 주세요.',
+  ACCOUNT_DELETION_COOLDOWN: '탈퇴한 로그인 계정은 30일이 지난 뒤 다시 가입할 수 있어요.',
+  INSUFFICIENT_COINS: '사용 가능한 코인이 부족해요. 코인 기록을 확인해 주세요.',
+  EQUIPMENT_CHANGED: '장비 상태가 바뀌었어요. 최신 상태에서 다시 선택해 주세요.',
+  BOSS_CHANGED: '보스 참여 상태가 바뀌었어요. 최신 상태를 확인해 주세요.',
+  BOSS_NOT_AVAILABLE: '주말에 케미 10칸을 채운 뒤 참여할 수 있어요.',
+  REPORT_TARGET_NOT_FOUND: '신고할 연결 기록을 찾을 수 없어요.',
+  REPORT_LIMIT: '하루 신고 횟수를 모두 사용했어요. 잠시 후 이용해 주세요.',
+  DEVICE_LIMIT: '알림은 최대 5대의 기기에 등록할 수 있어요.',
   INVALID_TUTORIAL_REQUEST:
     '첫 약속의 날짜와 선택 내용을 확인해 주세요. 일정은 현재부터 7일 안이어야 해요.',
   TUTORIAL_ALREADY_EXISTS: '이미 첫 약속을 보냈어요. 현재 튜토리얼을 다시 확인해 주세요.',

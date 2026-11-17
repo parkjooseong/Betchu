@@ -42,7 +42,7 @@ export async function clearRelationshipData(client: QueryClient, userId: string)
     generation: value.generation + 1,
     ending: true,
   }));
-  for (const prefix of ['home', 'quests', 'couples']) {
+  for (const prefix of ['home', 'quests', 'couples', 'relationship-features']) {
     await client.cancelQueries({ queryKey: [prefix, userId] });
     client.removeQueries({ queryKey: [prefix, userId] });
   }
@@ -50,7 +50,7 @@ export async function clearRelationshipData(client: QueryClient, userId: string)
 
 export function finishRelationshipChange(client: QueryClient, userId: string) {
   client.setQueryData<Boundary>(key(userId), (value = initial) => ({ ...value, ending: false }));
-  for (const prefix of ['home', 'quests', 'couples', 'relationship-end'])
+  for (const prefix of ['home', 'quests', 'couples', 'relationship-end', 'relationship-features'])
     void client.invalidateQueries({ queryKey: [prefix, userId] });
 }
 
@@ -69,7 +69,11 @@ export function observeRelationship(
     generation: previous.generation + (changed ? 1 : 0),
   });
   if (!changed) return;
-  for (const prefix of ['quests', source === 'home' ? 'couples' : 'home']) {
+  for (const prefix of [
+    'quests',
+    'relationship-features',
+    source === 'home' ? 'couples' : 'home',
+  ]) {
     void client.cancelQueries({ queryKey: [prefix, userId] });
     client.removeQueries({ queryKey: [prefix, userId] });
     void client.invalidateQueries({ queryKey: [prefix, userId] });

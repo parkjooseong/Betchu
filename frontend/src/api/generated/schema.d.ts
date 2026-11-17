@@ -961,6 +961,326 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/economy': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getEconomy'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/draws': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['drawEquipment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/equipment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['equipItem'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/wallet/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getWalletHistory'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/rescue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getRescue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/rescue/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['startRescue'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/rescue/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['completeRescue'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/coop/week': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getCoopWeek'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/coop/join': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['joinCoop'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/reports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['reportPartner'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/reports/targets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getReportTargets'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/account/delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['deleteAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/account/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['exportAccount'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/consents/EVIDENCE_OPTIONAL': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['withdrawEvidenceConsent'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getNotifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['readNotifications'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/device': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getNotificationPreferences'];
+    put: operations['registerPushDevice'];
+    post?: never;
+    delete: operations['unregisterPushDevice'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quest-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['getQuestTemplates'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/quest-templates/{code}/draft': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['createTemplateDraft'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/oauth/apple/callback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['appleOAuthCallback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1053,16 +1373,16 @@ export interface components {
     };
     AuthProviders: {
       providers: {
-        /** @constant */
-        provider: 'GOOGLE';
+        /** @enum {string} */
+        provider: 'GOOGLE' | 'APPLE';
         displayName: string;
         enabled: boolean;
       }[];
       registrationAvailable: boolean;
     };
     LoginStartRequest: {
-      /** @constant */
-      provider: 'GOOGLE';
+      /** @enum {string} */
+      provider: 'GOOGLE' | 'APPLE';
       redirectUri: string;
     };
     LoginStart: {
@@ -1200,10 +1520,8 @@ export interface components {
       nextLevelRequiredExp: number | null;
       baseHp: number;
       baseAttack: number;
-      /** @constant */
-      equipmentBonusHp: 0;
-      /** @constant */
-      equipmentBonusAttack: 0;
+      equipmentBonusHp: number;
+      equipmentBonusAttack: number;
       finalHp: number;
       finalAttack: number;
       combatPower: number;
@@ -1261,8 +1579,11 @@ export interface components {
       /** @description NFC and Unicode White_Space edge trim; 1-1000 code points; internal LF allowed, other control/format/line-separator characters rejected. */
       successCriteria: string;
       difficulty: number;
-      /** @enum {integer} */
-      stake: 0 | 100;
+      /**
+       * @description CUSTOM accepts 0/100 only. TEMPLATE accepts fixed difficulty-specific stakes.
+       * @enum {integer}
+       */
+      stake: 0 | 100 | 200 | 300;
       /**
        * Format: date-time
        * @description Offset required, 2000-01-01T00:00:00Z inclusive to 2101-01-01T00:00:00Z exclusive. Server truncates to UTC microseconds before comparisons, hashing and storage. Past dates may be saved.
@@ -1288,7 +1609,7 @@ export interface components {
       /** @enum {string} */
       questType: 'PERSONAL';
       /** @enum {string} */
-      sourceType: 'CUSTOM';
+      sourceType: 'CUSTOM' | 'TEMPLATE';
       /** Format: int64 */
       rowVersion: number;
       /** Format: date-time */
@@ -1507,9 +1828,8 @@ export interface components {
       successCriteria: string;
       difficulty: number;
       /** @enum {integer} */
-      stake: 0 | 100;
-      /** @enum {integer} */
-      reward: 0 | 50;
+      stake: 0 | 100 | 200 | 300;
+      reward: number;
       /** @enum {integer} */
       xp: 10 | 20 | 40 | 70;
       minimumDurationMinutes: number;
@@ -1558,9 +1878,8 @@ export interface components {
         'SUCCESS' | 'FAILURE' | 'INVALID' | 'CANCELED' | 'CANCELED_RELATIONSHIP_ENDED';
       invalidReason: string | null;
       /** @enum {integer} */
-      stake: 0 | 100;
-      /** @enum {integer} */
-      reward: 0 | 25 | 50;
+      stake: 0 | 100 | 200 | 300;
+      reward: number;
       xp: number;
       creditedMonsterId: string | null;
       recognizedSuccessBefore: number | null;
@@ -1603,8 +1922,8 @@ export interface components {
       draft?: components['schemas']['QuestDraft'];
       predictedResult: ('SUCCESS' | 'FAILURE') | null;
       budgetDateKst: string | null;
-      lockedStake: (0 | 100) | null;
-      rewardReservedAmount: (0 | 25 | 50) | null;
+      lockedStake: (0 | 100 | 200 | 300) | null;
+      rewardReservedAmount: number | null;
       decision: components['schemas']['PersonalQuestDecision'] | null;
       partnerSelection?: components['schemas']['TutorialPartnerSelection'];
       cancelRequest: components['schemas']['TutorialCancelRequest'] | null;
@@ -1649,9 +1968,8 @@ export interface components {
       coinSlotsRemaining: number;
       totalBonusRemaining: number;
       lowBonusRemaining: number;
-      /** @enum {integer} */
-      expectedReward: 0 | 25 | 50;
-      allowedStakes: (0 | 100)[];
+      expectedReward: number;
+      allowedStakes: (0 | 100 | 200 | 300)[];
       canApprove: boolean;
       blockingReason: string | null;
     };
@@ -1710,6 +2028,318 @@ export interface components {
     };
     PersonalQuestAcknowledgeRequest: {
       expectedGeneration: number;
+    };
+    GameplayItem: {
+      id: string;
+      name: string;
+      /** @enum {string} */
+      rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+      /** @enum {string} */
+      slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+      hpBonus: number;
+      attackBonus: number;
+      combatPower: number;
+      duplicateFragments: number;
+    };
+    DrawResult: {
+      /** Format: uuid */
+      id: string;
+      probabilityVersionId: string;
+      /** @enum {string} */
+      payment: 'COINS' | 'TICKET';
+      cost: number;
+      item: {
+        id: string;
+        name: string;
+        /** @enum {string} */
+        rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+        /** @enum {string} */
+        slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+        hpBonus: number;
+        attackBonus: number;
+        combatPower: number;
+        duplicateFragments: number;
+      };
+      pityApplied: boolean;
+      pityBefore: number;
+      pityAfter: number;
+      duplicate: boolean;
+      fragmentsGranted: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    Economy: {
+      availableCoins: number;
+      lockedCoins: number;
+      normalTickets: number;
+      catalog: {
+        id: string;
+        name: string;
+        /** @enum {string} */
+        rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+        /** @enum {string} */
+        slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+        hpBonus: number;
+        attackBonus: number;
+        combatPower: number;
+        duplicateFragments: number;
+      }[];
+      draws: {
+        versionId: string;
+        /** @enum {string} */
+        type: 'NORMAL' | 'ADVANCED' | 'LEGENDARY';
+        cost: number;
+        weights: number[];
+        pityThreshold: number;
+        pityRarity: ('COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC') | null;
+        misses: number;
+        itemIds: string[];
+      }[];
+      inventory: {
+        item: {
+          id: string;
+          name: string;
+          /** @enum {string} */
+          rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+          /** @enum {string} */
+          slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+          hpBonus: number;
+          attackBonus: number;
+          combatPower: number;
+          duplicateFragments: number;
+        };
+        fragments: number;
+      }[];
+      equipment: {
+        /** @enum {string} */
+        slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+        itemId: string | null;
+        rowVersion: number;
+      }[];
+      recentDraws: {
+        /** Format: uuid */
+        id: string;
+        probabilityVersionId: string;
+        /** @enum {string} */
+        payment: 'COINS' | 'TICKET';
+        cost: number;
+        item: {
+          id: string;
+          name: string;
+          /** @enum {string} */
+          rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+          /** @enum {string} */
+          slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+          hpBonus: number;
+          attackBonus: number;
+          combatPower: number;
+          duplicateFragments: number;
+        };
+        pityApplied: boolean;
+        pityBefore: number;
+        pityAfter: number;
+        duplicate: boolean;
+        fragmentsGranted: number;
+        /** Format: date-time */
+        createdAt: string;
+      }[];
+    };
+    RescueStatus: {
+      /** Format: date-time */
+      serverTime: string;
+      eligible: boolean;
+      reason: string | null;
+      nextEligibleAt: string | null;
+      quest: {
+        /** Format: uuid */
+        id: string;
+        /** @enum {string} */
+        status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED';
+        title: string;
+        /** Format: date-time */
+        startedAt: string;
+        /** Format: date-time */
+        availableAt: string;
+        /** Format: date-time */
+        expiresAt: string;
+        completedAt: string | null;
+      } | null;
+    };
+    CoopWeek: {
+      /** Format: date-time */
+      serverTime: string;
+      boss: {
+        /** Format: uuid */
+        id: string;
+        /** Format: date */
+        weekStartKst: string;
+        /** @enum {string} */
+        status:
+          | 'LOCKED'
+          | 'AVAILABLE'
+          | 'WAITING_PARTNER'
+          | 'CLEARED'
+          | 'FAILED'
+          | 'EXPIRED'
+          | 'CANCELED_RELATIONSHIP_ENDED';
+        rowVersion: number;
+        requiredPower: number;
+        chemistry: number;
+        /** Format: date-time */
+        opensAt: string;
+        /** Format: date-time */
+        closesAt: string;
+        self: {
+          /** Format: uuid */
+          userId: string;
+          baselinePower: number;
+          currentPower: number;
+          weeklyGrowth: number;
+          joined: boolean;
+          finalPower: number | null;
+        };
+        partner: {
+          /** Format: uuid */
+          userId: string;
+          baselinePower: number;
+          currentPower: number;
+          weeklyGrowth: number;
+          joined: boolean;
+          finalPower: number | null;
+        };
+      } | null;
+    };
+    WalletHistory: {
+      entries: {
+        /** Format: uuid */
+        id: string;
+        type: string;
+        availableDelta: number;
+        lockedDelta: number;
+        /** Format: date-time */
+        createdAt: string;
+      }[];
+      nextCursor: string | null;
+    };
+    NotificationInbox: {
+      notifications: {
+        /** Format: uuid */
+        id: string;
+        kind: string;
+        title: string;
+        route: string;
+        /** Format: date-time */
+        createdAt: string;
+        /** Format: date-time */
+        expiresAt: string;
+        read: boolean;
+      }[];
+      unreadCount: number;
+    };
+    NotificationPreferences: {
+      pushEnabled: boolean;
+      registeredDevices: number;
+    };
+    ReportReceipt: {
+      /** Format: uuid */
+      id: string;
+      status: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    AccountDeletion: {
+      /** @enum {string} */
+      status: 'PROCESSING' | 'COMPLETED';
+      /** Format: date-time */
+      requestedAt: string;
+    };
+    AccountExportPage: {
+      /** @constant */
+      formatVersion: 1;
+      section: string;
+      /** Format: date-time */
+      generatedAt: string;
+      records: {
+        [key: string]: unknown;
+      }[];
+      nextCursor: string | null;
+    };
+    DrawRequest: {
+      /** @enum {string} */
+      type: 'NORMAL' | 'ADVANCED' | 'LEGENDARY';
+      probabilityVersionId: string;
+      /** @enum {string} */
+      payment: 'COINS' | 'TICKET';
+    };
+    EquipRequest: {
+      /** @enum {string} */
+      slot: 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+      itemId: string | null;
+      rowVersion: number;
+    };
+    CompleteRescueRequest: {
+      /** Format: uuid */
+      questId: string;
+      /** @constant */
+      completed: true;
+    };
+    CoopJoinRequest: {
+      /** Format: uuid */
+      bossId: string;
+      rowVersion: number;
+    };
+    ReportRequest: {
+      /** Format: uuid */
+      reportedUserId: string;
+      /** @enum {string} */
+      reason: 'HARASSMENT' | 'UNSAFE_REQUEST' | 'PRIVACY' | 'OTHER';
+      description: string;
+    };
+    ReportTargets: {
+      /** Format: uuid */
+      id: string;
+      nickname: string;
+    }[];
+    DeleteAccountRequest: {
+      /** @constant */
+      confirmation: 'DELETE_MY_ACCOUNT';
+    };
+    PushDeviceRequest: {
+      token: string;
+      /** @enum {string} */
+      platform: 'ANDROID' | 'IOS';
+    };
+    ReadNotificationsRequest: {
+      ids: string[];
+    };
+    QuestTemplate: {
+      code: string;
+      title: string;
+      /** @enum {string} */
+      category:
+        | 'SLEEP'
+        | 'EXERCISE'
+        | 'STUDY'
+        | 'CONTACT'
+        | 'GAMING'
+        | 'SPENDING'
+        | 'HOUSEWORK'
+        | 'EATING'
+        | 'DATE'
+        | 'CUSTOM';
+      successCriteria: string;
+      difficulty: number;
+      minimumDurationMinutes: number;
+      stakes: (0 | 100 | 200 | 300)[];
+    };
+    QuestTemplates: components['schemas']['QuestTemplate'][];
+    TemplateDraftRequest: {
+      /** @enum {integer} */
+      stake: 0 | 100 | 200 | 300;
+      /** Format: date-time */
+      dueAt: string;
+      /** Format: date-time */
+      resultAt: string;
     };
   };
   responses: {
@@ -4393,6 +5023,1363 @@ export interface operations {
           'application/problem+json': components['schemas']['ApiProblem'];
         };
       };
+    };
+  };
+  getEconomy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Economy'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  drawEquipment: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DrawRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DrawResult'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  equipItem: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EquipRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Economy'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getWalletHistory: {
+    parameters: {
+      query?: {
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WalletHistory'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getRescue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RescueStatus'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  startRescue: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RescueStatus'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  completeRescue: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CompleteRescueRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RescueStatus'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getCoopWeek: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoopWeek'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  joinCoop: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CoopJoinRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoopWeek'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  reportPartner: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReportRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReportReceipt'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getReportTargets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReportTargets'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  deleteAccount: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeleteAccountRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccountDeletion'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  exportAccount: {
+    parameters: {
+      query: {
+        section:
+          | 'ACCOUNT'
+          | 'CONSENTS'
+          | 'LEDGER'
+          | 'INVENTORY'
+          | 'DRAWS'
+          | 'MONSTERS'
+          | 'PROGRESSION'
+          | 'EQUIPMENT'
+          | 'RESCUE'
+          | 'REPORTS'
+          | 'QUESTS';
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccountExportPage'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  withdrawEvidenceConsent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserMe'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationInbox'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  readNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReadNotificationsRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationInbox'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getNotificationPreferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationPreferences'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  registerPushDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PushDeviceRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationPreferences'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  unregisterPushDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationPreferences'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  getQuestTemplates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestTemplates'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  createTemplateDraft: {
+    parameters: {
+      query?: never;
+      header: {
+        'Idempotency-Key': components['parameters']['GameIdempotencyKey'];
+      };
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TemplateDraftRequest'];
+      };
+    };
+    responses: {
+      /** @description Current authorized projection */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['QuestDraft'];
+        };
+      };
+      400: components['responses']['GameBadRequest'];
+      401: components['responses']['AuthUnauthorized'];
+      403: components['responses']['GameForbidden'];
+      /** @description Resource is unavailable to the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      409: components['responses']['GameConflict'];
+      /** @description Request exceeds the size limit */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Too many requests; Retry-After indicates seconds until retry */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+      /** @description Internal failure; never contains SQL, credentials or provider response bodies */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['ApiProblem'];
+        };
+      };
+    };
+  };
+  appleOAuthCallback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/x-www-form-urlencoded': {
+          state: string;
+          code?: string;
+          error?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Redirect to the initiating app with one-time handoff, never tokens */
+      303: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: components['responses']['AuthBadRequest'];
     };
   };
 }

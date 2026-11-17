@@ -22,7 +22,11 @@ export const tokensSchema = z.object({
 }) satisfies z.ZodType<components['schemas']['AuthTokens']>;
 export const providersSchema = z.object({
   providers: z.array(
-    z.object({ provider: z.literal('GOOGLE'), displayName: z.string(), enabled: z.boolean() }),
+    z.object({
+      provider: z.enum(['GOOGLE', 'APPLE']),
+      displayName: z.string(),
+      enabled: z.boolean(),
+    }),
   ),
   registrationAvailable: z.boolean(),
 }) satisfies z.ZodType<components['schemas']['AuthProviders']>;

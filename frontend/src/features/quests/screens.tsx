@@ -149,6 +149,9 @@ function DraftList() {
 export function NewDraftScreen() {
   return (
     <QuestPage>
+      <Link href="/templates" style={ui.link}>
+        추천 약속에서 고르기 →
+      </Link>
       <DraftEditor />
     </QuestPage>
   );
@@ -310,6 +313,14 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
       }
     },
   });
+  const template = saved?.sourceType === 'TEMPLATE';
+  const maxStake = template
+    ? saved.difficulty <= 2
+      ? 100
+      : saved.difficulty === 3
+        ? 200
+        : 300
+    : 100;
   const busy = save.isPending || discard.isPending || reload.isPending;
   const error = save.error ?? discard.error ?? reload.error;
   const conflict = error instanceof ApiError && error.code === 'QUEST_VERSION_CONFLICT';
@@ -337,7 +348,7 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
           label="퀘스트 제목"
           value={form.title}
           onChange={(value) => changed('title', value)}
-          busy={busy}
+          busy={busy || template}
           hint="1~80자"
         />
         <Text style={ui.body}>카테고리</Text>
@@ -347,7 +358,7 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
               key={value}
               label={label}
               selected={form.category === value}
-              disabled={busy}
+              disabled={busy || template}
               onPress={() => changed('category', value as DraftForm['category'])}
             />
           ))}
@@ -356,7 +367,7 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
           label="성공 조건"
           value={form.successCriteria}
           onChange={(value) => changed('successCriteria', value)}
-          busy={busy}
+          busy={busy || template}
           hint="무엇을 하면 성공인지 구체적으로 적어 주세요. 1~1,000자"
           multiline
         />
@@ -367,25 +378,30 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
               key={value}
               label={`★${value}`}
               selected={form.difficulty === value}
-              disabled={busy}
+              disabled={busy || template}
               onPress={() => changed('difficulty', value)}
             />
           ))}
         </View>
         <Text style={ui.body}>제안 코인</Text>
         <View accessibilityRole="radiogroup" accessibilityLabel="제안 코인" style={ui.row}>
-          {([0, 100] as const).map((value) => (
-            <Choice
-              key={value}
-              label={`${value}C`}
-              selected={form.stake === value}
-              disabled={busy}
-              onPress={() => changed('stake', value)}
-            />
-          ))}
+          {([0, 100, 200, 300] as const)
+            .filter((value) => value <= maxStake)
+            .map((value) => (
+              <Choice
+                key={value}
+                label={`${value}C`}
+                selected={form.stake === value}
+                disabled={busy}
+                onPress={() => changed('stake', value)}
+              />
+            ))}
         </View>
         <Text style={ui.caption}>
-          자유 입력 퀘스트는 최대 100C를 제안할 수 있어요. 지금은 코인이 잠기지 않아요.
+          {template
+            ? '추천 약속의 내용과 난이도는 고정돼요. 일정과 코인을 바꿀 수 있어요.'
+            : '자유 입력 퀘스트는 최대 100C를 제안할 수 있어요.'}{' '}
+          지금은 코인이 잠기지 않아요.
         </Text>
       </View>
       <View style={ui.card}>
@@ -407,7 +423,7 @@ export function DraftEditor({ initial }: { initial?: Draft }) {
           hint="0~10,080분 · 특정 시점의 행동은 0분"
           value={form.minimumDurationMinutes}
           onChange={(value) => changed('minimumDurationMinutes', value)}
-          busy={busy}
+          busy={busy || template}
           numeric
         />
         <Field

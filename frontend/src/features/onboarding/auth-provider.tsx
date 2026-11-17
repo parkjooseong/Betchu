@@ -32,11 +32,11 @@ export function useAuth() {
   };
 }
 
-export async function launchLogin(session: AuthSession) {
+export async function launchLogin(session: AuthSession, provider: 'GOOGLE' | 'APPLE' = 'GOOGLE') {
   const redirectUri =
     Platform.OS === 'web' ? `${window.location.origin}/auth/callback` : 'betchu://auth/callback';
   try {
-    const authorizationUrl = await session.startLogin(redirectUri);
+    const authorizationUrl = await session.startLogin(redirectUri, provider);
     if (Platform.OS === 'web') {
       window.location.assign(authorizationUrl);
       return;

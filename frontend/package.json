@@ -55,6 +55,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
+    "test:release-config": "node --test scripts/release-config.test.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

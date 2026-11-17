@@ -31,6 +31,28 @@ function setup() {
   return { session, storage, send, clear };
 }
 
+it('binds Apple authorization to the selected provider and rejects cross-provider addresses', async () => {
+  const { session, send } = setup();
+  send.mockResolvedValue({
+    ...attempt,
+    authorizationUrl: 'https://appleid.apple.com/auth/authorize',
+  });
+  await expect(session.startLogin(attempt.redirectUri, 'APPLE')).resolves.toContain(
+    'appleid.apple.com',
+  );
+  expect(send).toHaveBeenCalledWith('/auth/login/start', expect.anything(), {
+    method: 'POST',
+    body: { provider: 'APPLE', redirectUri: attempt.redirectUri },
+  });
+  send.mockResolvedValue({
+    ...attempt,
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+  });
+  await expect(session.startLogin(attempt.redirectUri, 'APPLE')).rejects.toThrow(
+    '로그인 연결 주소',
+  );
+});
+
 it.each([
   ['wrong-id', 'SUCCESS'],
   ['login-one', 'FAILED'],
